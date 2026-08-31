@@ -15,8 +15,8 @@
         "turbo": "^2.10.12",
       },
     },
-    "apps/api": {
-      "name": "@cartepro/api",
+    "apps/backend": {
+      "name": "@cartepro/backend",
       "version": "0.0.1",
       "dependencies": {
         "@nestjs/common": "^12.0.1",
@@ -131,7 +131,7 @@
 
     "@borewit/text-codec": ["@borewit/text-codec@0.2.2", "", {}, "sha512-DDaRehssg1aNrH4+2hnj1B7vnUGEjU6OIlyRdkMd0aUdIUvKXrJfXsy8LVtXAy7DRvYVluWbMspsRhz2lcW0mQ=="],
 
-    "@cartepro/api": ["@cartepro/api@workspace:apps/api"],
+    "@cartepro/backend": ["@cartepro/backend@workspace:apps/backend"],
 
     "@commitlint/cli": ["@commitlint/cli@21.2.2", "", { "dependencies": { "@commitlint/config-conventional": "^21.2.2", "@commitlint/format": "^21.2.2", "@commitlint/lint": "^21.2.2", "@commitlint/load": "^21.2.2", "@commitlint/read": "^21.2.1", "@commitlint/types": "^21.2.0", "tinyexec": "^1.0.0", "yargs": "^18.0.0" }, "bin": { "commitlint": "cli.js" } }, "sha512-a+6hQxIxnpdvSvS2apvttPNbEliYsVC3PqFYDiiB2kjbwIsQsj1urvQ4Tkf70pKYozPalKAuRQmm/GHwndduqA=="],
 

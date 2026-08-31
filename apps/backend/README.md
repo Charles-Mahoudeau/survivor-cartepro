@@ -1,4 +1,4 @@
-# @cartepro/api
+# @cartepro/backend
 
 API NestJS du dispositif CartePro.
 
@@ -14,11 +14,18 @@ API NestJS du dispositif CartePro.
 
 ## Démarrer
 
+Depuis la racine du dépôt :
+
 ```bash
 bun install
-cp apps/api/.env.example apps/api/.env
-bun run db:up
-cd apps/api && bun run db:migrate && bun run start:dev
+cp apps/backend/.env.example apps/backend/.env
+bun run dev
+```
+
+Pour ne lancer que cette application, la base tournant déjà :
+
+```bash
+bun run --filter '@cartepro/backend' dev
 ```
 
 - API : http://localhost:3000
