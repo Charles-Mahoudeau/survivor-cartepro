@@ -18,10 +18,10 @@
     "format:check": "prettier --check \"**/*.{ts,js,mjs,json,md,yml}\"",
     "test": "turbo run test",
     "test:unit": "turbo run test:unit",
-    "db:up": "docker compose -f docker/compose.yml up -d",
-    "db:down": "docker compose -f docker/compose.yml down",
-    "db:nuke": "docker compose -f docker/compose.yml down -v",
-    "prepare": "husky"
+    "db:up": "docker compose -f docker-compose.yaml up -d",
+    "db:down": "docker compose -f docker-compose.yaml down",
+    "db:nuke": "docker compose -f docker-compose.yaml down -v",
+    "prepare": "bunx husky"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.2",
