@@ -8,7 +8,7 @@ Projet Epitech tek3, cahier des charges `JEB/DNI/2026-002`.
 ## Structure
 
 ```
-apps/api/     API NestJS
+apps/backend/     API NestJS
 packages/     code partagé entre applications
 docker/       stack de développement local (PostgreSQL 18)
 ```
@@ -17,19 +17,19 @@ docker/       stack de développement local (PostgreSQL 18)
 
 ```bash
 bun install
-cp apps/api/.env.example apps/api/.env
+cp apps/backend/.env.example apps/backend/.env
 bun run db:up
-cd apps/api && bun run db:migrate && bun run start:dev
+cd apps/backend && bun run db:migrate && bun run start:dev
 ```
 
 L'API répond sur http://localhost:3000, sa documentation sur
 http://localhost:3000/docs. Détail des scripts et des conventions dans
-[apps/api/README.md](apps/api/README.md).
+[apps/backend/README.md](apps/backend/README.md).
 
 La base écoute sur le port **5434** et non 5432 : une machine de développement
 fait souvent déjà tourner un Postgres, et le port standard est le premier à
 entrer en collision. Surchargeable par `DB_PORT`, qui doit rester aligné entre
-`apps/api/.env` et `docker/compose.yml`.
+`apps/backend/.env` et `docker/compose.yml`.
 
 ## Commandes racine
 

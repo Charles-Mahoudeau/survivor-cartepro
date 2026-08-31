@@ -1,4 +1,4 @@
-# @cartepro/api
+# @cartepro/backend
 
 API NestJS du dispositif CartePro.
 
@@ -16,9 +16,9 @@ API NestJS du dispositif CartePro.
 
 ```bash
 bun install
-cp apps/api/.env.example apps/api/.env
+cp apps/backend/.env.example apps/backend/.env
 bun run db:up
-cd apps/api && bun run db:migrate && bun run start:dev
+cd apps/backend && bun run db:migrate && bun run start:dev
 ```
 
 - API : http://localhost:3000

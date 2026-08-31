@@ -3,4 +3,4 @@ dist
 coverage
 .turbo
 bun.lock
-apps/api/database/migrations
+apps/backend/database/migrations

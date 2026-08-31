@@ -1,5 +1,5 @@
 {
-  "name": "@cartepro/api",
+  "name": "@cartepro/backend",
   "version": "0.0.1",
   "description": "API CartePro — avantages salariés dématérialisés",
   "private": true,
