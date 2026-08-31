@@ -1,0 +1,41 @@
+# Stack de développement local. Ces identifiants sont volontairement en clair :
+# la base ne contient que des données de test, elle n'écoute que sur la loopback,
+# et un secret ici serait un faux secret que personne ne ferait tourner.
+#
+# Le port hôte par défaut est 5434, pas 5432 : une machine de dev fait souvent
+# déjà tourner un Postgres, et le port standard est le premier à entrer en
+# collision. Surchargeable par DB_PORT, qui doit rester aligné sur apps/api/.env.
+
+name: cartepro
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cartepro
+      POSTGRES_PASSWORD: cartepro
+      POSTGRES_DB: cartepro
+    ports:
+      - '127.0.0.1:${DB_PORT:-5434}:5432'
+    # Depuis Postgres 18, l'image officielle range les données dans un
+    # sous-dossier par version majeure (/var/lib/postgresql/18/docker) pour
+    # rendre `pg_upgrade --link` possible. Le volume se monte donc sur
+    # /var/lib/postgresql et non sur .../data : monter l'ancien chemin fait
+    # refuser le démarrage, avec un crash loop et pas juste un avertissement.
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U cartepro -d cartepro']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+volumes:
+  postgres-data:
