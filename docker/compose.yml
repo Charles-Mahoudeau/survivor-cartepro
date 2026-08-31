@@ -1,0 +1,36 @@
+# Local development stack. Test data only, bound to the loopback, so the
+# credentials below are deliberately in the clear.
+#
+# The host port defaults to 5434 because 5432 usually collides with another
+# local database. Postgres 18 stores data in a major-version subdirectory, so
+# the volume mounts on /var/lib/postgresql and not on .../data, which
+# crash-loops.
+
+name: cartepro
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cartepro
+      POSTGRES_PASSWORD: cartepro
+      POSTGRES_DB: cartepro
+    ports:
+      - '127.0.0.1:${DB_PORT:-5434}:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U cartepro -d cartepro']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+volumes:
+  postgres-data:

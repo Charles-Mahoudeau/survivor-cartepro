@@ -1,0 +1,30 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "tasks": {
+    "build": {
+      "outputs": ["dist/**"],
+      "inputs": ["src/**", "scripts/**", "package.json", "tsconfig.json"]
+    },
+    "typecheck": {
+      "inputs": ["src/**", "scripts/**", "package.json", "tsconfig.json"]
+    },
+    "lint": {
+      "cache": false
+    },
+    "lint:check": {
+      "inputs": [
+        "src/**",
+        "scripts/**",
+        "eslint.config.mjs",
+        "tsconfig.json",
+        "tsconfig.eslint.json"
+      ]
+    },
+    "test": {
+      "inputs": ["src/**", "jest.config.js", "package.json"]
+    },
+    "test:unit": {
+      "inputs": ["src/**", "jest.config.js", "package.json"]
+    }
+  }
+}

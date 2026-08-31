@@ -13,7 +13,7 @@ build
 coverage
 .nyc_output
 
-# Environment — never committed. Copy .env.example and fill it in.
+# Environment
 .env
 .env.local
 .env.*.local
