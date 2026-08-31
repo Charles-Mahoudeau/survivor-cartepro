@@ -31,8 +31,8 @@ Détail des scripts et des conventions dans
 
 La base écoute sur le port **5434** et non 5432 : une machine de développement
 fait souvent déjà tourner un Postgres, et le port standard est le premier à
-entrer en collision. Surchargeable par `DB_PORT`, qui doit rester aligné entre
-`apps/backend/.env` et `docker/compose.yml`.
+entrer en collision. Surchargeable par `POSTGRES_PORT`, qui doit rester aligné entre
+`apps/backend/.env` et `docker-compose.yaml`.
 
 ## Commandes racine
 
