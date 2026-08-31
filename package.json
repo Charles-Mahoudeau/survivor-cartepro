@@ -8,6 +8,8 @@
     "packages/*"
   ],
   "scripts": {
+    "dev": "bun run db:up && turbo run dev",
+    "start": "bun run db:up && turbo run start",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",

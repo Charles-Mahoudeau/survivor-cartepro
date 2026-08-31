@@ -18,12 +18,15 @@ docker/       stack de développement local (PostgreSQL 18)
 ```bash
 bun install
 cp apps/backend/.env.example apps/backend/.env
-bun run db:up
-cd apps/backend && bun run db:migrate && bun run start:dev
+bun run dev
 ```
 
-L'API répond sur http://localhost:3000, sa documentation sur
-http://localhost:3000/docs. Détail des scripts et des conventions dans
+`bun run dev` démarre la base puis toutes les applications en mode watch, depuis
+n'importe où dans le dépôt. L'API répond sur http://localhost:3000, sa
+documentation sur http://localhost:3000/docs. Les migrations en attente
+s'appliquent au démarrage de l'application.
+
+Détail des scripts et des conventions dans
 [apps/backend/README.md](apps/backend/README.md).
 
 La base écoute sur le port **5434** et non 5432 : une machine de développement
@@ -35,6 +38,8 @@ entrer en collision. Surchargeable par `DB_PORT`, qui doit rester aligné entre
 
 | Commande                          | Effet                                              |
 | --------------------------------- | -------------------------------------------------- |
+| `bun run dev`                     | Base + toutes les applications en mode watch.      |
+| `bun run start`                   | Base + toutes les applications, sans watch.        |
 | `bun run db:up` / `db:down`       | Démarre / arrête PostgreSQL 18.                    |
 | `bun run db:nuke`                 | Arrête et **supprime le volume** de données.       |
 | `bun run typecheck`               | Vérification de types sur toutes les applications. |

@@ -5,10 +5,10 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "bun scripts/build.ts",
+    "dev": "bun --watch src/main.ts",
     "start": "bun src/main.ts",
-    "start:dev": "bun --watch src/main.ts",
     "start:prod": "NODE_ENV=production bun dist/main.js",
+    "build": "bun scripts/build.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"{src,scripts}/**/*.ts\" --fix",
     "lint:check": "eslint \"{src,scripts}/**/*.ts\"",
