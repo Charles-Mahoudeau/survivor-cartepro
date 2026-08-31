@@ -12,9 +12,16 @@ import { redact } from '../utils/redact.util';
 
 /**
  * Request logger. Writes one line in and one line out, and nothing that would
- * be a leak if the logs were read: query and body go through the denylist
- * redaction, and the response body is not logged at all — a payment QR or an
- * employee balance returned by a handler never reaches a log line.
+ * be a leak if the logs were read.
+ *
+ * The logged URL is the path only. `originalUrl` carries the raw query string,
+ * which would reprint every parameter unredacted on the same line that redacts
+ * them — a payment QR passed as `?qrPayload=…` would land in the logs in clear
+ * right next to its own placeholder. Parameters reach the log through the
+ * redacted payload and nowhere else.
+ *
+ * The response body is never logged, so a balance or a QR returned by a handler
+ * cannot leak through the exit line.
  */
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
@@ -27,11 +34,6 @@ export class LoggingInterceptor implements NestInterceptor {
     const response = httpContext.getResponse<Response>();
 
     const { method } = request;
-    // The PATH only, never `originalUrl`. `originalUrl` carries the raw query
-    // string, which would reprint every parameter unredacted on the same line
-    // that redacts them — a payment QR passed as `?qrPayload=…` would land in
-    // the logs in clear right next to its own `[redacted]`. Parameters reach
-    // the log through the redacted `query=` payload below, and nowhere else.
     const path = request.originalUrl.split('?')[0];
     const requestPayload = this.buildPayloadLog(redact(request.body));
     const queryPayload = this.buildPayloadLog(redact(request.query));

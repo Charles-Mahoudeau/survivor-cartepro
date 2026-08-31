@@ -36,8 +36,6 @@ describe('redact', () => {
   });
 
   it('matches on the exact key, never on a substring', () => {
-    // `translation` contains `lat`, `credited` contains `credit`: a substring
-    // test here would blank ordinary fields and nobody would notice.
     const input = { translation: 'fr', credited: true, tokenizer: 'v1' };
     expect(redact(input)).toEqual(input);
   });

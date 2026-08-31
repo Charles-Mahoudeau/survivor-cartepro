@@ -1,4 +1,3 @@
-// `jest` is not a global under ESM, unlike describe/it/expect.
 import { jest } from '@jest/globals';
 import { Logger } from '@nestjs/common';
 import type { CallHandler, ExecutionContext } from '@nestjs/common';
@@ -39,8 +38,6 @@ describe('LoggingInterceptor', () => {
   }
 
   it('never reprints the raw query string alongside the redacted payload', async () => {
-    // The regression this guards: logging `originalUrl` verbatim leaks every
-    // parameter the denylist just masked, on the very same line.
     const output = await run({
       method: 'GET',
       originalUrl: '/payments?qrPayload=eyJhbGciOi&amount=1250',

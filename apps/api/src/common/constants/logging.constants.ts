@@ -1,7 +1,7 @@
 /**
- * What the request log is allowed to say. Product/security decisions, identical
- * on every deployment and meant to go through code review — hence constants,
- * not env.
+ * What the request log is allowed to say. Product and security decisions,
+ * identical on every deployment and meant to go through code review, hence
+ * constants rather than environment variables.
  */
 
 /** Stands in for a denylisted value. */
@@ -26,16 +26,19 @@ export const MAX_LOGGED_PAYLOAD_LENGTH = 1000;
  * onto one entry here.
  *
  * Matching is exact on the normalized key, never a substring test: `translation`
- * and `latency` contain `lat`, and blanking them would make the logs useless
- * without anyone noticing.
+ * contains `lat` and `credited` contains `credit`, and blanking them would make
+ * the logs useless without anyone noticing.
  *
- * NOT listed, deliberately: identifiers (`id`, `transactionId`, `partnerId`,
- * `employeeId`). They carry no value on their own and they are the only handle
- * left for correlating the two lines of a request once every amount is masked.
- * Removing them too would leave a log that says nothing at all.
+ * Grouped by what they carry: credentials and session material, the payment QR
+ * and its tokens, employee personal data, partner business identity, and
+ * monetary values. The QR matters most — it is a self-contained signed payload
+ * with a five minute window, so one that reaches the logs is replayable.
+ *
+ * Identifiers are absent on purpose. They carry no value on their own and they
+ * are the only handle left for correlating the two lines of a request once
+ * every amount is masked.
  */
 export const REDACTED_KEYS: ReadonlySet<string> = new Set([
-  // Credentials and session material.
   'password',
   'passwordhash',
   'token',
@@ -47,33 +50,22 @@ export const REDACTED_KEYS: ReadonlySet<string> = new Set([
   'secret',
   'sessionid',
   'otp',
-  // The payment QR. The brief requires it to work "en mode dégradé (connexion
-  // limitée)", which means a self-contained signed payload rather than an id
-  // resolved against the database — so it is a bearer credential with a five
-  // minute window. A QR that reaches the logs is replayable inside that window,
-  // which is the whole reason this block exists.
   'qrcode',
   'qrtoken',
   'qrpayload',
   'paymenttoken',
   'nonce',
   'signature',
-  // Employee personal data.
   'email',
   'phone',
   'phonenumber',
   'firstname',
   'lastname',
   'birthdate',
-  // Partner / employer business identity.
   'siret',
   'siren',
   'iban',
   'bic',
-  // Monetary values. Masked by explicit project decision: nothing about an
-  // amount or a balance needs to survive in a log file. The cost is real and
-  // was accepted — tracing a balance bug from the logs alone is no longer
-  // possible, and doing it means reading the database instead.
   'amount',
   'montant',
   'balance',

@@ -1,15 +1,13 @@
 import { z } from 'zod';
 
 /**
- * Every environment variable the API reads, validated at boot. A missing or
+ * Every environment variable the API reads, validated at boot, so a missing or
  * malformed value fails the process here rather than surfacing as a confusing
  * runtime error later.
  *
- * Note what is absent: there is no `DB_SYNC`. The brief requires transaction
- * data to stay "intègre et non modifiable après validation", and a schema
- * synchronize pass is exactly the thing that can rewrite a table holding
- * validated transactions. Schema changes go through migrations, with no
- * environment escape hatch.
+ * There is no `DB_SYNC`. Validated transactions must stay immutable, and a
+ * schema synchronize pass is what could rewrite the table holding them, so
+ * schema changes go through migrations with no environment escape hatch.
  */
 export const EnvSchema = z.object({
   NODE_ENV: z
@@ -22,8 +20,6 @@ export const EnvSchema = z.object({
   DB_USERNAME: z.string().min(1).default('cartepro'),
   DB_PASSWORD: z.string().min(1).default('cartepro'),
   DB_DATABASE: z.string().min(1).default('cartepro'),
-  // Query logging is on by default so a dev sees the SQL its entities produce;
-  // set to 'false' to silence it.
   DB_LOGGING: z.enum(['true', 'false']).default('true'),
 });
 

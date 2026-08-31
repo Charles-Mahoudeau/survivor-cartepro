@@ -20,8 +20,7 @@ console.log(chalk.gray('Cleaning dist folder...'));
 await rm('./dist', { recursive: true, force: true });
 
 const prodDeps = Object.keys(packageJson.dependencies || {});
-// Optional Nest packages the framework requires lazily. They are not installed,
-// so the bundler must be told not to try to resolve them.
+// Optional Nest packages, resolved lazily by the framework and not installed.
 const nestOptionals = [
   '@nestjs/microservices',
   '@nestjs/websockets',

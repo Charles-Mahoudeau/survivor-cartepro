@@ -8,15 +8,29 @@ import { AppModule } from './app.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { buildOpenApiDocument } from './swagger';
 
+/**
+ * Composition root.
+ *
+ * Helmet runs with CSP off and everything else it ships on (HSTS, nosniff,
+ * frameguard, referrer policy). /docs renders its UI from a CDN, which a
+ * default `script-src 'self'` breaks, and the rest of the API answers JSON
+ * where CSP is not the control that matters.
+ *
+ * ClassSerializerInterceptor is what makes `@Exclude()` on an entity actually
+ * remove the property from a response. It is registered before the first
+ * entity exists, so no handler is ever written against a serializer that is
+ * not there — a password hash reaching a client is a one-line mistake
+ * otherwise.
+ *
+ * The OpenAPI contract is served by Nest itself: `raw` publishes it on
+ * /docs/json while `ui: false` keeps the bundled Swagger UI out of the way,
+ * leaving the rendered documentation to Scalar.
+ */
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
   const reflector = app.get(Reflector);
 
-  // CSP off, everything else helmet ships (HSTS, nosniff, frameguard, referrer
-  // policy) on. /docs renders its UI from a CDN and a default `script-src
-  // 'self'` breaks it; the rest of the API answers JSON, where CSP is not the
-  // control that matters.
   app.use(helmet({ contentSecurityPolicy: false }));
 
   app.useGlobalPipes(
@@ -27,10 +41,6 @@ async function bootstrap() {
     }),
   );
 
-  // ClassSerializerInterceptor is what makes `@Exclude()` on an entity actually
-  // remove the property from the response. Registered before the first entity
-  // exists, so no handler is ever written against a serializer that is not
-  // there — a password hash reaching a client is a one-line mistake otherwise.
   app.useGlobalInterceptors(
     new LoggingInterceptor(),
     new ClassSerializerInterceptor(reflector),
@@ -38,9 +48,6 @@ async function bootstrap() {
 
   const document = buildOpenApiDocument(app);
 
-  // Nest serves the raw document itself. `ui: false` keeps its bundled Swagger
-  // UI out of the way, leaving the rendered documentation to Scalar below,
-  // while `raw` still publishes the contract on /docs/json.
   SwaggerModule.setup('docs', app, document, {
     ui: false,
     raw: ['json'],
