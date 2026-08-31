@@ -1,0 +1,37 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+build
+*.tsbuildinfo
+
+# Turbo
+.turbo
+
+# Tests
+coverage
+.nyc_output
+
+# Environment — never committed. Copy .env.example and fill it in.
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
