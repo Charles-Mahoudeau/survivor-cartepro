@@ -1,17 +1,39 @@
 name: cartepro
 
 services:
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+
   backend:
     build:
+      context: .
       dockerfile: apps/backend/Dockerfile
-    env_file: .env
     ports:
-      - "3000:3000"
+      - "${BACKEND_PORT:-3001}:3000"
+    environment:
+      - PORT=3000
+      - DATABASE_HOST=${DATABASE_HOST:-postgres}
+      - DATABASE_PORT=${DATABASE_PORT:-5432}
+      - DATABASE_USER=${DATABASE_USER:-cartepro}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-cartepro}
+      - DATABASE_NAME=${DATABASE_NAME:-cartepro}
+      - DATABASE_LOGGING=${DATABASE_LOGGING:-false}
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   postgres:
     image: postgres:18-alpine
     restart: unless-stopped
-    env_file: .env
+    environment:
+      - POSTGRES_PORT=${DATABASE_PORT:-5432}
+      - POSTGRES_USER=${DATABASE_USER:-cartepro}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD:-cartepro}
+      - POSTGRES_DB=${DATABASE_NAME:-cartepro}
     volumes:
       - postgres-data:/var/lib/postgresql
     healthcheck:
