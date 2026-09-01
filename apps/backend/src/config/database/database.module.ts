@@ -24,9 +24,7 @@ import { buildDataSourceOptions } from './data-source';
           POSTGRES_USERNAME: configService.get<string>('POSTGRES_USER'),
           POSTGRES_PASSWORD: configService.get<string>('POSTGRES_PASSWORD'),
           POSTGRES_DATABASE: configService.get<string>('POSTGRES_DB'),
-          POSTGRES_LOGGING: String(
-            configService.get<boolean>('POSTGRES_LOGGING'),
-          ),
+          POSTGRES_LOGGING: configService.get<string>('POSTGRES_LOGGING'),
         }),
         autoLoadEntities: true,
         migrationsRun: true,

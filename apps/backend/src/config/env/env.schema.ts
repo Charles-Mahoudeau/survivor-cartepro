@@ -20,7 +20,7 @@ export const EnvSchema = z.object({
   POSTGRES_USER: z.string().min(1).default('cartepro'),
   POSTGRES_PASSWORD: z.string().min(1).default('cartepro'),
   POSTGRES_DB: z.string().min(1).default('cartepro'),
-  POSTGRES_LOGGING: z.boolean().default(true),
+  POSTGRES_LOGGING: z.enum(['true', 'false']).default('true'),
 });
 
 export type Env = z.infer<typeof EnvSchema>;
