@@ -8,7 +8,8 @@ Projet Epitech tek3, cahier des charges `JEB/DNI/2026-002`.
 ## Structure
 
 ```
-apps/backend/     API NestJS
+apps/backend/     Backend NestJS
+apps/frontend/    Frontend NextJS
 packages/     code partagé entre applications
 docker/       stack de développement local (PostgreSQL 18)
 ```
@@ -21,16 +22,16 @@ cp apps/backend/.env.example apps/backend/.env
 bun run dev
 ```
 
-`bun run dev` démarre la base puis toutes les applications en mode watch, depuis
-n'importe où dans le dépôt. L'API répond sur http://localhost:3000, sa
-documentation sur http://localhost:3000/docs. Les migrations en attente
-s'appliquent au démarrage de l'application.
+`bun run dev` démarre la base puis toutes les applications en mode watch.
+Le frontend répond sur http://localhost:3000.
+Le backend répond sur http://localhost:3001.
+La documentation sur http://localhost:3001/docs.
+Les migrations en attente s'appliquent au démarrage de l'application.
 
 Détail des scripts et des conventions dans
 [apps/backend/README.md](apps/backend/README.md).
 
-La base écoute sur le port **5432**. Surchargeable par `POSTGRES_PORT`, qui doit rester aligné entre
-`apps/backend/.env` et `docker-compose.yaml`.
+La base écoute sur le port `5432`. Surchargeable par `DATABASE_PORT`.
 Le fichier `compose.override.yaml` permet de surcharger le compose de production pour les options de développement.
 
 ## Commandes racine
