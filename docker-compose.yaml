@@ -1,0 +1,30 @@
+name: cartepro
+
+services:
+  backend:
+    build:
+      dockerfile: apps/backend/Dockerfile
+    env_file: .env
+    ports:
+      - "80:3000"
+
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U cartepro -d cartepro']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+volumes:
+  postgres-data:

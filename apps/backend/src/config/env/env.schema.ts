@@ -15,12 +15,12 @@ export const EnvSchema = z.object({
     .default('development'),
   PORT: z.coerce.number().default(3000),
   HOST: z.string().min(1).default('0.0.0.0'),
-  DB_HOST: z.string().min(1).trim().default('localhost'),
-  DB_PORT: z.coerce.number().default(5432),
-  DB_USERNAME: z.string().min(1).default('cartepro'),
-  DB_PASSWORD: z.string().min(1).default('cartepro'),
-  DB_DATABASE: z.string().min(1).default('cartepro'),
-  DB_LOGGING: z.enum(['true', 'false']).default('true'),
+  POSTGRES_HOST: z.string().min(1).trim().default('localhost'),
+  POSTGRES_PORT: z.coerce.number().default(5432),
+  POSTGRES_USER: z.string().min(1).default('cartepro'),
+  POSTGRES_PASSWORD: z.string().min(1).default('cartepro'),
+  POSTGRES_DB: z.string().min(1).default('cartepro'),
+  POSTGRES_LOGGING: z.enum(['true', 'false']).default('true'),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

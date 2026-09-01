@@ -29,10 +29,9 @@ s'appliquent au démarrage de l'application.
 Détail des scripts et des conventions dans
 [apps/backend/README.md](apps/backend/README.md).
 
-La base écoute sur le port **5434** et non 5432 : une machine de développement
-fait souvent déjà tourner un Postgres, et le port standard est le premier à
-entrer en collision. Surchargeable par `DB_PORT`, qui doit rester aligné entre
-`apps/backend/.env` et `docker/compose.yml`.
+La base écoute sur le port **5432**. Surchargeable par `POSTGRES_PORT`, qui doit rester aligné entre
+`apps/backend/.env` et `docker-compose.yaml`.
+Le fichier `compose.override.yaml` permet de surcharger le compose de production pour les options de développement.
 
 ## Commandes racine
 

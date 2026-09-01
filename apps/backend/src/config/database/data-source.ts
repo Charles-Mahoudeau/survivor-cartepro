@@ -30,14 +30,14 @@ export function buildDataSourceOptions(
 ): DataSourceOptions {
   return {
     type: 'postgres',
-    host: env.DB_HOST || 'localhost',
-    port: parseInt(env.DB_PORT || '5432', 10),
-    username: env.DB_USERNAME || 'cartepro',
-    password: env.DB_PASSWORD || 'cartepro',
-    database: env.DB_DATABASE || 'cartepro',
+    host: env.POSTGRES_HOST || 'localhost',
+    port: parseInt(env.POSTGRES_PORT || '5432', 10),
+    username: env.POSTGRES_USER || 'cartepro',
+    password: env.POSTGRES_PASSWORD || 'cartepro',
+    database: env.POSTGRES_DB || 'cartepro',
     entities: [entitiesGlob, viewsGlob],
     migrations: [migrationsGlob],
-    logging: env.DB_LOGGING !== 'false',
+    logging: env.POSTGRES_LOGGING !== 'false',
     namingStrategy: new SnakeNamingStrategy(),
   };
 }
