@@ -5,23 +5,22 @@ services:
     build:
       context: .
       dockerfile: apps/frontend/Dockerfile
-    ports:
-      - "${FRONTEND_PORT:-3000}:3000"
+    expose:
+      - 3000
 
   backend:
     build:
       context: .
       dockerfile: apps/backend/Dockerfile
-    ports:
-      - "${BACKEND_PORT:-3001}:3000"
     environment:
-      - PORT=3000
       - DATABASE_HOST=${DATABASE_HOST:-postgres}
       - DATABASE_PORT=${DATABASE_PORT:-5432}
       - DATABASE_USER=${DATABASE_USER:-cartepro}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD:-cartepro}
       - DATABASE_NAME=${DATABASE_NAME:-cartepro}
       - DATABASE_LOGGING=${DATABASE_LOGGING:-false}
+    expose:
+      - 3000
     depends_on:
       postgres:
         condition: service_healthy
