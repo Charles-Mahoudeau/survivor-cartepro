@@ -45,6 +45,18 @@
             packages = toolchain ++ services;
             shellHook = hint;
           };
+
+          # Les deux shells de .github/workflows/ci.yml, sans bannière : chaque
+          # job les traverse deux fois.
+          ci = pkgs.mkShellNoCC {
+            name = "cartepro-ci";
+            packages = [ pkgs.bun ];
+          };
+
+          ci-node = pkgs.mkShellNoCC {
+            name = "cartepro-ci-node";
+            packages = toolchain;
+          };
         }
       );
 
