@@ -7,20 +7,18 @@ RUN bun install -g turbo
 COPY . .
 RUN turbo prune @cartepro/backend --docker
 
-FROM base AS install
+FROM base AS build
 
 COPY --from=prune /usr/src/app/out/json/ ./
 RUN bun install --frozen-lockfile --ignore-scripts
 
-FROM base AS build
-
-COPY --from=install /usr/src/app/node_modules/ ./node_modules/
 COPY --from=prune /usr/src/app/out/full/ ./
 RUN bun --filter=@cartepro/backend run build
 
 FROM base AS run
 
-COPY --from=install /usr/src/app/node_modules/ ./node_modules/
+COPY --from=build /usr/src/app/node_modules/ ./node_modules/
+COPY --from=build /usr/src/app/apps/backend/node_modules/ ./apps/backend/node_modules/
 COPY --from=build /usr/src/app/apps/backend/dist/ ./apps/backend/dist/
 COPY --from=build /usr/src/app/apps/backend/package.json ./apps/backend/package.json
 
