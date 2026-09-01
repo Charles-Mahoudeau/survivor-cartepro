@@ -13,7 +13,9 @@ services:
       context: .
       dockerfile: apps/backend/Dockerfile
     environment:
-      - DATABASE_HOST=${DATABASE_HOST:-postgres}
+      # Le conteneur joint la base par le nom du service, pas par l'adresse que
+      # .env donne à l'hôte.
+      - DATABASE_HOST=postgres
       - DATABASE_PORT=${DATABASE_PORT:-5432}
       - DATABASE_USER=${DATABASE_USER:-cartepro}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD:-cartepro}
