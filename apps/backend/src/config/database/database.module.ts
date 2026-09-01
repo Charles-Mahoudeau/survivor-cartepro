@@ -19,12 +19,12 @@ import { buildDataSourceOptions } from './data-source';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         ...buildDataSourceOptions({
-          POSTGRES_HOST: configService.get<string>('POSTGRES_HOST'),
-          POSTGRES_PORT: String(configService.get<number>('POSTGRES_PORT')),
-          POSTGRES_USERNAME: configService.get<string>('POSTGRES_USER'),
-          POSTGRES_PASSWORD: configService.get<string>('POSTGRES_PASSWORD'),
-          POSTGRES_DATABASE: configService.get<string>('POSTGRES_DB'),
-          POSTGRES_LOGGING: configService.get<string>('POSTGRES_LOGGING'),
+          DATABASE_HOST: configService.get<string>('DATABASE_HOST'),
+          DATABASE_PORT: String(configService.get<number>('DATABASE_PORT')),
+          DATABASE_USERNAME: configService.get<string>('DATABASE_USER'),
+          DATABASE_PASSWORD: configService.get<string>('DATABASE_PASSWORD'),
+          DATABASE_NAME: configService.get<string>('DATABASE_NAME'),
+          DATABASE_LOGGING: configService.get<string>('DATABASE_LOGGING'),
         }),
         autoLoadEntities: true,
         migrationsRun: true,
