@@ -18,9 +18,9 @@
     "format:check": "prettier --check \"**/*.{ts,js,mjs,json,md,yml}\"",
     "test": "turbo run test",
     "test:unit": "turbo run test:unit",
-    "db:up": "docker compose -f docker-compose.yaml up -d",
-    "db:down": "docker compose -f docker-compose.yaml down",
-    "db:nuke": "docker compose -f docker-compose.yaml down -v",
+    "db:up": "docker compose up postgres -d",
+    "db:down": "docker compose down postgres",
+    "db:nuke": "docker compose down postgres -v",
     "prepare": "bunx husky"
   },
   "devDependencies": {
