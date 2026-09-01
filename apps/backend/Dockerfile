@@ -20,6 +20,7 @@ FROM base AS prerelease
 
 # Copy node_modules from temp directory
 COPY --from=install /temp/dev/node_modules node_modules
+COPY --from=install /temp/dev/apps/backend/node_modules apps/backend/node_modules
 
 # Copy all (non-ignored) project files into the image
 COPY . .
