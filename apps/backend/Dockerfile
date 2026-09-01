@@ -1,4 +1,7 @@
-FROM oven/bun:alpine AS base
+# La version de bun est alignée sur celle du flake (pkgs.bun de flake.lock),
+# qui est aussi celle du devShell et de la CI. `nix eval nixpkgs#bun.version`
+# la donne ; un `nix flake update` qui la fait bouger doit la faire bouger ici.
+FROM oven/bun:1.3.13-alpine AS base
 WORKDIR /usr/src/app
 
 FROM base AS prune

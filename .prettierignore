@@ -7,3 +7,5 @@ apps/backend/database/migrations
 
 apps/frontend/.next
 apps/frontend/next-env.d.ts
+
+.direnv
