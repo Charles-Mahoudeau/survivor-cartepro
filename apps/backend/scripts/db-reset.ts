@@ -24,5 +24,12 @@ if (migrate.exitCode !== 0) {
   process.exit(migrate.exitCode);
 }
 
+// `db:drop` takes the whole schema down, authentication tables included, and
+// those are not TypeORM's to put back — a second migrator owns them.
+const authMigrate = await $`bun scripts/auth-migrate.ts`.nothrow();
+if (authMigrate.exitCode !== 0) {
+  process.exit(authMigrate.exitCode);
+}
+
 console.log(chalk.bold.green('Base réinitialisée!'));
 console.log('');
