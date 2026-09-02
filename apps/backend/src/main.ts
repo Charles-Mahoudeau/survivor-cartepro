@@ -1,4 +1,9 @@
-import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  RequestMethod,
+  ValidationPipe,
+  VersioningType,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
@@ -45,6 +50,14 @@ async function bootstrap() {
     new LoggingInterceptor(),
     new ClassSerializerInterceptor(reflector),
   );
+
+  app.setGlobalPrefix('api', {
+    exclude: [
+      { path: 'docs', method: RequestMethod.ALL },
+      { path: 'health', method: RequestMethod.GET },
+    ],
+  });
+  app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
 
   const document = buildOpenApiDocument(app);
 
