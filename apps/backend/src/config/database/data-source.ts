@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 import { DataSource, type DataSourceOptions } from 'typeorm';
-import 'dotenv/config';
+import '../env/load-env';
 import { SnakeNamingStrategy } from './snake-naming.strategy';
 
 const cwd = process.cwd();

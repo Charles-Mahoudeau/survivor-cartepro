@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import 'dotenv/config';
+import '../src/config/env/load-env';
 import type { DataSource } from 'typeorm';
 
 /**
@@ -8,10 +8,10 @@ import type { DataSource } from 'typeorm';
  * nothing.
  */
 export function describeConnection(): string {
-  const user = process.env.DB_USERNAME || 'cartepro';
-  const host = process.env.DB_HOST || 'localhost';
-  const port = process.env.DB_PORT || '5432';
-  const database = process.env.DB_DATABASE || 'cartepro';
+  const user = process.env.DATABASE_USER || 'cartepro';
+  const host = process.env.DATABASE_HOST || 'localhost';
+  const port = process.env.DATABASE_PORT || '5432';
+  const database = process.env.DATABASE_NAME || 'cartepro';
   return `${user}@${host}:${port}/${database}`;
 }
 
