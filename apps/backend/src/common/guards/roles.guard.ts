@@ -6,9 +6,9 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ERROR_CODES } from '@/common/constants/error-codes.constant';
+import type { RequestWithSession } from '@/common/decorators/current-user.decorator';
+import { ROLES_KEY } from '@/common/decorators/roles.decorator';
 import type { Role } from '@/config/auth/auth.constants';
-import type { RequestWithSession } from '../decorators/current-user.decorator';
-import { ROLES_KEY } from '../decorators/roles.decorator';
 
 /**
  * Refuses a request whose role is not one the route accepts.

@@ -1,4 +1,4 @@
-import { isBanActive } from '../ban.helper';
+import { isBanActive } from '../ban.util';
 
 const NOW = new Date('2026-09-02T12:00:00.000Z');
 

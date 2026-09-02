@@ -6,11 +6,12 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { fromNodeHeaders } from 'better-auth/node';
 import { ERROR_CODES } from '@/common/constants/error-codes.constant';
-import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-import type { RequestWithSession } from '../decorators/current-user.decorator';
-import { AuthService } from '../services/auth.service';
-import { isBanActive } from '../services/helpers/ban.helper';
+import type { RequestWithSession } from '@/common/decorators/current-user.decorator';
+import { IS_PUBLIC_KEY } from '@/common/decorators/public.decorator';
+import { isBanActive } from '@/common/utils/ban.util';
+import { auth } from '@/config/auth/auth';
 
 /**
  * Resolves the session of every request and refuses the ones that have none.
@@ -19,18 +20,19 @@ import { isBanActive } from '../services/helpers/ban.helper';
  * The session is attached to the request, which is what lets `@CurrentUser()`
  * and `RolesGuard` work without reading it a second time.
  *
+ * It asks Better Auth rather than reading the `session` table itself. The token
+ * in the cookie is not the column: validating it is the library's job, and a
+ * second implementation of that check is a second place to get it wrong.
+ *
  * The ban is enforced here rather than left to whatever route the account
  * reaches: Better Auth refuses a banned account at sign-in, but a session
  * opened before the ban stays valid until it expires. Since there is no cookie
- * cache, the `banned` column is read on every request, so a ban takes effect on
- * the next one.
+ * cache, the ban columns are read on every request, so a ban takes effect on the
+ * next one.
  */
 @Injectable()
 export class SessionGuard implements CanActivate {
-  constructor(
-    private readonly reflector: Reflector,
-    private readonly authService: AuthService,
-  ) {}
+  constructor(private readonly reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
@@ -43,7 +45,9 @@ export class SessionGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<RequestWithSession>();
-    const session = await this.authService.getSession(request.headers);
+    const session = await auth.api.getSession({
+      headers: fromNodeHeaders(request.headers),
+    });
 
     if (!session) {
       throw new UnauthorizedException(ERROR_CODES.UNAUTHENTICATED);
