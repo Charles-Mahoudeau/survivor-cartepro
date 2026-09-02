@@ -2,9 +2,10 @@
 
 > **Source** : cahier des charges `JEB/DNI/2026-002` §3.1 (« authentification
 > multi-rôles avec sessions »), documentation Better Auth 1.7.2.
-> **Portée** : inscription, connexion, déconnexion, rôles `user` et `admin`,
-> garde de session côté NestJS. Hors portée : partenaires, clés d'API SIRH,
-> vérification d'e-mail, réinitialisation de mot de passe, fédération OAuth.
+> **Portée** : inscription, connexion, déconnexion, les trois rôles du
+> dispositif, garde de session côté NestJS, limitation de débit. Hors portée :
+> le domaine partenaire, l'usage des clés d'API, la vérification d'e-mail, la
+> réinitialisation de mot de passe, la fédération OAuth.
 > **Vérifié contre** : `better-auth@1.7.2`, `@nestjs/common@12.0.1`,
 > `express@5.2.1`, PostgreSQL 18, Bun 1.3.14.
 
@@ -26,26 +27,31 @@ Les routes d'authentification sont servies par Better Auth et appelées
 **directement par le frontend**, à travers son client (`better-auth/react`,
 construit avec le même `basePath`). Cette API n'en réexpose aucune (§2, D11).
 
-Un rôle `partner` s'ajoutera sans rien défaire : `user.role` porte une chaîne
-libre et la garde compare des constantes.
+Trois rôles, un par espace du sujet : `employee`, `partner`, `admin`. Un compte
+en porte exactement un — `user.role` est une colonne scalaire, rien n'y écrit de
+liste. L'inscription attribue `employee` ; les deux autres se donnent hors bande,
+un compte partenaire étant validé par l'administration avant de pouvoir
+encaisser.
 
 ## 2. Décisions verrouillées
 
-| #   | Décision                                                                     | Raison                                                                                                                                        |
-| --- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| D1  | Better Auth porte la **logique** d'authentification, pas le schéma.          | Mots de passe, sessions, rôles et bannissement sont du code déjà écrit et déjà audité. Les tables, elles, sont du domaine de ce dépôt.        |
-| D2  | Le schéma appartient à TypeORM : cinq entities, migration par `db:generate`. | §3. Une seule source de vérité, un seul migrateur, et une clé étrangère métier vers `user.id` devient une relation ordinaire.                 |
-| D3  | Aucun second migrateur. Le schéma s'applique au démarrage comme les autres.  | Le dépôt promet déjà « récupérer une branche et lancer le serveur suffit à être sur son schéma ». Une promesse, un mécanisme.                 |
-| D4  | Montage à `/auth`, pas à `/api/auth`.                                        | Cette API n'a pas de segment `/api` — `/health`, `/docs`. Le client web est construit avec le même `basePath`.                                |
-| D5  | Pas de plugin `organization`.                                                | Il modélise des espaces à plusieurs membres avec invitations ; le sujet décrit un compte partenaire unique. Refusé le 2026-09-01.             |
-| D6  | Pas de `cookieCache`.                                                        | §11 — un cache garde un compte banni et un rôle périmé vivants jusqu'à son expiration. Ce lot existe pour bannir et promouvoir.               |
-| D7  | Clés primaires `uuid` avec défaut `uuidv7()`, comme toutes les tables.       | `generateId: false` laisse la base générer. Sans ça les identifiants d'auth seraient des chaînes base62 et les FK métier des colonnes `text`. |
-| D8  | La bibliothèque `@thallesp/nestjs-better-auth` n'est pas utilisée.           | §7.1 — elle déclare `@nestjs/common@^11.1.6` en peer non optionnelle, ce dépôt est en NestJS 12.                                              |
-| D9  | Longueur minimale de mot de passe : 12 caractères.                           | Recommandation ANSSI-PG-078 pour un compte sans second facteur. La valeur par défaut de la bibliothèque est 8.                                |
-| D10 | Limitation de débit activée, stockée en base.                                | Les routes d'authentification sont la surface brute-forçable de ce lot. Le stockage mémoire perd son compteur à chaque redémarrage.           |
-| D11 | **Aucun controller NestJS d'authentification.**                              | §5.2 — le client Better Auth du frontend appelle `/auth/*` directement. Un controller qui les réexpose est une seconde copie du contrat.      |
-| D12 | Colonnes en `snake_case`, mapping **calculé**, jamais recopié.               | §4.2 — le mapping et la stratégie de nommage partagent une seule implémentation, donc ils ne peuvent pas diverger.                            |
-| D13 | `NODE_ENV` est chargé **avant** le premier import de la bibliothèque.        | §7.4 — elle le lit une seule fois, au chargement de son module, et cette lecture décide de la limitation de débit et des cookies `Secure`.    |
+| #   | Décision                                                                                   | Raison                                                                                                                                                      |
+| --- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | Better Auth porte la **logique** d'authentification, pas le schéma.                        | Mots de passe, sessions, rôles et bannissement sont du code déjà écrit et déjà audité. Les tables, elles, sont du domaine de ce dépôt.                      |
+| D2  | Le schéma appartient à TypeORM : six entities, migrations par `db:generate`.               | §3. Une seule source de vérité, un seul migrateur, et une clé étrangère métier vers `user.id` devient une relation ordinaire.                               |
+| D3  | Aucun second migrateur. Le schéma s'applique au démarrage comme les autres.                | Le dépôt promet déjà « récupérer une branche et lancer le serveur suffit à être sur son schéma ». Une promesse, un mécanisme.                               |
+| D4  | Montage à `/auth`, pas à `/api/auth`.                                                      | Cette API n'a pas de segment `/api` — `/health`, `/docs`. Le client web est construit avec le même `basePath`.                                              |
+| D5  | Pas de plugin `organization`.                                                              | Il modélise des espaces à plusieurs membres avec invitations ; le sujet décrit un compte partenaire unique. Refusé le 2026-09-01.                           |
+| D6  | Pas de `cookieCache`.                                                                      | §11 — un cache garde un compte banni et un rôle périmé vivants jusqu'à son expiration. Ce lot existe pour bannir et promouvoir.                             |
+| D7  | Clés primaires `uuid` avec défaut `uuidv7()`, comme toutes les tables.                     | `generateId: false` laisse la base générer. Sans ça les identifiants d'auth seraient des chaînes base62 et les FK métier des colonnes `text`.               |
+| D8  | La bibliothèque `@thallesp/nestjs-better-auth` n'est pas utilisée.                         | §7.1 — elle déclare `@nestjs/common@^11.1.6` en peer non optionnelle, ce dépôt est en NestJS 12.                                                            |
+| D9  | Longueur minimale de mot de passe : 12 caractères.                                         | Recommandation ANSSI-PG-078 pour un compte sans second facteur. La valeur par défaut de la bibliothèque est 8.                                              |
+| D10 | Limitation de débit activée, stockée en base.                                              | Les routes d'authentification sont la surface brute-forçable de ce lot. Le stockage mémoire perd son compteur à chaque redémarrage.                         |
+| D11 | **Aucun controller NestJS d'authentification.**                                            | §5.2 — le client Better Auth du frontend appelle `/auth/*` directement. Un controller qui les réexpose est une seconde copie du contrat.                    |
+| D12 | Colonnes en `snake_case`, mapping **calculé**, jamais recopié.                             | §4.2 — le mapping et la stratégie de nommage partagent une seule implémentation, donc ils ne peuvent pas diverger.                                          |
+| D13 | `NODE_ENV` est chargé **avant** le premier import de la bibliothèque.                      | §7.4 — elle le lit une seule fois, au chargement de son module, et cette lecture décide des cookies `Secure` et du repli d'adresse IP.                      |
+| D14 | Limitation de débit et contrôle d'origine **épinglés**, jamais déduits de l'environnement. | §7.4 — les deux défauts de la bibliothèque se calculent depuis `NODE_ENV`. Un contrôle de sécurité qui s'éteint sur un nom d'environnement n'en est pas un. |
+| D15 | Isolation des tests par TRUNCATE, suite en série.                                          | §12 — Better Auth écrit par son propre pool : un rollback de transaction TypeORM ne verrait rien de ses écritures et ne les annulerait pas.                 |
 
 ## 3. Pourquoi le schéma est à nous
 
@@ -67,18 +73,25 @@ référence un compte.
 
 ## 4. Modèle de données
 
-Cinq entities dans `src/modules/user/entities/`, une migration générée par
+Six entities dans `src/modules/user/entities/`, deux migrations générées par
 `bun run db:generate`.
+
+`api_key.reference_id` ne porte volontairement aucune clé étrangère. Le plugin
+n'en déclare pas, et ce qu'une clé représente n'est pas tranché : une clé pour un
+SIRH appartient plus vraisemblablement à un employeur qu'à une personne. La
+contraindre vers `user.id` aujourd'hui serait à défaire par le lot qui répond à
+la question.
 
 ### 4.1 Ce que chaque table porte, et ce qui casse sans elle
 
-| Table          | Rôle                                                                     | Sans elle                                                                                      |
-| -------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| `user`         | L'identité : e-mail unique, nom, rôle, état de bannissement.             | Rien à authentifier.                                                                           |
-| `account`      | Le moyen de preuve. Le hash du mot de passe vit ici, pas sur `user`.     | Le hash finirait sur `user`, donc dans chaque projection qui sert un profil.                   |
-| `session`      | Une ligne par session ouverte, avec son jeton, son IP et son user-agent. | Pas de déconnexion réelle ni de révocation à distance : un jeton signé vit jusqu'à expiration. |
-| `verification` | Jetons à durée de vie courte (changement d'e-mail, réinitialisation).    | Les flux qui les consomment échouent à la première utilisation, pas au démarrage.              |
-| `rate_limit`   | Compteur par clé pour la limitation de débit.                            | Le compteur repart à zéro à chaque redémarrage, donc à chaque déploiement.                     |
+| Table          | Rôle                                                                     | Sans elle                                                                                                   |
+| -------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `user`         | L'identité : e-mail unique, nom, rôle, état de bannissement.             | Rien à authentifier.                                                                                        |
+| `account`      | Le moyen de preuve. Le hash du mot de passe vit ici, pas sur `user`.     | Le hash finirait sur `user`, donc dans chaque projection qui sert un profil.                                |
+| `session`      | Une ligne par session ouverte, avec son jeton, son IP et son user-agent. | Pas de déconnexion réelle ni de révocation à distance : un jeton signé vit jusqu'à expiration.              |
+| `verification` | Jetons à durée de vie courte (changement d'e-mail, réinitialisation).    | Les flux qui les consomment échouent à la première utilisation, pas au démarrage.                           |
+| `rate_limit`   | Compteur par clé pour la limitation de débit.                            | Le compteur repart à zéro à chaque redémarrage, donc à chaque déploiement.                                  |
+| `api_key`      | Clés de la surface tierce (§3.3, un SIRH lisant un solde).               | Rien aujourd'hui : aucune route n'en consomme. La table est posée avec le reste plutôt que seule plus tard. |
 
 La séparation `user` / `account` est ce qui fait qu'un mot de passe ne peut pas
 fuir par une route de profil : `ClassSerializerInterceptor` ne filtre que de
@@ -457,6 +470,20 @@ l'ordre correct, et la chaîne vide sans lui.
 En conteneur, `NODE_ENV` est passé explicitement par `docker-compose.yaml` : il
 n'y a pas de `.env` dans l'image, donc rien ne le poserait autrement.
 
+**Deux contrôles de sécurité se calculent depuis cette même lecture**, et les
+deux sont désormais épinglés dans la configuration plutôt que déduits :
+
+| Option                        | Défaut de la bibliothèque          | Ce que valait le défaut ici                                     |
+| ----------------------------- | ---------------------------------- | --------------------------------------------------------------- |
+| `rateLimit.enabled`           | activé **en production** seulement | éteint partout ailleurs, y compris sous un `NODE_ENV` vide      |
+| `advanced.disableOriginCheck` | `disableOriginCheck ?? isTest()`   | contrôle CSRF **désactivé** dès que `NODE_ENV=test` ou `TEST=1` |
+
+Le second a été trouvé en écrivant les tests : une assertion « une origine
+hostile reçoit 403 » passait en `200` sans rien signaler, parce que le harnais
+pose `NODE_ENV=test`. Un test vert qui ne teste rien est pire que pas de test —
+et le même défaut existe hors des tests, `isTest()` honorant aussi une variable
+`TEST` que n'importe quelle CI peut poser.
+
 ### 7.5 Documentation d'API
 
 Le plugin `openAPI` publie le schéma des routes d'authentification sur
@@ -563,19 +590,94 @@ d'e-mail (donc une adresse peut être fausse) et aucun second facteur.
 
 ## 12. Tests
 
-| Niveau      | Ce qui est couvert                                                                                                                |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Unitaire    | `isBanActive` : les six cas, dont l'instant exact d'expiration. Le mapping de champs, écrit littéralement. `parseTrustedOrigins`. |
-| Intégration | **Absent** (O4). `UserRepo` et `UserService` touchent la base : ils relèvent de ce niveau, pas d'un test unitaire à mocks.        |
+Deux suites, deux commandes, deux jobs de CI. `bun run test` ne touche rien
+d'externe ; `bun run test:integration` démarre un conteneur et monte la vraie
+application.
 
-Les gardes ont des dépendances : les tester unitairement demanderait les mocks
-que le skill `write-unit-tests` interdit, et le harnais d'intégration n'existe
-pas encore (`jest.config.js` unique, aucun service PostgreSQL dans la CI). Elles
-ont été vérifiées à la main contre le serveur réel — 401 sans cookie, 200 avec,
-403 sur un rôle insuffisant, 403 sur un bannissement hors bande, 200 quand son
-échéance est passée — avec un controller temporaire retiré avant le commit. Ce
-n'est pas une couverture, c'est une vérification, et la différence est le sujet
-de O4.
+### 12.1 Ce que couvre l'unitaire
+
+Seulement de la logique pure — c'est la définition du niveau, pas une
+préférence. Une garde a des dépendances : la tester unitairement demanderait les
+mocks que le contrat de tests interdit, donc elle relève de l'intégration.
+
+| Unité                 | Ce qui est couvert                                                                                                                  |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `isBanActive`         | Six cas, dont l'instant exact d'expiration et une échéance oubliée sur un compte non banni.                                         |
+| `parseTrustedOrigins` | Une origine, plusieurs, virgule traînante, variable absente ou blanche.                                                             |
+| Mapping de champs     | Les correspondances écrites **littéralement**, pour qu'un changement de `snakeCase` échoue ici et non à la première connexion.      |
+| Constantes de rôle    | Trois valeurs distinctes, `ADMIN_ROLES` inclus dans `ROLES`, et l'administration jamais donnée au rôle de l'inscription.            |
+| Règle de débit        | `max = 5` et `window = 60` : le critère parle de la sixième tentative, l'option du nombre autorisé, et un décalage d'un les sépare. |
+
+### 12.2 Le harnais d'intégration
+
+```
+test/global-setup.ts        ← démarre postgres:18-alpine, applique les migrations
+test/setup-integration.ts   ← pose la connexion dans l'env, AVANT le premier import
+test/db/truncate.ts         ← vide les tables entre deux tests
+test/app.ts                 ← monte la vraie application via configureApp
+test/probe.controller.ts    ← un consommateur pour les gardes
+test/fixtures/user.fixture.ts
+```
+
+Quatre contraintes ont dicté sa forme. Trois viennent de la concurrence.
+
+**TRUNCATE, pas un rollback de transaction.** Le motif habituel — ouvrir une
+transaction, la défaire après chaque test — est inapplicable ici : Better Auth
+écrit par **son propre pool**. Une fixture posée dans une transaction TypeORM
+lui serait invisible, et ses écritures à elle survivraient au rollback.
+L'isolation serait une illusion dans les deux sens. Committer pour de vrai garde
+en prime observables les choses qui méritent un test : une contrainte d'unicité
+lève réellement, une cascade cascade, et le compteur de débit est une ligne comme
+une autre.
+
+**Un seul worker.** L'isolation étant un TRUNCATE, deux workers sur le même
+conteneur se videraient mutuellement les fixtures en plein milieu d'une
+assertion — et l'échec tomberait dans la spec la plus lente, pas dans la
+fautive.
+
+**Le compteur de débit est un état partagé.** Sa clé est adresse + chemin, et
+toutes les requêtes de la suite viennent de la même adresse. Sans un TRUNCATE
+entre les tests, une spec qui se connecte six fois offre un `429` à la suivante,
+pour des raisons qui ne la concernent pas. Ce n'est pas du rangement, c'est ce
+qui rend les specs indépendantes de leur ordre.
+
+**L'environnement avant le premier import.** `auth.ts` construit son pool et lit
+`NODE_ENV` au chargement de son module (§7.4). `setup-integration.ts` tourne
+dans chaque worker **avant** que la spec ne soit requise, ce qui est exactement
+la fenêtre nécessaire : posée après, la connexion viserait la base de
+développement.
+
+Deux détails qui ne sont pas des détails. L'image est `postgres:18-alpine` et
+pas « un Postgres » : chaque clé primaire du schéma a `uuidv7()` pour défaut, un
+builtin de la 18, donc une image plus ancienne échoue à la première table — le
+harnais ne peut pas tourner en silence sur une version que le schéma ne supporte
+pas. Et `closeTestApp` ferme **les deux** pools : `app.close()` libère celui de
+TypeORM, celui de Better Auth n'est connu de personne dans le cycle de vie Nest,
+et laissé ouvert il fait pendre Jest après la dernière assertion sans rien à
+montrer.
+
+`configureApp` est appelé par la suite comme par `main.ts`. L'ordre des
+middlewares est lui-même porteur — c'est le défaut CORS de §7.4 — donc une suite
+qui le réassemblerait à la main testerait son propre assemblage.
+
+Les gardes n'ont pas encore de route métier à protéger, alors la suite en fournit
+une : `test/probe.controller.ts`, trois formes — sans annotation, avec un rôle
+requis, et explicitement publique. Ce n'est pas un mock : les gardes, les
+décorateurs et la lecture de session dessous sont les vrais. Le jour où un module
+métier existe, ses routes exercent le même code et ce fichier peut partir.
+
+### 12.3 Ce que couvre l'intégration
+
+43 tests, trois specs.
+
+| Spec                                | Ce qui est couvert                                                                                                                                                                                                                                                                                                                                                                        |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auth.integration.spec.ts`          | Inscription, longueur de mot de passe (11 refusé, 12 accepté), doublon d'adresse, rôle par défaut et non choisi par le client, réponse identique entre mot de passe faux et compte inconnu, message de bannissement, débit (`[401 ×5, 429]`), déconnexion et origine hostile. Plus le schéma : colonnes `snake_case`, PK v7, mot de passe absent de `user`, adresse et agent enregistrés. |
+| `session.guard.integration.spec.ts` | 401 sans session et sur un jeton mort, 200 avec, 401 après déconnexion, route publique, 403 pour un salarié et pour un partenaire, 200 pour un administrateur, promotion **et** rétrogradation prises en compte à la requête suivante, bannissement hors bande et échéance dépassée.                                                                                                      |
+| `user.repo.integration.spec.ts`     | Les quatre méthodes du repo, l'unicité de l'adresse levée par la base, et la cascade qui ferme les sessions d'un compte supprimé.                                                                                                                                                                                                                                                         |
+
+Les trois critères d'acceptation de l'issue EPI-45 sont couverts par une
+assertion chacun, dans la première spec.
 
 ## 13. Décisions ouvertes
 
@@ -583,10 +685,16 @@ de O4.
 | --- | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
 | O1  | Envoi d'e-mail : quel transport ? Sans lui, vérification d'adresse et réinitialisation restent indisponibles.        | La récupération de compte.                |
 | O2  | `requireEmailVerification` : à activer en même temps que O1, sinon tout le monde est verrouillé dehors.              | Rien tant que O1 n'est pas tranché.       |
-| O3  | Troisième rôle `partner`, ou appartenance déduite de `partner.owner` ?                                               | Le lot partenaire.                        |
-| O4  | Harnais de tests d'intégration + service PostgreSQL dans la CI.                                                      | La couverture des gardes.                 |
 | O5  | Durée de session : 7 jours par défaut. Le sujet ne dit rien ; un dispositif d'avantages salariés peut vouloir moins. | Rien, la valeur est une constante.        |
 | O6  | Journalisation des connexions échouées via `databaseHooks` — attendue par la fiche de registre ?                     | La fiche RGPD, si elle décrit un journal. |
+
+Fermées depuis : le troisième rôle est tranché (`partner`, §1), et le harnais
+d'intégration existe (§12).
+
+**Ce que les clés d'API laissent ouvert.** Le plugin est activé et sa table
+posée, mais rien ne l'utilise : à quoi une clé se rattache — un employeur, un
+compte — se décidera avec la surface tierce du §3.3. D'où l'absence de clé
+étrangère sur `api_key.reference_id`.
 
 ## 14. Sources
 

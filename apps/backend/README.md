@@ -89,8 +89,9 @@ lire(@CurrentUser() user: AuthUser) { … }
 
 ### Rôles
 
-**Deux rôles**, `user` et `admin`. Un compte créé par inscription est `user` ; le
-rôle n'est jamais lu depuis le corps de la requête. Toutes les routes
+**Trois rôles**, un par espace : `employee`, `partner`, `admin`. Un compte en
+porte exactement un — la colonne est scalaire. L'inscription attribue `employee`,
+et le rôle n'est jamais lu depuis le corps de la requête. Toutes les routes
 d'administration exigent déjà un administrateur, donc le premier se pose hors
 bande :
 
@@ -101,6 +102,22 @@ bun run auth:promote quelquun@exemple.fr
 Le rôle est relu en base à chaque requête — il n'y a pas de cache de session,
 volontairement : une promotion, une révocation ou un bannissement prennent effet
 à la requête suivante, pas à l'expiration d'un cookie.
+
+### Limites et bannissement
+
+Six tentatives de connexion en une minute depuis la même adresse : la sixième
+répond `429`. Le compteur vit dans `rate_limit`, pas en mémoire — un compteur
+de process repart à zéro à chaque redémarrage, donc à chaque déploiement.
+
+Un compte banni reçoit un message qui lui est propre, distinct de l'erreur
+d'identifiants : refuser un mot de passe correct avec « identifiants
+incorrects » envoie quelqu'un réinitialiser un mot de passe qui n'était pas le
+problème.
+
+Les deux contrôles sont **épinglés** dans la configuration plutôt que déduits de
+`NODE_ENV`. La bibliothèque les calcule sinon depuis l'environnement, et
+`NODE_ENV=test` — ou une variable `TEST` que n'importe quelle CI peut poser —
+éteint le contrôle d'origine CSRF sans rien signaler.
 
 ### Schéma
 
@@ -120,6 +137,19 @@ fonction que `SnakeNamingStrategy` utilise, jamais recopié.
 `UserRepo` est la seule couche de ce code qui requête ces tables, et
 `UserService` est ce que le module exporte — un autre module dépend du service,
 jamais du repository.
+
+### Tests
+
+```bash
+bun run test              # unitaire, aucune dépendance externe
+bun run test:integration  # conteneur Postgres 18 éphémère, vraie application
+```
+
+La suite d'intégration démarre son propre conteneur (Testcontainers), applique
+les vraies migrations, et isole les tests par `TRUNCATE` plutôt que par une
+transaction annulée — Better Auth écrit par son propre pool, donc un rollback
+TypeORM ne verrait rien de ses écritures et ne les annulerait pas. Elle tourne
+en série pour la même raison : deux workers se videraient les fixtures.
 
 Les choix et leurs raisons sont dans
 [docs/design/authentication.md](../../docs/design/authentication.md).
