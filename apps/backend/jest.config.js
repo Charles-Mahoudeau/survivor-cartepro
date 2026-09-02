@@ -16,6 +16,10 @@ const config = {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   modulePathIgnorePatterns: ['dist', 'node_modules'],
+  // Unit run only. Integration specs need the ephemeral container that
+  // `jest.integration.config.js` starts, and would fail here with a connection
+  // error that says nothing about the code.
+  testPathIgnorePatterns: ['/node_modules/', '\\.integration\\.spec\\.ts$'],
 };
 
 module.exports = config;
