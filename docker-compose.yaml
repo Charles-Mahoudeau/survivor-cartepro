@@ -13,6 +13,10 @@ services:
       context: .
       dockerfile: apps/backend/Dockerfile
     environment:
+      # Better Auth reads it once, when its module loads, and that read decides
+      # whether rate limiting is on and whether cookies are Secure. Unset is
+      # neither development nor production: both would be off.
+      - NODE_ENV=${NODE_ENV:-production}
       - DATABASE_HOST=${DATABASE_HOST:-postgres}
       - DATABASE_PORT=${DATABASE_PORT:-5432}
       - DATABASE_USER=${DATABASE_USER:-cartepro}

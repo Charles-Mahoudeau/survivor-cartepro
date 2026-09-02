@@ -1,3 +1,8 @@
+// FIRST, before anything else is evaluated. Better Auth reads NODE_ENV once,
+// when its module loads, and that single read decides whether rate limiting is
+// on, whether cookies are Secure, and whether an unproxied request gets an IP.
+// A module imported above this line would capture an empty environment.
+import './config/env/load-env';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory, Reflector } from '@nestjs/core';
