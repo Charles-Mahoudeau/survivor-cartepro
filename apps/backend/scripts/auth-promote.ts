@@ -3,6 +3,7 @@ import chalk from 'chalk';
 import dataSource from '../src/config/database/data-source';
 import { ROLES, type Role } from '../src/config/auth/auth.constants';
 import { User } from '../src/modules/user/entities';
+import { UserRepo } from '../src/modules/user/repos/user.repo';
 import { connect, describeConnection, fail } from './db-common';
 
 /**
@@ -13,8 +14,9 @@ import { connect, describeConnection, fail } from './db-common';
  * is that step, and it is deliberately a script rather than an endpoint: an
  * HTTP route that hands out the admin role is a route someone eventually calls.
  *
- * It writes through the `User` entity, since the table is ours — no raw SQL,
- * and the column name comes from the same place the migration does.
+ * It writes through `UserRepo`, the same repository the application uses, built
+ * by hand because there is no Nest container here. No raw SQL, and no second
+ * place that knows how a role is stored.
  */
 const [email, requestedRole = ROLES.ADMIN] = process.argv.slice(2);
 
@@ -42,8 +44,8 @@ console.log(chalk.gray(`Database: ${describeConnection()}`));
 
 try {
   await connect(dataSource);
-  const users = dataSource.getRepository(User);
-  const user = await users.findOne({ where: { email } });
+  const users = new UserRepo(dataSource.getRepository(User));
+  const user = await users.findByEmail(email);
 
   if (!user) {
     await dataSource.destroy();
@@ -58,7 +60,7 @@ try {
   }
 
   const previousRole = user.role ?? ROLES.USER;
-  await users.update({ id: user.id }, { role: requestedRole });
+  await users.setRole(user.id, requestedRole as Role);
   await dataSource.destroy();
 
   console.log('');
