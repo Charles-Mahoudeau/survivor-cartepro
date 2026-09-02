@@ -3,9 +3,12 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
+import { toNodeHandler } from 'better-auth/node';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { auth, trustedOrigins } from './config/auth/auth';
+import { AUTH_BASE_PATH } from './config/auth/auth.constants';
 import { buildOpenApiDocument } from './swagger';
 
 /**
@@ -15,6 +18,22 @@ import { buildOpenApiDocument } from './swagger';
  * frameguard, referrer policy). /docs renders its UI from a CDN, which a
  * default `script-src 'self'` breaks, and the rest of the API answers JSON
  * where CSP is not the control that matters.
+ *
+ * Better Auth is mounted as plain middleware, right after helmet and before
+ * anything Nest registers. Two consequences worth knowing before adding
+ * anything global: the handler answers EVERY request under its prefix, unknown
+ * paths included, so Nest can own no route below /auth; and those routes cross
+ * neither the validation pipe, nor the serializer, nor the request log — the
+ * library validates with its own schemas, and an authentication request is
+ * never logged.
+ *
+ * CORS reads the same list as the auth trusted origins, and is enabled BEFORE
+ * that mount. Order matters here: the auth handler answers everything under its
+ * prefix and knows nothing about OPTIONS, so a preflight reaching it gets a 404
+ * and the browser never sends the sign-in that follows. Behind the CORS
+ * middleware, the preflight is answered before it gets there. The frontend runs
+ * on its own port, so it is already a different origin in development, and two
+ * lists that drift produce a refusal whose cause is invisible client-side.
  *
  * ClassSerializerInterceptor is what makes `@Exclude()` on an entity actually
  * remove the property from a response. It is registered before the first
@@ -33,6 +52,10 @@ async function bootstrap() {
 
   app.use(helmet({ contentSecurityPolicy: false }));
 
+  app.enableCors({ origin: trustedOrigins(), credentials: true });
+
+  app.use(AUTH_BASE_PATH, toNodeHandler(auth));
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -46,7 +69,7 @@ async function bootstrap() {
     new ClassSerializerInterceptor(reflector),
   );
 
-  const document = buildOpenApiDocument(app);
+  const document = await buildOpenApiDocument(app);
 
   SwaggerModule.setup('docs', app, document, {
     ui: false,
@@ -58,7 +81,7 @@ async function bootstrap() {
     '/docs',
     apiReference({
       content: document,
-      authentication: { preferredSecurityScheme: 'bearer' },
+      authentication: { preferredSecurityScheme: 'cookie' },
     }),
   );
 
