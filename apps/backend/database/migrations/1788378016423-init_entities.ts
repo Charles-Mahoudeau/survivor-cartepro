@@ -73,11 +73,11 @@ export class InitEntities1788378016423 implements MigrationInterface {
         await queryRunner.query(`DROP TABLE "payment"`);
         await queryRunner.query(`DROP TYPE "public"."payment_capture_mode_enum"`);
         await queryRunner.query(`DROP TABLE "partner"`);
-        await queryRunner.query(`DROP TYPE "public"."partner_status_enum"`);
+        // await queryRunner.query(`DROP TYPE "public"."partner_status_enum"`);
         await queryRunner.query(`DROP TABLE "partner_category"`);
         await queryRunner.query(`DROP TABLE "user"`);
         await queryRunner.query(`DROP TABLE "partner_review"`);
-        // await queryRunner.query(`DROP TYPE "public"."partner_status_enum"`);
+        await queryRunner.query(`DROP TYPE "public"."partner_status_enum"`);
         await queryRunner.query(`DROP TABLE "allocation"`);
         await queryRunner.query(`DROP TABLE "employer"`);
         await queryRunner.query(`DROP INDEX "public"."IDX_5ca6b5ed2b5a796e6ab01eac09"`);
