@@ -63,7 +63,35 @@ export const AUTH_ADMIN_SCHEMA = {
 } as const;
 
 /**
- * The rate limit table is the one whose NAME changes too: `rateLimit` in the
- * library, `rate_limit` in a schema where every other table is snake_case.
+ * Field mappings for the columns of the API key plugin. `configId`,
+ * `referenceId` and the four rate-limit columns are the ones the
+ * transformation touches; `key`, `name`, `prefix`, `start`, `enabled`,
+ * `remaining`, `permissions` and `metadata` map to themselves.
+ */
+export const AUTH_API_KEY_SCHEMA = {
+  apikey: {
+    modelName: snakeCase('apiKey'),
+    fields: columnsOf(
+      'configId',
+      'referenceId',
+      'refillInterval',
+      'refillAmount',
+      'lastRefillAt',
+      'rateLimitEnabled',
+      'rateLimitTimeWindow',
+      'rateLimitMax',
+      'requestCount',
+      'lastRequest',
+      'expiresAt',
+      'createdAt',
+      'updatedAt',
+    ),
+  },
+} as const;
+
+/**
+ * Two table names the transformation changes as well: `rateLimit` and `apiKey`
+ * in the library, `rate_limit` and `api_key` in a schema where every other
+ * table is snake_case.
  */
 export const AUTH_RATE_LIMIT_MODEL_NAME = snakeCase('rateLimit');

@@ -1,6 +1,7 @@
 // FIRST: see the note in `main.ts`. Better Auth captures NODE_ENV when its
 // module loads, so the environment has to exist before the import below.
 import '../env/load-env';
+import { apiKey } from '@better-auth/api-key';
 import { betterAuth } from 'better-auth';
 import { admin } from 'better-auth/plugins/admin';
 import { openAPI } from 'better-auth/plugins';
@@ -8,14 +9,17 @@ import { Pool } from 'pg';
 import {
   ADMIN_ROLES,
   AUTH_BASE_PATH,
+  BANNED_USER_MESSAGE,
   MIN_PASSWORD_LENGTH,
   parseTrustedOrigins,
   ROLES,
   SESSION_EXPIRES_IN_SECONDS,
   SESSION_UPDATE_AGE_SECONDS,
+  SIGN_IN_RATE_LIMIT,
 } from './auth.constants';
 import {
   AUTH_ADMIN_SCHEMA,
+  AUTH_API_KEY_SCHEMA,
   AUTH_MODEL_FIELDS,
   AUTH_RATE_LIMIT_MODEL_NAME,
 } from './auth.schema';
@@ -89,21 +93,51 @@ export const authOptions = {
    * budget each time.
    */
   rateLimit: {
+    /**
+     * Explicit rather than left to the default, which is "on in production".
+     * That default is read from the NODE_ENV the library captures once at load,
+     * so an environment that arrives late turns the limiter off without a word
+     * — and this is a security control, not a convenience. On everywhere means
+     * the behaviour under test is the behaviour deployed.
+     */
+    enabled: true,
     storage: 'database',
     modelName: AUTH_RATE_LIMIT_MODEL_NAME,
     fields: AUTH_MODEL_FIELDS.rateLimit,
+    customRules: {
+      '/sign-in/email': SIGN_IN_RATE_LIMIT,
+    },
   },
 
-  advanced: { database: { generateId: false } },
+  advanced: {
+    /**
+     * Pinned, not left to the default. The library computes it as
+     * `disableOriginCheck ?? isTest()`, so `NODE_ENV=test` — or a stray `TEST`
+     * variable, which `isTest()` also honours — turns the CSRF origin check off
+     * without a word. That is a security control disappearing on an
+     * environment name, and it also makes any test that claims to cover it
+     * vacuous: the assertion passes because nothing is checked.
+     */
+    disableOriginCheck: false,
+    database: { generateId: false },
+  },
 
   telemetry: { enabled: false },
 
   plugins: [
     admin({
-      defaultRole: ROLES.USER,
+      defaultRole: ROLES.EMPLOYEE,
       adminRoles: [...ADMIN_ROLES],
+      bannedUserMessage: BANNED_USER_MESSAGE,
       schema: AUTH_ADMIN_SCHEMA,
     }),
+    /**
+     * Keys for the third-party surface the brief asks for (§3.3, an HR system
+     * reading a balance). No route consumes them yet — the plugin is enabled
+     * here so the table exists in the same migration as the rest of
+     * authentication, rather than arriving alone later.
+     */
+    apiKey({ schema: AUTH_API_KEY_SCHEMA }),
     /**
      * Publishes the schema of the routes below `/auth`, which `swagger.ts`
      * merges into the document Nest builds. Its own Scalar page is off: this

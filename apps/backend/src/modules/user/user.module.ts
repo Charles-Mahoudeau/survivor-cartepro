@@ -1,6 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Account, RateLimit, Session, User, Verification } from './entities';
+import {
+  Account,
+  ApiKey,
+  RateLimit,
+  Session,
+  User,
+  Verification,
+} from './entities';
 import { UserRepo } from './repos/user.repo';
 import { UserService } from './services/user.service';
 
@@ -17,7 +24,14 @@ import { UserService } from './services/user.service';
  */
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Session, Account, Verification, RateLimit]),
+    TypeOrmModule.forFeature([
+      User,
+      Session,
+      Account,
+      Verification,
+      RateLimit,
+      ApiKey,
+    ]),
   ],
   providers: [UserRepo, UserService],
   exports: [UserService],

@@ -13,12 +13,19 @@
 export const AUTH_BASE_PATH = '/auth';
 
 /**
- * The two roles of this lot. `USER` is what the admin plugin assigns to every
- * account created through sign-up; `ADMIN` is granted out of band. A third role
- * for partners is additive — the column already holds an arbitrary string.
+ * The three spaces of the dispositif, one role each — an account carries
+ * exactly one, because `user.role` is a single column and nothing writes a
+ * list into it.
+ *
+ * `EMPLOYEE` is what the admin plugin assigns on sign-up: it is the path
+ * everyone takes, and it grants nothing beyond one's own wallet. `PARTNER` and
+ * `ADMIN` are granted out of band — a partner account is validated by the
+ * administration before it can collect anything, and an administrator is
+ * promoted by someone who already is one.
  */
 export const ROLES = {
-  USER: 'user',
+  EMPLOYEE: 'employee',
+  PARTNER: 'partner',
   ADMIN: 'admin',
 } as const;
 
@@ -30,6 +37,23 @@ export type Role = (typeof ROLES)[keyof typeof ROLES];
  * not in this list.
  */
 export const ADMIN_ROLES: Role[] = [ROLES.ADMIN];
+
+/**
+ * What a banned account is told at sign-in. Distinct from the credentials
+ * error on purpose: refusing a correct password with « identifiants
+ * incorrects » sends someone to reset a password that was never the problem.
+ * It names no reason and no expiry — that is for the administration to give,
+ * not for an unauthenticated response to disclose.
+ */
+export const BANNED_USER_MESSAGE =
+  'Ce compte est suspendu. Contactez l’administration du dispositif.';
+
+/**
+ * Sign-in attempts allowed per window, per address. The sixth inside a minute
+ * is refused with a 429 — slow enough to stop a credential-stuffing run, wide
+ * enough that someone mistyping their password twice is not locked out.
+ */
+export const SIGN_IN_RATE_LIMIT = { window: 60, max: 5 } as const;
 
 /** Seven days, the library default, restated so the value is greppable. */
 export const SESSION_EXPIRES_IN_SECONDS = 60 * 60 * 24 * 7;

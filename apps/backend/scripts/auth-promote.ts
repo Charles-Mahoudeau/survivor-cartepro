@@ -59,7 +59,7 @@ try {
     process.exit(1);
   }
 
-  const previousRole = user.role ?? ROLES.USER;
+  const previousRole = user.role ?? ROLES.EMPLOYEE;
   await users.setRole(user.id, requestedRole as Role);
   await dataSource.destroy();
 
