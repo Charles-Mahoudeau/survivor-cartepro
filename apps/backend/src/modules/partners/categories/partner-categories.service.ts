@@ -24,7 +24,7 @@ export class PartnerCategoriesService {
       .leftJoin('category.partners', 'partner')
       .select('category.slug', 'slug')
       .addSelect('category.displayName', 'displayName')
-      .addSelect('COUNT(*)', 'partnerCount')
+      .addSelect('COUNT(partner.id)', 'partnerCount')
       .groupBy('category.slug')
       .addGroupBy('category.displayName')
       .getRawMany<{
