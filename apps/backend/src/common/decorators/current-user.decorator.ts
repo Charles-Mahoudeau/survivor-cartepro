@@ -14,13 +14,21 @@ export interface RequestWithSession extends Request {
 /**
  * Hands the handler the authenticated account.
  *
- * It never resolves the session itself: `SessionGuard` has already done the
- * read and refused the request if there was none, so a route reaching this
- * decorator always has one. A parameter decorator that re-read the session
- * would double the query count of every guarded route.
+ * The two type arguments are the ones `createParamDecorator` takes: what the
+ * decorator accepts at the call site, and what it hands the handler. `undefined`
+ * for the first because this decorator takes no argument — `@CurrentUser('email')`
+ * is a compile error rather than a silently ignored string. `AuthUser` for the
+ * second, inferred from the Better Auth instance, so the handler receives the
+ * account with its plugin columns (`role`, `banned`, `banExpires`) and not an
+ * `any` that would make every read of them unchecked.
+ *
+ * It never resolves the session itself: `SessionGuard` has already done the read
+ * and refused the request if there was none, so a route reaching this decorator
+ * always has one. A parameter decorator that re-read the session would double
+ * the query count of every guarded route.
  */
-export const CurrentUser = createParamDecorator(
-  (_data: unknown, context: ExecutionContext): AuthUser => {
+export const CurrentUser = createParamDecorator<undefined, AuthUser>(
+  (_, context: ExecutionContext): AuthUser => {
     const request = context.switchToHttp().getRequest<RequestWithSession>();
     return request.session!.user;
   },

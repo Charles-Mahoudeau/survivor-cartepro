@@ -39,7 +39,13 @@ export class RolesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<RequestWithSession>();
     const role = request.session?.user.role;
 
-    if (!role || !required.includes(role as Role)) {
+    // The column holds a free string — it can already carry a role this build
+    // does not know, such as one added by a later lot. The question asked here
+    // is whether that string is among the names the route accepts, so the list
+    // is widened rather than the value asserted to be a `Role` it may not be.
+    const accepted: readonly string[] = required;
+
+    if (!role || !accepted.includes(role)) {
       throw new ForbiddenException(ERROR_CODES.FORBIDDEN_ROLE);
     }
 
