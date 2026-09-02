@@ -10,6 +10,7 @@ import {
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-generated-uuid-v7.column';
 import { User } from '@/modules/users/entities/user.entity';
 import { PartnerCategory } from '@/modules/partners/entities/partner-category.entity';
@@ -25,7 +26,7 @@ export class Partner {
 
   @OneToOne(() => User, (user) => user.partner)
   @JoinColumn({ name: 'owner_id' })
-  owner: User;
+  owner: Relation<User>;
 
   @Column({ type: 'text' })
   legalName: string;
@@ -53,7 +54,7 @@ export class Partner {
     joinColumn: { name: 'partner_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'category_slug', referencedColumnName: 'slug' },
   })
-  categories: PartnerCategory[];
+  categories: Relation<PartnerCategory>[];
 
   @Column({ type: 'text' })
   addressLine: string;
@@ -85,8 +86,8 @@ export class Partner {
   updatedAt: Date;
 
   @OneToMany(() => PartnerReview, (partnerReview) => partnerReview.partner)
-  reviews: PartnerReview[];
+  reviews: Relation<PartnerReview>[];
 
   @OneToMany(() => Payment, (payment) => payment.partner)
-  payments: Payment[];
+  payments: Relation<Payment>[];
 }

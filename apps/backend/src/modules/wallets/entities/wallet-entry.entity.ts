@@ -6,6 +6,7 @@ import {
   JoinColumn,
   ManyToOne,
 } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-generated-uuid-v7.column';
 import { Allocation } from '@/modules/allocations/entities/allocation.entity';
 import { Payment } from '@/modules/payments/entities/payment.entity';
@@ -21,7 +22,7 @@ export class WalletEntry {
 
   @ManyToOne(() => Wallet, (wallet) => wallet.entries)
   @JoinColumn({ name: 'wallet_id' })
-  wallet: Wallet;
+  wallet: Relation<Wallet>;
 
   @Column({ type: 'enum', enum: WalletEntryDirection })
   direction: WalletEntryDirection;
@@ -39,13 +40,13 @@ export class WalletEntry {
     nullable: true,
   })
   @JoinColumn({ name: 'payment_id' })
-  payment: Payment | null;
+  payment: Relation<Payment> | null;
 
   @ManyToOne(() => Allocation, (allocation) => allocation.walletEntries, {
     nullable: true,
   })
   @JoinColumn({ name: 'allocation_id' })
-  allocation: Allocation | null;
+  allocation: Relation<Allocation> | null;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;

@@ -9,6 +9,7 @@ import {
   OneToMany,
   UpdateDateColumn,
 } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-generated-uuid-v7.column';
 import { Employer } from '@/modules/employers/entities/employer.entity';
 import { PaymentToken } from '@/modules/payments/entities/payment-token.entity';
@@ -27,11 +28,11 @@ export class Wallet {
 
   @ManyToOne(() => User, (user) => user.wallets)
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user: Relation<User>;
 
   @ManyToOne(() => Employer, (employer) => employer.wallets, { nullable: true })
   @JoinColumn({ name: 'employer_id' })
-  employer: Employer | null;
+  employer: Relation<Employer> | null;
 
   @Column({ type: 'text', nullable: true })
   employeeRef: string | null;
@@ -46,13 +47,13 @@ export class Wallet {
   status: WalletStatus;
 
   @OneToMany(() => WalletEntry, (entry) => entry.wallet)
-  entries: WalletEntry[];
+  entries: Relation<WalletEntry>[];
 
   @OneToMany(() => PaymentToken, (paymentToken) => paymentToken.wallet)
-  paymentTokens: PaymentToken[];
+  paymentTokens: Relation<PaymentToken>[];
 
   @OneToMany(() => Payment, (payment) => payment.wallet)
-  payments: Payment[];
+  payments: Relation<Payment>[];
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;

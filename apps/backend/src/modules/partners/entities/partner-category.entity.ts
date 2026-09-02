@@ -1,4 +1,5 @@
 import { Column, Entity, ManyToMany, PrimaryColumn } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { Partner } from '@/modules/partners/entities/partner.entity';
 
 @Entity()
@@ -10,5 +11,5 @@ export class PartnerCategory {
   displayName: string;
 
   @ManyToMany(() => Partner, (partner) => partner.categories)
-  partners: Partner[];
+  partners: Relation<Partner>[];
 }

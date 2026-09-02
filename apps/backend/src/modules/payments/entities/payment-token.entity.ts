@@ -7,6 +7,7 @@ import {
   ManyToOne,
   OneToOne,
 } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-generated-uuid-v7.column';
 import { Payment } from '@/modules/payments/entities/payment.entity';
 import { PaymentTokenStatus } from '@/modules/payments/enums/payment-token-status.enum';
@@ -20,7 +21,7 @@ export class PaymentToken {
 
   @ManyToOne(() => Wallet, (wallet) => wallet.paymentTokens)
   @JoinColumn({ name: 'wallet_id' })
-  wallet: Wallet;
+  wallet: Relation<Wallet>;
 
   @Column({ type: 'char', length: 8 })
   shortCode: string;
@@ -35,7 +36,7 @@ export class PaymentToken {
   consumedAt: Date | null;
 
   @OneToOne(() => Payment, (payment) => payment.paymentToken)
-  payment: Payment;
+  payment: Relation<Payment>;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;

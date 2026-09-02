@@ -8,6 +8,7 @@ import {
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-generated-uuid-v7.column';
 import { Allocation } from '@/modules/allocations/entities/allocation.entity';
 import { User } from '@/modules/users/entities/user.entity';
@@ -21,7 +22,7 @@ export class Employer {
 
   @OneToOne(() => User, (user) => user.employer)
   @JoinColumn({ name: 'owner_id' })
-  owner: User;
+  owner: Relation<User>;
 
   @Column({ type: 'text' })
   name: string;
@@ -30,10 +31,10 @@ export class Employer {
   siren: string;
 
   @OneToMany(() => Wallet, (wallet) => wallet.employer)
-  wallets: Wallet[];
+  wallets: Relation<Wallet>[];
 
   @OneToMany(() => Allocation, (allocation) => allocation.employer)
-  allocations: Allocation[];
+  allocations: Relation<Allocation>[];
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;

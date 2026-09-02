@@ -7,6 +7,7 @@ import {
   ManyToOne,
   OneToMany,
 } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-generated-uuid-v7.column';
 import { Employer } from '@/modules/employers/entities/employer.entity';
 import { User } from '@/modules/users/entities/user.entity';
@@ -20,7 +21,7 @@ export class Allocation {
 
   @ManyToOne(() => Employer, (employer) => employer.allocations)
   @JoinColumn({ name: 'employer_id' })
-  employer: Employer;
+  employer: Relation<Employer>;
 
   @Column({ type: 'text' })
   label: string;
@@ -30,11 +31,11 @@ export class Allocation {
 
   @ManyToOne(() => User, (user) => user.createdAllocations)
   @JoinColumn({ name: 'created_by' })
-  createdBy: User;
+  createdBy: Relation<User>;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
   @OneToMany(() => WalletEntry, (entry) => entry.allocation)
-  walletEntries: WalletEntry[];
+  walletEntries: Relation<WalletEntry>[];
 }

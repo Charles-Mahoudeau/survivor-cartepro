@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
 } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-generated-uuid-v7.column';
 import { User } from '@/modules/users/entities/user.entity';
 import { Partner } from '@/modules/partners/entities/partner.entity';
@@ -17,7 +18,7 @@ export class PartnerReview {
 
   @ManyToOne(() => Partner, (partner) => partner.reviews)
   @JoinColumn({ name: 'partner_id' })
-  partner: Partner;
+  partner: Relation<Partner>;
 
   @Column({
     type: 'enum',
@@ -38,7 +39,7 @@ export class PartnerReview {
 
   @ManyToOne(() => User, (user) => user.decidedPartnerReviews)
   @JoinColumn({ name: 'decided_by' })
-  decidedBy: User;
+  decidedBy: Relation<User>;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;

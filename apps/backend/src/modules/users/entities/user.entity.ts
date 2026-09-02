@@ -1,4 +1,5 @@
 import { Entity, OneToMany, OneToOne } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { Allocation } from '@/modules/allocations/entities/allocation.entity';
 import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-generated-uuid-v7.column';
 import { Employer } from '@/modules/employers/entities/employer.entity';
@@ -12,17 +13,17 @@ export class User {
   id: string;
 
   @OneToOne(() => Employer, (employer) => employer.owner)
-  employer: Employer;
+  employer: Relation<Employer>;
 
   @OneToOne(() => Partner, (partner) => partner.owner)
-  partner: Partner;
+  partner: Relation<Partner>;
 
   @OneToMany(() => Wallet, (wallet) => wallet.user)
-  wallets: Wallet[];
+  wallets: Relation<Wallet>[];
 
   @OneToMany(() => PartnerReview, (partnerReview) => partnerReview.decidedBy)
-  decidedPartnerReviews: PartnerReview[];
+  decidedPartnerReviews: Relation<PartnerReview>[];
 
   @OneToMany(() => Allocation, (allocation) => allocation.createdBy)
-  createdAllocations: Allocation[];
+  createdAllocations: Relation<Allocation>[];
 }

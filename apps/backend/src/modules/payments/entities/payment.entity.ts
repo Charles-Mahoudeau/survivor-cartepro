@@ -8,6 +8,7 @@ import {
   OneToMany,
   OneToOne,
 } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-generated-uuid-v7.column';
 import { Partner } from '@/modules/partners/entities/partner.entity';
 import { WalletEntry } from '@/modules/wallets/entities/wallet-entry.entity';
@@ -23,24 +24,24 @@ export class Payment {
 
   @ManyToOne(() => Wallet, (wallet) => wallet.payments)
   @JoinColumn({ name: 'wallet_id' })
-  wallet: Wallet;
+  wallet: Relation<Wallet>;
 
   @ManyToOne(() => Partner, (partner) => partner.payments)
   @JoinColumn({ name: 'partner_id' })
-  partner: Partner;
+  partner: Relation<Partner>;
 
   @Column({ type: 'numeric', precision: 12, scale: 2 })
   amount: number;
 
   @OneToOne(() => PaymentToken, (paymentToken) => paymentToken.payment)
   @JoinColumn({ name: 'payment_token_id' })
-  paymentToken: PaymentToken;
+  paymentToken: Relation<PaymentToken>;
 
   @Column({ type: 'enum', enum: CaptureMode })
   captureMode: CaptureMode;
 
   @OneToMany(() => WalletEntry, (entry) => entry.payment)
-  walletEntries: WalletEntry[];
+  walletEntries: Relation<WalletEntry>[];
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
