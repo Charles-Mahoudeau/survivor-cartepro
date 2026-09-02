@@ -1,8 +1,10 @@
+// FIRST: see the note in `main.ts`. Better Auth captures NODE_ENV when its
+// module loads, so the environment has to exist before the import below.
+import '../env/load-env';
 import { betterAuth } from 'better-auth';
 import { admin } from 'better-auth/plugins/admin';
 import { openAPI } from 'better-auth/plugins';
 import { Pool } from 'pg';
-import '../env/load-env';
 import {
   ADMIN_ROLES,
   AUTH_BASE_PATH,
@@ -12,6 +14,11 @@ import {
   SESSION_EXPIRES_IN_SECONDS,
   SESSION_UPDATE_AGE_SECONDS,
 } from './auth.constants';
+import {
+  AUTH_ADMIN_SCHEMA,
+  AUTH_MODEL_FIELDS,
+  AUTH_RATE_LIMIT_MODEL_NAME,
+} from './auth.schema';
 
 /**
  * Origins allowed to carry a session cookie to this API. The same list feeds
@@ -23,17 +30,22 @@ export function trustedOrigins(): string[] {
 }
 
 /**
- * Everything Better Auth needs, kept separate from the instance because the
- * migration planner (`getMigrations`) takes the options, not the instance.
+ * The single Better Auth instance.
  *
  * It reads `process.env` directly rather than through `ConfigService`, for the
- * same reason `data-source.ts` does: the migration script and the promotion
- * script load this file with no Nest container running, so anything it needs
- * must be readable without one.
+ * same reason `data-source.ts` does: the role script loads this file with no
+ * Nest container running, so anything it needs must be readable without one.
  *
- * The connection is its own `pg.Pool`, separate from the one TypeORM holds.
+ * The connection is its own `pg.Pool`, separate from the one TypeORM holds:
  * Better Auth talks to Postgres through Kysely and cannot borrow a TypeORM
- * connection; both pools point at the same database.
+ * connection. It is the same database and the same five tables — the schema is
+ * ours, declared in `src/modules/user/entities/` and migrated by
+ * `db:generate`, and the library is told where our columns are.
+ *
+ * Ids are left to the database (`generateId: false`), so a row gets the same
+ * `uuidv7()` default as every other row of this schema rather than a
+ * library-generated string. That is what makes a foreign key from a business
+ * table to `user.id` an ordinary `uuid` relation.
  *
  * There is no `cookieCache`. Caching the session in a signed cookie removes a
  * query per request, but it also keeps a revoked session and a stale role alive
@@ -56,15 +68,19 @@ export const authOptions = {
     database: process.env.DATABASE_NAME || 'cartepro',
   }),
 
+  user: { fields: AUTH_MODEL_FIELDS.user },
+  session: {
+    fields: AUTH_MODEL_FIELDS.session,
+    expiresIn: SESSION_EXPIRES_IN_SECONDS,
+    updateAge: SESSION_UPDATE_AGE_SECONDS,
+  },
+  account: { fields: AUTH_MODEL_FIELDS.account },
+  verification: { fields: AUTH_MODEL_FIELDS.verification },
+
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
     minPasswordLength: MIN_PASSWORD_LENGTH,
-  },
-
-  session: {
-    expiresIn: SESSION_EXPIRES_IN_SECONDS,
-    updateAge: SESSION_UPDATE_AGE_SECONDS,
   },
 
   /**
@@ -74,7 +90,11 @@ export const authOptions = {
    */
   rateLimit: {
     storage: 'database',
+    modelName: AUTH_RATE_LIMIT_MODEL_NAME,
+    fields: AUTH_MODEL_FIELDS.rateLimit,
   },
+
+  advanced: { database: { generateId: false } },
 
   telemetry: { enabled: false },
 
@@ -82,6 +102,7 @@ export const authOptions = {
     admin({
       defaultRole: ROLES.USER,
       adminRoles: [...ADMIN_ROLES],
+      schema: AUTH_ADMIN_SCHEMA,
     }),
     /**
      * Publishes the schema of the routes below `/auth`, which `swagger.ts`

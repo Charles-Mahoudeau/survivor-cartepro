@@ -24,8 +24,6 @@
     "db:show": "bun scripts/db-show.ts",
     "db:drop": "bun scripts/db-drop.ts",
     "db:reset": "bun scripts/db-reset.ts",
-    "auth:migrate": "bun scripts/auth-migrate.ts",
-    "auth:show": "bun scripts/auth-show.ts",
     "auth:promote": "bun scripts/auth-promote.ts"
   },
   "dependencies": {
