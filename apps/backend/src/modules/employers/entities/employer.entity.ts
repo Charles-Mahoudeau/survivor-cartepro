@@ -20,7 +20,7 @@ export class Employer {
   @PrimaryGeneratedUuidV7Column()
   id: string;
 
-  @OneToOne(() => User, (user) => user.employer)
+  @OneToOne(() => User, (user) => user.employer, { nullable: false })
   @JoinColumn({ name: 'owner_id' })
   owner: Relation<User>;
 

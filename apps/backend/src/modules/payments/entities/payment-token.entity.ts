@@ -19,7 +19,9 @@ export class PaymentToken {
   @PrimaryGeneratedUuidV7Column()
   id: string;
 
-  @ManyToOne(() => Wallet, (wallet) => wallet.paymentTokens)
+  @ManyToOne(() => Wallet, (wallet) => wallet.paymentTokens, {
+    nullable: false,
+  })
   @JoinColumn({ name: 'wallet_id' })
   wallet: Relation<Wallet>;
 

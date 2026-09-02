@@ -20,7 +20,7 @@ export class WalletEntry {
   @PrimaryGeneratedUuidV7Column()
   id: string;
 
-  @ManyToOne(() => Wallet, (wallet) => wallet.entries)
+  @ManyToOne(() => Wallet, (wallet) => wallet.entries, { nullable: false })
   @JoinColumn({ name: 'wallet_id' })
   wallet: Relation<Wallet>;
 

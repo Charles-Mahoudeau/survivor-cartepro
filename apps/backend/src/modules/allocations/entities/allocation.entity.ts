@@ -19,7 +19,9 @@ export class Allocation {
   @PrimaryGeneratedUuidV7Column()
   id: string;
 
-  @ManyToOne(() => Employer, (employer) => employer.allocations)
+  @ManyToOne(() => Employer, (employer) => employer.allocations, {
+    nullable: false,
+  })
   @JoinColumn({ name: 'employer_id' })
   employer: Relation<Employer>;
 
@@ -29,7 +31,9 @@ export class Allocation {
   @Column({ type: 'numeric', precision: 12, scale: 2 })
   amount: number;
 
-  @ManyToOne(() => User, (user) => user.createdAllocations)
+  @ManyToOne(() => User, (user) => user.createdAllocations, {
+    nullable: false,
+  })
   @JoinColumn({ name: 'created_by' })
   createdBy: Relation<User>;
 

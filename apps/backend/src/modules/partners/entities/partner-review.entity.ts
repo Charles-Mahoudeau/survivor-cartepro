@@ -16,7 +16,7 @@ export class PartnerReview {
   @PrimaryGeneratedUuidV7Column()
   id: string;
 
-  @ManyToOne(() => Partner, (partner) => partner.reviews)
+  @ManyToOne(() => Partner, (partner) => partner.reviews, { nullable: false })
   @JoinColumn({ name: 'partner_id' })
   partner: Relation<Partner>;
 
@@ -37,7 +37,9 @@ export class PartnerReview {
   @Column({ type: 'text' })
   reason: string;
 
-  @ManyToOne(() => User, (user) => user.decidedPartnerReviews)
+  @ManyToOne(() => User, (user) => user.decidedPartnerReviews, {
+    nullable: false,
+  })
   @JoinColumn({ name: 'decided_by' })
   decidedBy: Relation<User>;
 

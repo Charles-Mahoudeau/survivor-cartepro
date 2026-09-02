@@ -24,7 +24,7 @@ export class Partner {
   @PrimaryGeneratedUuidV7Column()
   id: string;
 
-  @OneToOne(() => User, (user) => user.partner)
+  @OneToOne(() => User, (user) => user.partner, { nullable: false })
   @JoinColumn({ name: 'owner_id' })
   owner: Relation<User>;
 

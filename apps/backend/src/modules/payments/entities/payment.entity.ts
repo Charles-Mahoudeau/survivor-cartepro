@@ -22,18 +22,20 @@ export class Payment {
   @PrimaryGeneratedUuidV7Column()
   id: string;
 
-  @ManyToOne(() => Wallet, (wallet) => wallet.payments)
+  @ManyToOne(() => Wallet, (wallet) => wallet.payments, { nullable: false })
   @JoinColumn({ name: 'wallet_id' })
   wallet: Relation<Wallet>;
 
-  @ManyToOne(() => Partner, (partner) => partner.payments)
+  @ManyToOne(() => Partner, (partner) => partner.payments, { nullable: false })
   @JoinColumn({ name: 'partner_id' })
   partner: Relation<Partner>;
 
   @Column({ type: 'numeric', precision: 12, scale: 2 })
   amount: number;
 
-  @OneToOne(() => PaymentToken, (paymentToken) => paymentToken.payment)
+  @OneToOne(() => PaymentToken, (paymentToken) => paymentToken.payment, {
+    nullable: false,
+  })
   @JoinColumn({ name: 'payment_token_id' })
   paymentToken: Relation<PaymentToken>;
 
