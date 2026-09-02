@@ -48,7 +48,7 @@ export class Partner {
   })
   status: PartnerStatus;
 
-  @ManyToMany(() => PartnerCategory)
+  @ManyToMany(() => PartnerCategory, (category) => category.partners)
   @JoinTable({
     name: 'partner_to_category',
     joinColumn: { name: 'partner_id', referencedColumnName: 'id' },
