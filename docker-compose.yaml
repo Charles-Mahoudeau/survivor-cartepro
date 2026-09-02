@@ -19,6 +19,9 @@ services:
       - DATABASE_PASSWORD=${DATABASE_PASSWORD:-cartepro}
       - DATABASE_NAME=${DATABASE_NAME:-cartepro}
       - DATABASE_LOGGING=${DATABASE_LOGGING:-false}
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:?set BETTER_AUTH_SECRET, e.g. openssl rand -base64 32}
+      - BETTER_AUTH_URL=${BETTER_AUTH_URL:?set BETTER_AUTH_URL to the public URL of the API}
+      - AUTH_TRUSTED_ORIGINS=${AUTH_TRUSTED_ORIGINS:?set AUTH_TRUSTED_ORIGINS to the origins allowed to sign in}
     expose:
       - 3000
     depends_on:
