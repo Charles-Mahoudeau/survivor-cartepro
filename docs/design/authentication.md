@@ -566,7 +566,7 @@ d'e-mail (donc une adresse peut être fausse) et aucun second facteur.
 | Niveau      | Ce qui est couvert                                                                                                                |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | Unitaire    | `isBanActive` : les six cas, dont l'instant exact d'expiration. Le mapping de champs, écrit littéralement. `parseTrustedOrigins`. |
-| Intégration | **Absent.** Voir O4.                                                                                                              |
+| Intégration | **Absent** (O4). `UserRepo` et `UserService` touchent la base : ils relèvent de ce niveau, pas d'un test unitaire à mocks.        |
 
 Les gardes ont des dépendances : les tester unitairement demanderait les mocks
 que le skill `write-unit-tests` interdit, et le harnais d'intégration n'existe
@@ -587,7 +587,6 @@ de O4.
 | O4  | Harnais de tests d'intégration + service PostgreSQL dans la CI.                                                      | La couverture des gardes.                 |
 | O5  | Durée de session : 7 jours par défaut. Le sujet ne dit rien ; un dispositif d'avantages salariés peut vouloir moins. | Rien, la valeur est une constante.        |
 | O6  | Journalisation des connexions échouées via `databaseHooks` — attendue par la fiche de registre ?                     | La fiche RGPD, si elle décrit un journal. |
-| O7  | `UserModule` n'expose aucun repository. Le premier lot qui lit un compte décidera de sa surface.                     | Rien aujourd'hui.                         |
 
 ## 14. Sources
 

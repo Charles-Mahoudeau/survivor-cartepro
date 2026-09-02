@@ -117,6 +117,10 @@ fonction que `SnakeNamingStrategy` utilise, jamais recopié.
 > limitation de débit, de l'attribut `Secure` des cookies et du repli d'adresse
 > IP. D'où `import './config/env/load-env'` en première ligne de `main.ts`.
 
+`UserRepo` est la seule couche de ce code qui requête ces tables, et
+`UserService` est ce que le module exporte — un autre module dépend du service,
+jamais du repository.
+
 Les choix et leurs raisons sont dans
 [docs/design/authentication.md](../../docs/design/authentication.md).
 
