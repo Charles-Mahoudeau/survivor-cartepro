@@ -16,6 +16,7 @@ jobs:
   verify:
     name: ${{ matrix.task }}
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     timeout-minutes: 10
     permissions:
       contents: read
@@ -37,3 +38,35 @@ jobs:
 
       - name: Run ${{ matrix.task }}
         run: bun run ${{ matrix.task }}
+
+  # Le web doit pouvoir être build sans accès à internet
+  # (voir https://linear.app/epitech-tek3-survivor-2026/issue/EPI-35/infra-integration-continue-du-web)
+  web-build-offline:
+    name: build:web (offline)
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # sudo car créer un espace de noms réseau demande CAP_SYS_ADMIN
+      # env pour forward le PATH du runner à sudo, qui impose le sien (secure_path)
+      # unshare --net pour avoir une pile réseau sans interface externe
+      # ip link <...> pour réautoriser la boucle locale (localhost)
+      # (Turbopack en a besoin pour le build)
+      # exec pour que le code du job soit le code du build
+      - name: Build the web app without a network
+        run: |
+          sudo env "PATH=$PATH" unshare --net -- \
+            sh -c 'ip link set lo up && exec bun --filter=@cartepro/frontend run build'

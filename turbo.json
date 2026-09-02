@@ -10,29 +10,23 @@
       "persistent": true
     },
     "build": {
-      "outputs": ["dist/**"],
-      "inputs": ["src/**", "scripts/**", "package.json", "tsconfig.json"]
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "inputs": ["$TURBO_DEFAULT$"]
     },
     "typecheck": {
-      "inputs": ["src/**", "scripts/**", "package.json", "tsconfig.json"]
+      "inputs": ["$TURBO_DEFAULT$"]
     },
     "lint": {
       "cache": false
     },
     "lint:check": {
-      "inputs": [
-        "src/**",
-        "scripts/**",
-        "eslint.config.mjs",
-        "tsconfig.json",
-        "tsconfig.eslint.json"
-      ]
+      "inputs": ["$TURBO_DEFAULT$"]
     },
     "test": {
-      "inputs": ["src/**", "jest.config.js", "package.json"]
+      "inputs": ["$TURBO_DEFAULT$"]
     },
     "test:unit": {
-      "inputs": ["src/**", "jest.config.js", "package.json"]
+      "inputs": ["$TURBO_DEFAULT$"]
     }
   }
 }

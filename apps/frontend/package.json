@@ -3,27 +3,39 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "dev": "NEXT_TELEMETRY_DISABLED=1 next dev",
+    "start": "NEXT_TELEMETRY_DISABLED=1 next start",
+    "build": "NEXT_TELEMETRY_DISABLED=1 next build",
+    "typegen": "NEXT_TELEMETRY_DISABLED=1 next typegen",
+    "typecheck": "bun run typegen && tsc --noEmit",
+    "lint": "eslint --fix",
+    "lint:check": "eslint",
+    "format": "prettier --write \"app/**/*.{ts,tsx,css}\"",
+    "format:check": "prettier --check \"app/**/*.{ts,tsx,css}\"",
+    "test": "bun test",
+    "test:unit": "bun test",
+    "test:watch": "bun test --watch",
+    "test:cov": "bun test --coverage"
   },
   "dependencies": {
+    "geist": "^1.7.2",
     "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/bun": "^1.4.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
+    "prettier": "^3.9.6",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
-  "packageManager": "bun@1.4.0",
+  "packageManager": "bun@1.3.14",
   "ignoreScripts": [
     "sharp",
     "unrs-resolver"
