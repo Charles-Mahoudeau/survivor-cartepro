@@ -67,6 +67,7 @@ export default async function globalSetup(): Promise<void> {
     const failure = error as { stdout?: Buffer; stderr?: Buffer };
     if (failure.stdout) process.stdout.write(failure.stdout);
     if (failure.stderr) process.stderr.write(failure.stderr);
+    await container.stop().catch(() => undefined);
     throw error;
   }
 
