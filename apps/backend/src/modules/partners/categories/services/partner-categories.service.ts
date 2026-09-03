@@ -3,13 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { PartnerCategory } from '@/modules/partners/categories/entities/partner-category.entity';
 import { Repository } from 'typeorm';
 import { Partner } from '@/modules/partners/core/entities/partner.entity';
-
-export type PartnerCategoryWithPartnerCount = Omit<
-  PartnerCategory,
-  'partners'
-> & {
-  partnerCount: number;
-};
+import { PartnerCategoryResponseDto } from '@/modules/partners/categories/dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class PartnerCategoriesService {
@@ -18,7 +13,7 @@ export class PartnerCategoriesService {
     private readonly categoryRepository: Repository<PartnerCategory>,
   ) {}
 
-  async findAllWithPartnerCount(): Promise<PartnerCategoryWithPartnerCount[]> {
+  async findAllWithPartnerCount(): Promise<PartnerCategoryResponseDto[]> {
     const categories = await this.categoryRepository
       .createQueryBuilder('category')
       .leftJoin('category.partners', 'partner')
@@ -33,16 +28,23 @@ export class PartnerCategoriesService {
         partnerCount: string | number;
       }>();
 
-    return categories.map(({ slug, displayName, partnerCount }) => ({
-      slug,
-      displayName,
-      partnerCount: Number(partnerCount),
-    }));
+    const categoryWithPartnersArray = categories.map(
+      ({ slug, displayName, partnerCount }) => ({
+        slug,
+        displayName,
+        partnerCount: Number(partnerCount),
+      }),
+    );
+
+    return plainToInstance(
+      PartnerCategoryResponseDto,
+      categoryWithPartnersArray,
+    );
   }
 
   async findOneWithPartnerCount(
     slug: string,
-  ): Promise<PartnerCategoryWithPartnerCount | null> {
+  ): Promise<PartnerCategoryResponseDto | null> {
     const category = await this.categoryRepository.findOne({
       where: {
         slug,
@@ -57,9 +59,11 @@ export class PartnerCategoriesService {
       where: { categories: { slug: category.slug } },
     });
 
-    return {
+    const categoryWithPartners = {
       ...category,
       partnerCount,
     };
+
+    return plainToInstance(PartnerCategoryResponseDto, categoryWithPartners);
   }
 }
