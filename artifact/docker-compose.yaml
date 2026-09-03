@@ -34,13 +34,19 @@ services:
       - DATABASE_PASSWORD=${DATABASE_PASSWORD:-cartepro}
       - DATABASE_NAME=${DATABASE_NAME:-cartepro}
       - DATABASE_LOGGING=${DATABASE_LOGGING:-false}
+      # Better Auth refuses to boot without these three, and AppModule validates
+      # them before the first request. BETTER_AUTH_URL also decides whether the
+      # session cookie is Secure, so it has to be the URL the browser reaches.
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:?set BETTER_AUTH_SECRET, e.g. openssl rand -base64 32}
+      - BETTER_AUTH_URL=${BETTER_AUTH_URL:?set BETTER_AUTH_URL to the public URL of the API}
+      - AUTH_TRUSTED_ORIGINS=${AUTH_TRUSTED_ORIGINS:?set AUTH_TRUSTED_ORIGINS to the origins allowed to sign in}
     depends_on:
       postgres:
         condition: service_healthy
     labels:
       - traefik.enable=true
       - traefik.http.routers.back.entrypoints=web
-      - traefik.http.routers.back.rule=Host(`cartepro.localhost`) && (PathPrefix(`/api`) || PathPrefix(`/docs`) || Path(`/health`))
+      - traefik.http.routers.back.rule=Host(`cartepro.localhost`) && (PathPrefix(`/api`) || PathPrefix(`/docs`) || Path(`/health`) || PathPrefix(`/auth`))
       - traefik.http.routers.back.priority=100
       - traefik.http.services.back.loadbalancer.server.port=3000
 
