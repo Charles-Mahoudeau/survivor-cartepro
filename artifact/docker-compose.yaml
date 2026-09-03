@@ -28,12 +28,12 @@ services:
   backend:
     image: cartepro-backend
     environment:
-      - DATABASE_HOST=postgres
-      - DATABASE_PORT=5432
-      - DATABASE_USER=cartepro
-      - DATABASE_PASSWORD=cartepro
-      - DATABASE_NAME=cartepro
-      - DATABASE_LOGGING=false
+      - DATABASE_HOST=${DATABASE_HOST:-postgres}
+      - DATABASE_PORT=${DATABASE_PORT:-5432}
+      - DATABASE_USER=${DATABASE_USER:-cartepro}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-cartepro}
+      - DATABASE_NAME=${DATABASE_NAME:-cartepro}
+      - DATABASE_LOGGING=${DATABASE_LOGGING:-false}
     depends_on:
       postgres:
         condition: service_healthy
@@ -48,14 +48,13 @@ services:
     image: postgres:18-alpine
     restart: unless-stopped
     environment:
-      - POSTGRES_PORT=5432
-      - POSTGRES_USER=cartepro
-      - POSTGRES_PASSWORD=cartepro
-      - POSTGRES_DB=cartepro
+      - POSTGRES_USER=${DATABASE_USER:-cartepro}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD:-cartepro}
+      - POSTGRES_DB=${DATABASE_NAME:-cartepro}
     volumes:
       - postgres-data:/var/lib/postgresql
     healthcheck:
-      test: [ 'CMD-SHELL', 'pg_isready -U cartepro -d cartepro' ]
+      test: [ 'CMD-SHELL', 'pg_isready -U ${DATABASE_USER:-cartepro} -d ${DATABASE_NAME:-cartepro}' ]
       interval: 5s
       timeout: 3s
       retries: 10
