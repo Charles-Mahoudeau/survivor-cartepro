@@ -14,7 +14,7 @@ import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-genera
 import { Employer } from '@/modules/employers/entities/employer.entity';
 import { PaymentToken } from '@/modules/payments/entities/payment-token.entity';
 import { Payment } from '@/modules/payments/entities/payment.entity';
-import { User } from '@/modules/users/entities/user.entity';
+import { User } from '@/modules/user/entities/user.entity';
 import { WalletEntry } from '@/modules/wallets/entities/wallet-entry.entity';
 import { WalletStatus } from '@/modules/wallets/enums/wallet-status.enum';
 

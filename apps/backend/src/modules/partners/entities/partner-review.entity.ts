@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import type { Relation } from 'typeorm';
 import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-generated-uuid-v7.column';
-import { User } from '@/modules/users/entities/user.entity';
+import { User } from '@/modules/user/entities/user.entity';
 import { Partner } from '@/modules/partners/entities/partner.entity';
 import { PartnerStatus } from '@/modules/partners/enums/partner-status.enum';
 
@@ -22,18 +22,10 @@ export class PartnerReview {
   @JoinColumn({ name: 'partner_id' })
   partner: Relation<Partner>;
 
-  @Column({
-    type: 'enum',
-    enum: PartnerStatus,
-    enumName: 'partner_status_enum',
-  })
+  @Column({ type: 'enum', enum: PartnerStatus })
   fromStatus: PartnerStatus;
 
-  @Column({
-    type: 'enum',
-    enum: PartnerStatus,
-    enumName: 'partner_status_enum',
-  })
+  @Column({ type: 'enum', enum: PartnerStatus })
   toStatus: PartnerStatus;
 
   @Column({ type: 'text' })
