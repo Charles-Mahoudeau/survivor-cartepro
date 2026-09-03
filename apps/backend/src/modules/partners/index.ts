@@ -1,1 +1,1 @@
-export { PartnersModule } from '@/modules/partners/partners.module';
+export { PartnersModule } from './partners.module';

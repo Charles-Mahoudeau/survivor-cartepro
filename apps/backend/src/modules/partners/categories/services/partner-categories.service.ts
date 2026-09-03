@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PartnerCategory } from '@/modules/partners/entities/partner-category.entity';
+import { PartnerCategory } from '@/modules/partners/categories/entities/partner-category.entity';
 import { Repository } from 'typeorm';
-import { Partner } from '@/modules/partners/entities/partner.entity';
+import { Partner } from '@/modules/partners/core/entities/partner.entity';
 
 export type PartnerCategoryWithPartnerCount = Omit<
   PartnerCategory,

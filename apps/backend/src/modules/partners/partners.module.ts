@@ -1,16 +1,9 @@
 import { Module } from '@nestjs/common';
-import { PartnerCategoriesController } from '@/modules/partners/categories/partner-categories.controller';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { PartnerReview } from '@/modules/partners/entities/partner-review.entity';
-import { PartnerCategory } from '@/modules/partners/entities/partner-category.entity';
-import { Partner } from '@/modules/partners/entities/partner.entity';
-import { PartnerCategoriesService } from '@/modules/partners/categories/partner-categories.service';
+import { PartnerReviewsModule } from '@/modules/partners/reviews/partner-reviews.module';
+import { PartnerCategoriesModule } from '@/modules/partners/categories/partner-categories.module';
+import { PartnersCoreModule } from '@/modules/partners/core';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Partner, PartnerCategory, PartnerReview]),
-  ],
-  controllers: [PartnerCategoriesController],
-  providers: [PartnerCategoriesService],
+  imports: [PartnersCoreModule, PartnerCategoriesModule, PartnerReviewsModule],
 })
 export class PartnersModule {}

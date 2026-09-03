@@ -1,7 +1,7 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { PartnerCategoryResponseDto } from '@/modules/partners/categories/dto/partner-category-response.dto';
-import { PartnerCategoriesService } from '@/modules/partners/categories/partner-categories.service';
+import { PartnerCategoriesService } from '@/modules/partners/categories/services/partner-categories.service';
 import { plainToInstance } from 'class-transformer';
 
 @ApiTags('Partner Categories')

@@ -6,10 +6,10 @@ import { DatabaseModule } from '@/config/database/database.module';
 import { AllocationsModule } from '@/modules/allocations/allocations.module';
 import { EmployersModule } from '@/modules/employers/employers.module';
 import { HealthModule } from '@/modules/health/health.module';
-import { PartnersModule } from '@/modules/partners';
 import { PaymentsModule } from '@/modules/payments/payments.module';
 import { UserModule } from '@/modules/user';
 import { WalletsModule } from '@/modules/wallets/wallets.module';
+import { PartnersModule } from '@/modules/partners';
 
 @Module({
   imports: [
@@ -26,7 +26,6 @@ import { WalletsModule } from '@/modules/wallets/wallets.module';
     PaymentsModule,
     AllocationsModule,
     HealthModule,
-    PartnersModule,
   ],
 })
 export class AppModule {}

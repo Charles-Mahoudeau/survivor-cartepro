@@ -9,8 +9,8 @@ import {
 import type { Relation } from 'typeorm';
 import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-generated-uuid-v7.column';
 import { User } from '@/modules/user/entities/user.entity';
-import { Partner } from '@/modules/partners/entities/partner.entity';
-import { PartnerStatus } from '@/modules/partners/enums/partner-status.enum';
+import { Partner } from '@/modules/partners/core/entities/partner.entity';
+import { PartnerStatus } from '@/modules/partners/core/enums/partner-status.enum';
 
 @Entity()
 @Index('IDX_partner_review_partner_id', ['partner'])

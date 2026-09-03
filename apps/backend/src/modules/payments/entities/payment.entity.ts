@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 import type { Relation } from 'typeorm';
 import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-generated-uuid-v7.column';
-import { Partner } from '@/modules/partners/entities/partner.entity';
+import { Partner } from '@/modules/partners/core/entities/partner.entity';
 import { WalletEntry } from '@/modules/wallets/entities/wallet-entry.entity';
 import { Wallet } from '@/modules/wallets/entities/wallet.entity';
 import { PaymentToken } from '@/modules/payments/entities/payment-token.entity';

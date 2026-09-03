@@ -12,8 +12,8 @@ import { Account } from './account.entity';
 import { Session } from './session.entity';
 import { Allocation } from '@/modules/allocations/entities/allocation.entity';
 import { Employer } from '@/modules/employers/entities/employer.entity';
-import { Partner } from '@/modules/partners/entities/partner.entity';
-import { PartnerReview } from '@/modules/partners/entities/partner-review.entity';
+import { Partner } from '@/modules/partners/core/entities/partner.entity';
+import { PartnerReview } from '@/modules/partners/reviews/entities/partner-review.entity';
 import { Wallet } from '@/modules/wallets/entities/wallet.entity';
 
 @Entity('user')

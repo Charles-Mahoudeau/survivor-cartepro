@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToMany, PrimaryColumn } from 'typeorm';
 import type { Relation } from 'typeorm';
-import { Partner } from '@/modules/partners/entities/partner.entity';
+import { Partner } from '@/modules/partners/core/entities/partner.entity';
 
 @Entity()
 export class PartnerCategory {

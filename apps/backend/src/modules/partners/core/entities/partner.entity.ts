@@ -13,10 +13,10 @@ import {
 import type { Relation } from 'typeorm';
 import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-generated-uuid-v7.column';
 import { User } from '@/modules/user/entities/user.entity';
-import { PartnerCategory } from '@/modules/partners/entities/partner-category.entity';
-import { PartnerReview } from '@/modules/partners/entities/partner-review.entity';
+import { PartnerCategory } from '@/modules/partners/categories/entities/partner-category.entity';
+import { PartnerReview } from '@/modules/partners/reviews/entities/partner-review.entity';
 import { Payment } from '@/modules/payments/entities/payment.entity';
-import { PartnerStatus } from '@/modules/partners/enums/partner-status.enum';
+import { PartnerStatus } from '@/modules/partners/core/enums/partner-status.enum';
 
 @Entity()
 @Unique(['siren'])
