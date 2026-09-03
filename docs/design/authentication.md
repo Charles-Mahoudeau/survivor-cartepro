@@ -35,23 +35,23 @@ encaisser.
 
 ## 2. Décisions verrouillées
 
-| #   | Décision                                                                                   | Raison                                                                                                                                                      |
-| --- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| D1  | Better Auth porte la **logique** d'authentification, pas le schéma.                        | Mots de passe, sessions, rôles et bannissement sont du code déjà écrit et déjà audité. Les tables, elles, sont du domaine de ce dépôt.                      |
-| D2  | Le schéma appartient à TypeORM : six entities, migrations par `db:generate`.               | §3. Une seule source de vérité, un seul migrateur, et une clé étrangère métier vers `user.id` devient une relation ordinaire.                               |
-| D3  | Aucun second migrateur. Le schéma s'applique au démarrage comme les autres.                | Le dépôt promet déjà « récupérer une branche et lancer le serveur suffit à être sur son schéma ». Une promesse, un mécanisme.                               |
-| D4  | Montage à `/auth`, pas à `/api/auth`.                                                      | Cette API n'a pas de segment `/api` — `/health`, `/docs`. Le client web est construit avec le même `basePath`.                                              |
-| D5  | Pas de plugin `organization`.                                                              | Il modélise des espaces à plusieurs membres avec invitations ; le sujet décrit un compte partenaire unique. Refusé le 2026-09-01.                           |
-| D6  | Pas de `cookieCache`.                                                                      | §11 — un cache garde un compte banni et un rôle périmé vivants jusqu'à son expiration. Ce lot existe pour bannir et promouvoir.                             |
-| D7  | Clés primaires `uuid` avec défaut `uuidv7()`, comme toutes les tables.                     | `generateId: false` laisse la base générer. Sans ça les identifiants d'auth seraient des chaînes base62 et les FK métier des colonnes `text`.               |
-| D8  | La bibliothèque `@thallesp/nestjs-better-auth` n'est pas utilisée.                         | §7.1 — elle déclare `@nestjs/common@^11.1.6` en peer non optionnelle, ce dépôt est en NestJS 12.                                                            |
-| D9  | Longueur minimale de mot de passe : 12 caractères.                                         | Recommandation ANSSI-PG-078 pour un compte sans second facteur. La valeur par défaut de la bibliothèque est 8.                                              |
-| D10 | Limitation de débit activée, stockée en base.                                              | Les routes d'authentification sont la surface brute-forçable de ce lot. Le stockage mémoire perd son compteur à chaque redémarrage.                         |
-| D11 | **Aucun controller NestJS d'authentification.**                                            | §5.2 — le client Better Auth du frontend appelle `/auth/*` directement. Un controller qui les réexpose est une seconde copie du contrat.                    |
-| D12 | Colonnes en `snake_case`, mapping **calculé**, jamais recopié.                             | §4.2 — le mapping et la stratégie de nommage partagent une seule implémentation, donc ils ne peuvent pas diverger.                                          |
-| D13 | `NODE_ENV` est chargé **avant** le premier import de la bibliothèque.                      | §7.4 — elle le lit une seule fois, au chargement de son module, et cette lecture décide des cookies `Secure` et du repli d'adresse IP.                      |
-| D14 | Limitation de débit et contrôle d'origine **épinglés**, jamais déduits de l'environnement. | §7.4 — les deux défauts de la bibliothèque se calculent depuis `NODE_ENV`. Un contrôle de sécurité qui s'éteint sur un nom d'environnement n'en est pas un. |
-| D15 | Isolation des tests par TRUNCATE, suite en série.                                          | §12 — Better Auth écrit par son propre pool : un rollback de transaction TypeORM ne verrait rien de ses écritures et ne les annulerait pas.                 |
+| #   | Décision                                                                                   | Raison                                                                                                                                                                     |
+| --- | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | Better Auth porte la **logique** d'authentification, pas le schéma.                        | Mots de passe, sessions, rôles et bannissement sont du code déjà écrit et déjà audité. Les tables, elles, sont du domaine de ce dépôt.                                     |
+| D2  | Le schéma appartient à TypeORM : six entities, migrations par `db:generate`.               | §3. Une seule source de vérité, un seul migrateur, et une clé étrangère métier vers `user.id` devient une relation ordinaire.                                              |
+| D3  | Aucun second migrateur. Le schéma s'applique au démarrage comme les autres.                | Le dépôt promet déjà « récupérer une branche et lancer le serveur suffit à être sur son schéma ». Une promesse, un mécanisme.                                              |
+| D4  | Montage à `/auth`, pas à `/api/auth`.                                                      | Le préfixe global `api` et le versioning d'URI ne s'appliquent qu'au routeur NestJS, et le handler est monté avant lui. Le client web utilise le même `basePath`. Voir O9. |
+| D5  | Pas de plugin `organization`.                                                              | Il modélise des espaces à plusieurs membres avec invitations ; le sujet décrit un compte partenaire unique. Refusé le 2026-09-01.                                          |
+| D6  | Pas de `cookieCache`.                                                                      | §11 — un cache garde un compte banni et un rôle périmé vivants jusqu'à son expiration. Ce lot existe pour bannir et promouvoir.                                            |
+| D7  | Clés primaires `uuid` avec défaut `uuidv7()`, comme toutes les tables.                     | `generateId: false` laisse la base générer. Sans ça les identifiants d'auth seraient des chaînes base62 et les FK métier des colonnes `text`.                              |
+| D8  | La bibliothèque `@thallesp/nestjs-better-auth` n'est pas utilisée.                         | §7.1 — elle déclare `@nestjs/common@^11.1.6` en peer non optionnelle, ce dépôt est en NestJS 12.                                                                           |
+| D9  | Longueur minimale de mot de passe : 12 caractères.                                         | Recommandation ANSSI-PG-078 pour un compte sans second facteur. La valeur par défaut de la bibliothèque est 8.                                                             |
+| D10 | Limitation de débit activée, stockée en base.                                              | Les routes d'authentification sont la surface brute-forçable de ce lot. Le stockage mémoire perd son compteur à chaque redémarrage.                                        |
+| D11 | **Aucun controller NestJS d'authentification.**                                            | §5.2 — le client Better Auth du frontend appelle `/auth/*` directement. Un controller qui les réexpose est une seconde copie du contrat.                                   |
+| D12 | Colonnes en `snake_case`, mapping **calculé**, jamais recopié.                             | §4.2 — le mapping et la stratégie de nommage partagent une seule implémentation, donc ils ne peuvent pas diverger.                                                         |
+| D13 | `NODE_ENV` est chargé **avant** le premier import de la bibliothèque.                      | §7.4 — elle le lit une seule fois, au chargement de son module, et cette lecture décide des cookies `Secure` et du repli d'adresse IP.                                     |
+| D14 | Limitation de débit et contrôle d'origine **épinglés**, jamais déduits de l'environnement. | §7.4 — les deux défauts de la bibliothèque se calculent depuis `NODE_ENV`. Un contrôle de sécurité qui s'éteint sur un nom d'environnement n'en est pas un.                |
+| D15 | Isolation des tests par TRUNCATE, suite en série.                                          | §12 — Better Auth écrit par son propre pool : un rollback de transaction TypeORM ne verrait rien de ses écritures et ne les annulerait pas.                                |
 
 ## 3. Pourquoi le schéma est à nous
 
@@ -397,10 +397,16 @@ trois décorateurs — tient dans une centaine de lignes aux conventions du dép
 ### 7.2 Montage du handler
 
 ```ts
-// src/main.ts
+// src/bootstrap.ts
 app.use(helmet({ contentSecurityPolicy: false }));
 app.enableCors({ origin: trustedOrigins(), credentials: true });
-app.use(AUTH_BASE_PATH, toNodeHandler(auth));
+app.use(AUTH_BASE_PATH, resolveClientAddress, toNodeHandler(auth));
+// … puis, pour le routeur NestJS seulement :
+app.setGlobalPrefix(API_PREFIX, { exclude: ['docs', 'health'] });
+app.enableVersioning({
+  type: VersioningType.URI,
+  defaultVersion: API_DEFAULT_VERSION,
+});
 ```
 
 Trois choses rendent ce montage correct, vérifiées et non supposées :
@@ -414,7 +420,8 @@ Trois choses rendent ce montage correct, vérifiées et non supposées :
    documente la bibliothèque communautaire, écrite pour des versions antérieures.
 3. **L'ordre place le handler avant le routeur.** `app.use()` s'applique à
    l'instance Express immédiatement, tandis que NestJS enregistre ses parseurs et
-   son routeur pendant `app.listen()`.
+   son routeur pendant `app.listen()`. C'est aussi pourquoi `setGlobalPrefix` ne
+   déplace pas `/auth` : il ne réécrit que les routes du routeur NestJS.
 
 ### 7.3 Ce que les routes `/auth` ne traversent pas
 
@@ -681,13 +688,14 @@ assertion chacun, dans la première spec.
 
 ## 13. Décisions ouvertes
 
-| #   | Question                                                                                                             | Bloque                                    |
-| --- | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| O1  | Envoi d'e-mail : quel transport ? Sans lui, vérification d'adresse et réinitialisation restent indisponibles.        | La récupération de compte.                |
-| O2  | `requireEmailVerification` : à activer en même temps que O1, sinon tout le monde est verrouillé dehors.              | Rien tant que O1 n'est pas tranché.       |
-| O5  | Durée de session : 7 jours par défaut. Le sujet ne dit rien ; un dispositif d'avantages salariés peut vouloir moins. | Rien, la valeur est une constante.        |
-| O8  | Bannissement hors bande non appliqué aux routes `/auth` — mesuré, suivi dans EPI-166.                                | La suspension d'un compte.                |
-| O6  | Journalisation des connexions échouées via `databaseHooks` — attendue par la fiche de registre ?                     | La fiche RGPD, si elle décrit un journal. |
+| #   | Question                                                                                                             | Bloque                                               |
+| --- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| O1  | Envoi d'e-mail : quel transport ? Sans lui, vérification d'adresse et réinitialisation restent indisponibles.        | La récupération de compte.                           |
+| O2  | `requireEmailVerification` : à activer en même temps que O1, sinon tout le monde est verrouillé dehors.              | Rien tant que O1 n'est pas tranché.                  |
+| O5  | Durée de session : 7 jours par défaut. Le sujet ne dit rien ; un dispositif d'avantages salariés peut vouloir moins. | Rien, la valeur est une constante.                   |
+| O8  | Bannissement hors bande non appliqué aux routes `/auth` — mesuré, suivi dans EPI-166.                                | La suspension d'un compte.                           |
+| O6  | Journalisation des connexions échouées via `databaseHooks` — attendue par la fiche de registre ?                     | La fiche RGPD, si elle décrit un journal.            |
+| O9  | Le reste de l'API répond sous `/api/v1` ; `/auth` reste à la racine. Faut-il aligner sur `/api/auth` ?               | Rien — à trancher avant que le client web soit figé. |
 
 Fermées depuis : le troisième rôle est tranché (`partner`, §1), et le harnais
 d'intégration existe (§12).
