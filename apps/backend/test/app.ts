@@ -18,6 +18,14 @@ export interface TestApp {
  * smaller graph would assert on a composition that never runs. `configureApp`
  * is what `main.ts` calls, so the middleware order under test is the deployed
  * one.
+ *
+ * It LISTENS, on an ephemeral port, rather than only initialising. Supertest
+ * calls `listen(0)` itself when handed a server that is not listening, and
+ * closes it again after the response — once per request. Dozens of those cycles
+ * in a file let the operating system hand back a port whose previous socket is
+ * still finishing, so a late response lands on the next connection: a status
+ * belonging to another request, or bytes that do not begin with `HTTP/`.
+ * Listening once means supertest binds nothing and closes nothing.
  */
 export async function createTestApp(): Promise<TestApp> {
   const moduleRef = await Test.createTestingModule({
@@ -27,7 +35,7 @@ export async function createTestApp(): Promise<TestApp> {
 
   const app = moduleRef.createNestApplication();
   await configureApp(app, { withDocs: false });
-  await app.init();
+  await app.listen(0);
 
   return { app, dataSource: app.get(DataSource) };
 }
