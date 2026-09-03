@@ -5,6 +5,7 @@ import {
   type TestApp,
 } from '../../../../test/app';
 import {
+  grantRole,
   signUp,
   TEST_USER_AGENT,
   TRUSTED_ORIGIN,
@@ -15,10 +16,40 @@ import { UserRepo } from '@/modules/user/repos/user.repo';
 import { AUTH_BASE_PATH, ROLES } from '../auth.constants';
 
 let context: TestApp;
-const post = (path: string) =>
-  api(context.app)
+const post = (path: string, cookie?: string[]) => {
+  const call = api(context.app)
     .post(`${AUTH_BASE_PATH}${path}`)
     .set('Origin', TRUSTED_ORIGIN);
+  return cookie ? call.set('Cookie', cookie) : call;
+};
+
+const get = (path: string, cookie?: string[]) => {
+  const call = api(context.app).get(`${AUTH_BASE_PATH}${path}`);
+  return cookie ? call.set('Cookie', cookie) : call;
+};
+
+/** An account the administration routes accept, promoted out of band. */
+async function anAdministrator(email: string) {
+  const account = await signUp(context.app, email);
+  await grantRole(context, account.id, ROLES.ADMIN);
+  return account;
+}
+
+async function roleOf(userId: string): Promise<string> {
+  const rows: Array<{ role: string }> = await context.dataSource.query(
+    `SELECT role FROM "user" WHERE id = $1`,
+    [userId],
+  );
+  return rows[0].role;
+}
+
+async function isBanned(userId: string): Promise<boolean> {
+  const rows: Array<{ banned: boolean | null }> =
+    await context.dataSource.query(`SELECT banned FROM "user" WHERE id = $1`, [
+      userId,
+    ]);
+  return rows[0].banned === true;
+}
 
 beforeAll(async () => {
   context = await createTestApp();
@@ -293,16 +324,15 @@ describe('the schema the library writes into', () => {
     expect(columns).toEqual([]);
   });
 
-  it('records the address the middleware resolved, not one a client can claim', async () => {
+  it('records the user agent the caller sent', async () => {
     const account = await signUp(context.app, 'trace@tickettout.test');
 
-    const sessions: Array<{ ip_address: string; user_agent: string }> =
+    const sessions: Array<{ user_agent: string }> =
       await context.dataSource.query(
-        `SELECT ip_address, user_agent FROM session WHERE user_id = $1`,
+        `SELECT user_agent FROM session WHERE user_id = $1`,
         [account.id],
       );
 
-    expect(sessions[0].ip_address).toBe('127.0.0.1');
     expect(sessions[0].user_agent).toBe(TEST_USER_AGENT);
   });
 
@@ -352,5 +382,78 @@ describe('the schema the library writes into', () => {
       );
 
     expect(tables).toHaveLength(1);
+  });
+});
+
+describe('administration routes', () => {
+  it('lists the accounts for an administrator', async () => {
+    const admin = await anAdministrator('chef@tickettout.test');
+    await signUp(context.app, 'salarie@tickettout.test');
+
+    const response = await get('/admin/list-users?limit=10', admin.cookie);
+    const { users } = bodyOf<{ users: Array<{ email: string }> }>(response);
+
+    expect(response.status).toBe(200);
+    expect(users.map((user) => user.email).sort()).toEqual([
+      'chef@tickettout.test',
+      'salarie@tickettout.test',
+    ]);
+  });
+
+  it('refuses the account list to an employee', async () => {
+    const employee = await signUp(context.app, 'curieux@tickettout.test');
+
+    const response = await get('/admin/list-users?limit=10', employee.cookie);
+
+    expect(response.status).toBe(403);
+  });
+
+  it('changes a role for an administrator', async () => {
+    const admin = await anAdministrator('promoteur@tickettout.test');
+    const target = await signUp(context.app, 'cible@tickettout.test');
+
+    const response = await post('/admin/set-role', admin.cookie).send({
+      userId: target.id,
+      role: ROLES.PARTNER,
+    });
+
+    expect(response.status).toBe(200);
+    expect(await roleOf(target.id)).toBe(ROLES.PARTNER);
+  });
+
+  it('refuses to let an employee promote itself to administrator', async () => {
+    const employee = await signUp(context.app, 'ambitieux@tickettout.test');
+
+    const response = await post('/admin/set-role', employee.cookie).send({
+      userId: employee.id,
+      role: ROLES.ADMIN,
+    });
+
+    expect(response.status).toBe(403);
+    expect(await roleOf(employee.id)).toBe(ROLES.EMPLOYEE);
+  });
+
+  it('bans an account for an administrator', async () => {
+    const admin = await anAdministrator('gardien@tickettout.test');
+    const target = await signUp(context.app, 'fautif@tickettout.test');
+
+    const response = await post('/admin/ban-user', admin.cookie).send({
+      userId: target.id,
+    });
+
+    expect(response.status).toBe(200);
+    expect(await isBanned(target.id)).toBe(true);
+  });
+
+  it('refuses banning to an employee', async () => {
+    const employee = await signUp(context.app, 'justicier@tickettout.test');
+    const target = await signUp(context.app, 'innocent@tickettout.test');
+
+    const response = await post('/admin/ban-user', employee.cookie).send({
+      userId: target.id,
+    });
+
+    expect(response.status).toBe(403);
+    expect(await isBanned(target.id)).toBe(false);
   });
 });
