@@ -1,0 +1,38 @@
+name: Build and Package Artifact
+on:
+  push:
+    branches: [main, master]
+
+jobs:
+  build-and-package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build Docker images
+        run: |
+          docker build -t cartepro-backend -f apps/backend/Dockerfile .
+          docker build -t cartepro-frontend -f apps/frontend/Dockerfile .
+
+      - name: Prepare artifact package
+        run: |
+          # Copy artifact/ to release/
+          cp -r artifact/ release/
+
+          # Save docker images
+          docker save cartepro-backend:latest cartepro-frontend:latest | gzip > release/docker-images.tar.gz
+
+          # Set execution permissions
+          chmod +x release/start.sh
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cartepro-livrable
+          path: release/
+          retention-days: 14
