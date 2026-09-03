@@ -25,14 +25,15 @@ un défaut, pas une préférence.
 
 Points d'entrée, par situation :
 
-| Situation                  | À appliquer                                                                       |
-| -------------------------- | --------------------------------------------------------------------------------- |
-| Créer / modifier un module | skill `architecture-module-conventions`                                           |
-| Écrire un test             | skills `write-unit-tests`, `write-integration-tests`                              |
-| Faire une revue            | `.claude/rules/code-review.md`                                                    |
-| Committer                  | `.claude/rules/commit.md`, `.claude/rules/fix-process-pas-de-co-author-commit.md` |
-| Toucher au schéma          | `.claude/rules/fix-process-migrations-via-db-generate.md`                         |
-| Se tromper                 | `.claude/rules/errors-learning.md` — l'erreur produit une nouvelle règle          |
+| Situation                     | À appliquer                                                                               |
+| ----------------------------- | ----------------------------------------------------------------------------------------- |
+| Créer / modifier un module    | skill `architecture-module-conventions`                                                   |
+| Écrire un test                | skills `write-unit-tests`, `write-integration-tests`                                      |
+| Faire une revue               | `.claude/rules/code-review.md`                                                            |
+| Committer                     | `.claude/rules/commit.md`, `.claude/rules/fix-process-pas-de-co-author-commit.md`         |
+| Toucher au schéma             | `.claude/rules/fix-process-migrations-via-db-generate.md`                                 |
+| Voir un défaut hors périmètre | `.claude/rules/fix-process-hors-scope-poser-sans-acter.md` — on le pose, on ne l'acte pas |
+| Se tromper                    | `.claude/rules/errors-learning.md` — l'erreur produit une nouvelle règle                  |
 
 ## Invariants du backend
 
@@ -57,13 +58,13 @@ Points d'entrée, par situation :
 
 ## Commandes
 
-| Commande                                                 | Effet                                    |
-| -------------------------------------------------------- | ---------------------------------------- |
-| `bun run dev`                                            | Base + toutes les applications en watch  |
-| `bun run typecheck` / `lint:check`                       | Gates de types et de lint                |
-| `bun run format:check`                                   | Gate Prettier                            |
-| `bun run test`                                           | Tests unitaires                          |
-| `bun run build`                                          | Compilation                              |
+| Commande                                                   | Effet                                    |
+| ---------------------------------------------------------- | ---------------------------------------- |
+| `bun run dev`                                              | Base + toutes les applications en watch  |
+| `bun run typecheck` / `lint:check`                         | Gates de types et de lint                |
+| `bun run format:check`                                     | Gate Prettier                            |
+| `bun run test`                                             | Tests unitaires                          |
+| `bun run build`                                            | Compilation                              |
 | `bun run --filter '@tickettout/backend' db:generate <Nom>` | Génère une migration depuis les entities |
 
 La CI rejoue les cinq mêmes gates sur chaque push d'une pull request
