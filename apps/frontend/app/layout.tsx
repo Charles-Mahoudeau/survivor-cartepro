@@ -10,8 +10,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CartePro",
-  description: "Dispositif d'avantages salariés dématérialisés",
+  title: "Ticket Tout (simulation)",
+  description:
+    "Vos avantages salariés, à dépenser partout chez les partenaires du Ministère du Job et Bonheur. Dispositif de simulation, sans valeur monétaire réelle.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

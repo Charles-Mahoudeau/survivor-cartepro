@@ -160,3 +160,91 @@
     font-family: var(--font-heading);
   }
 }
+@theme inline {
+  --font-serif: var(--font-spectral), Georgia, serif;
+  --font-display: var(--font-marianne), system-ui, sans-serif;
+}
+
+/* Compatibilité avec la maquette Ticket Tout : elle nomme les rôles
+   typographiques `font-display` et `font-mono-data`, et porte les statuts
+   par des classes plutôt que par des utilitaires. */
+.font-display {
+  font-family: var(--font-marianne), system-ui, sans-serif;
+}
+
+.font-mono-data {
+  font-family: var(--font-marianne), system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.badge-pending {
+  background: var(--coral-light);
+  color: var(--coral-dark);
+}
+.badge-active {
+  background: var(--emerald-light);
+  color: var(--emerald-dark);
+}
+.badge-rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.badge-suspended {
+  background: var(--muted);
+  color: var(--muted-foreground);
+}
+.badge-closed {
+  background: var(--muted);
+  color: var(--muted-foreground);
+}
+
+.qr-container {
+  image-rendering: pixelated;
+}
+
+.page-enter {
+  animation: fadeInUp 0.18s ease both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter {
+    animation: none;
+  }
+}
+
+/* Avertissement : mention de simulation, exigence 1 du courrier du 01/09/2026.
+   Ambre plutôt que corail, pour ne pas se confondre avec une erreur. */
+:root {
+  --warning: #b45309;
+  --warning-light: #fef3c7;
+  --warning-border: #f0b429;
+}
+
+.dark {
+  --warning: #fcd34d;
+  --warning-light: #3a2a06;
+  --warning-border: #a16207;
+}
+
+@theme inline {
+  --color-warning: var(--warning);
+  --color-warning-light: var(--warning-light);
+  --color-warning-border: var(--warning-border);
+}
+
+.badge-pending {
+  background: var(--warning-light);
+  color: var(--warning);
+}
