@@ -11,6 +11,7 @@ import {
   VALID_PASSWORD,
 } from '../../../../test/fixtures/user.fixture';
 import { api, bodyOf } from '../../../../test/http';
+import { UserRepo } from '@/modules/user/repos/user.repo';
 import { AUTH_BASE_PATH, ROLES } from '../auth.constants';
 
 let context: TestApp;
@@ -118,20 +119,18 @@ describe('roles', () => {
     expect(admins).toEqual([]);
   });
 
-  it('replaces the role rather than accumulating one', async () => {
+  it('replaces the role rather than accumulating one, through the code that grants it', async () => {
     const { id } = await signUp(context.app, 'promu@cartepro.test');
-    await context.dataSource.query(
-      `UPDATE "user" SET role = $1 WHERE id = $2`,
-      [ROLES.ADMIN, id],
-    );
+
+    await context.app.get(UserRepo).setRole(id, ROLES.ADMIN);
 
     const rows: Array<{ role: string }> = await context.dataSource.query(
       `SELECT role FROM "user" WHERE id = $1`,
       [id],
     );
 
+    expect(rows).toHaveLength(1);
     expect(rows[0].role).toBe(ROLES.ADMIN);
-    expect(rows[0].role).not.toContain(ROLES.EMPLOYEE);
   });
 });
 
@@ -291,7 +290,7 @@ describe('the schema the library writes into', () => {
     expect(columns).toEqual([]);
   });
 
-  it('records the address and the agent, which an empty NODE_ENV would leave blank', async () => {
+  it('records the address the middleware resolved, not one a client can claim', async () => {
     const account = await signUp(context.app, 'trace@cartepro.test');
 
     const sessions: Array<{ ip_address: string; user_agent: string }> =
@@ -302,6 +301,28 @@ describe('the schema the library writes into', () => {
 
     expect(sessions[0].ip_address).toBe('127.0.0.1');
     expect(sessions[0].user_agent).toBe(TEST_USER_AGENT);
+  });
+
+  it('ignores the address a client puts in X-Forwarded-For', async () => {
+    const response = await post('/sign-up/email')
+      .set('User-Agent', TEST_USER_AGENT)
+      .set('X-Forwarded-For', '198.51.100.7')
+      .send({
+        name: 'Usurpateur',
+        email: 'forge@cartepro.test',
+        password: VALID_PASSWORD,
+      })
+      .expect(200);
+
+    const { user } = bodyOf<{ user: { id: string } }>(response);
+    const sessions: Array<{ ip_address: string }> =
+      await context.dataSource.query(
+        `SELECT ip_address FROM session WHERE user_id = $1`,
+        [user.id],
+      );
+
+    expect(sessions[0].ip_address).not.toBe('198.51.100.7');
+    expect(sessions[0].ip_address).toBe('127.0.0.1');
   });
 
   it('counts sign-in attempts in the rate limit table', async () => {

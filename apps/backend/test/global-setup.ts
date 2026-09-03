@@ -21,8 +21,12 @@ const IMAGE = 'postgres:18-alpine';
  * Never the developer's database — a suite that truncates between tests has no
  * business pointing at anything someone might have data in.
  *
- * Migration output is captured rather than inherited, and re-emitted only when
- * it fails.
+ * The container is registered the moment it starts, before the migrations: one
+ * that throws would otherwise leave it running with nothing in the teardown
+ * holding a reference to stop it.
+ *
+ * Migration output is captured rather than inherited, re-emitted only on
+ * failure.
  */
 export default async function globalSetup(): Promise<void> {
   console.log(`\n🐘 [integration] starting ${IMAGE}...`);
@@ -32,6 +36,8 @@ export default async function globalSetup(): Promise<void> {
     .withUsername('cartepro')
     .withPassword('cartepro')
     .start();
+
+  setContainer(container);
 
   const conn: TestConnection = {
     host: container.getHost(),
@@ -65,7 +71,6 @@ export default async function globalSetup(): Promise<void> {
   }
 
   writeFileSync(CONN_FILE, JSON.stringify(conn), 'utf8');
-  setContainer(container);
 
   console.log(`🐘 [integration] ready on ${conn.host}:${conn.port}\n`);
 }
