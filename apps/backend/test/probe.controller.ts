@@ -6,14 +6,15 @@ import type { AuthUser } from '@/config/auth/auth';
 import { ROLES } from '@/config/auth/auth.constants';
 
 /**
- * A consumer for the guards, declared by the test module only — the three
- * shapes a real route takes. Nothing here is a mock: the guards, decorators and
+ * A consumer for the guards, declared by the test module only — the four shapes
+ * a real route takes. Nothing here is a mock: the guards, decorators and
  * session lookup underneath are the real ones.
  */
 @Controller('probe')
 export class ProbeController {
-  /** Authentication required, any role. */
+  /** Open to every role, said out loud. */
   @Get('any')
+  @Roles(ROLES.EMPLOYEE, ROLES.PARTNER, ROLES.ADMIN)
   any(@CurrentUser() user: AuthUser) {
     return { id: user.id, email: user.email, role: user.role };
   }
@@ -30,5 +31,14 @@ export class ProbeController {
   @Public()
   open() {
     return { ok: true };
+  }
+
+  /**
+   * The handler somebody forgets to annotate. It exists so the suite can prove
+   * the omission is refused instead of quietly serving every signed-in account.
+   */
+  @Get('unannotated')
+  unannotated() {
+    return { reached: true };
   }
 }
