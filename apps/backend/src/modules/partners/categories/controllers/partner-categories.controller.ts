@@ -1,6 +1,7 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { PartnerCategoryResponseDto } from '@/modules/partners/categories/dto/partner-category-response.dto';
+import { GetPartnerCategoryDoc, ListPartnerCategoriesDoc } from '../docs';
 import { PartnerCategoriesService } from '@/modules/partners/categories/services/partner-categories.service';
 import { plainToInstance } from 'class-transformer';
 
@@ -10,12 +11,7 @@ export class PartnerCategoriesController {
   constructor(private readonly service: PartnerCategoriesService) {}
 
   @Get()
-  @ApiOperation({ summary: 'List partner categories' })
-  @ApiOkResponse({
-    description: 'List of partner categories',
-    type: PartnerCategoryResponseDto,
-    isArray: true,
-  })
+  @ListPartnerCategoriesDoc()
   findAll() {
     return plainToInstance(
       PartnerCategoryResponseDto,
@@ -27,11 +23,7 @@ export class PartnerCategoriesController {
   }
 
   @Get(':slug')
-  @ApiOperation({ summary: 'Get a partner category by slug' })
-  @ApiOkResponse({
-    description: 'A partner category',
-    type: PartnerCategoryResponseDto,
-  })
+  @GetPartnerCategoryDoc()
   findOne(@Param('slug') slug: string) {
     return plainToInstance(
       PartnerCategoryResponseDto,
