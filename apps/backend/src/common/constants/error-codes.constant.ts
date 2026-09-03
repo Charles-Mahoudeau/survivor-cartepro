@@ -12,6 +12,8 @@ export const ERROR_CODES = {
   ACCOUNT_BANNED: 'ACCOUNT_BANNED',
   /** The session is valid, but its role is not one the route accepts. */
   FORBIDDEN_ROLE: 'FORBIDDEN_ROLE',
+  /** The connected account has no wallet. */
+  WALLET_NOT_FOUND: 'WALLET_NOT_FOUND',
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];
