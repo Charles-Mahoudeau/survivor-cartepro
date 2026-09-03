@@ -43,7 +43,7 @@ export class Wallet {
   @Column({ type: 'text', nullable: true })
   employeeRef: string | null;
 
-  @Column({ type: 'numeric', precision: 12, scale: 2 })
+  @Column({ type: 'numeric', precision: 12, scale: 2, default: 0 })
   balance: number;
 
   @Column({ type: 'char', length: 3, default: 'EUR' })

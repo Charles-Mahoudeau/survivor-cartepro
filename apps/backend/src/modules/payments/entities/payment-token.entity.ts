@@ -28,7 +28,11 @@ export class PaymentToken {
   @Column({ type: 'char', length: 8 })
   shortCode: string;
 
-  @Column({ type: 'enum', enum: PaymentTokenStatus })
+  @Column({
+    type: 'enum',
+    enum: PaymentTokenStatus,
+    default: PaymentTokenStatus.LIVE,
+  })
   status: PaymentTokenStatus;
 
   @Column({ type: 'timestamptz' })
