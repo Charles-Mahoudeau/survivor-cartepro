@@ -686,6 +686,7 @@ assertion chacun, dans la première spec.
 | O1  | Envoi d'e-mail : quel transport ? Sans lui, vérification d'adresse et réinitialisation restent indisponibles.        | La récupération de compte.                |
 | O2  | `requireEmailVerification` : à activer en même temps que O1, sinon tout le monde est verrouillé dehors.              | Rien tant que O1 n'est pas tranché.       |
 | O5  | Durée de session : 7 jours par défaut. Le sujet ne dit rien ; un dispositif d'avantages salariés peut vouloir moins. | Rien, la valeur est une constante.        |
+| O8  | Bannissement hors bande non appliqué aux routes `/auth` — mesuré, suivi dans EPI-166.                                | La suspension d'un compte.                |
 | O6  | Journalisation des connexions échouées via `databaseHooks` — attendue par la fiche de registre ?                     | La fiche RGPD, si elle décrit un journal. |
 
 Fermées depuis : le troisième rôle est tranché (`partner`, §1), et le harnais
