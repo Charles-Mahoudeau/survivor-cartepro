@@ -3,8 +3,8 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 import Home from './page';
 
-describe('page d’accueil', () => {
-  it('rend un contenu principal et un titre', () => {
+describe('home page', () => {
+  it('renders a main landmark and a heading', () => {
     const html = renderToStaticMarkup(<Home />);
 
     expect(html).toContain('<main');

@@ -4,14 +4,14 @@ Application web du dispositif CartePro.
 
 ## Stack
 
-|           |               |
-| --------- | ------------- |
-| Runtime   | Bun 1.3       |
-| Framework | Next.js 16    |
-| UI        | React 19      |
-| Styles    | Tailwind 4    |
-| Tests     | `bun test`    |
-| Polices   | Geist, locale |
+|           |                                          |
+| --------- | ---------------------------------------- |
+| Runtime   | Bun 1.3                                  |
+| Framework | Next.js 16                               |
+| UI        | React 19, shadcn/ui                      |
+| Styles    | Tailwind 4                               |
+| Tests     | `bun test`                               |
+| Polices   | Marianne, Spectral, Geist Mono — locales |
 
 ## Démarrer
 

@@ -13,6 +13,7 @@ export class HealthController {
       type: 'object',
       properties: {
         status: { type: 'string', example: 'ok' },
+        version: { type: 'string', example: '1.0.0' },
         timestamp: { type: 'string', example: '2026-08-31T12:00:00.000Z' },
       },
     },
@@ -20,6 +21,7 @@ export class HealthController {
   check() {
     return {
       status: 'ok',
+      version: '1.0.0',
       timestamp: new Date().toISOString(),
     };
   }
