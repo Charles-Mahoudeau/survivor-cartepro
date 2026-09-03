@@ -16,9 +16,9 @@ export async function buildOpenApiDocument(
   app: INestApplication,
 ): Promise<OpenAPIObject> {
   const config = new DocumentBuilder()
-    .setTitle('CartePro API')
+    .setTitle('Ticket Tout API')
     .setDescription(
-      'API du dispositif CartePro — avantages salariés dématérialisés. ' +
+      'API du dispositif Ticket Tout — avantages salariés dématérialisés. ' +
         'Trois espaces : salarié, partenaire, administration.',
     )
     .setVersion('0.1.0')

@@ -5,7 +5,7 @@ FROM base AS prune
 
 RUN bun install -g turbo
 COPY . .
-RUN turbo prune @cartepro/frontend --docker
+RUN turbo prune @tickettout/frontend --docker
 
 FROM base AS build
 
@@ -13,7 +13,7 @@ COPY --from=prune /usr/src/app/out/json/ ./
 RUN bun install --frozen-lockfile --ignore-scripts
 
 COPY --from=prune /usr/src/app/out/full/ ./
-RUN bun --filter=@cartepro/frontend run build
+RUN bun --filter=@tickettout/frontend run build
 
 FROM base AS run
 

@@ -1,7 +1,7 @@
 {
-  "name": "@cartepro/backend",
+  "name": "@tickettout/backend",
   "version": "0.0.1",
-  "description": "API CartePro \u2014 avantages salari\u00e9s d\u00e9mat\u00e9rialis\u00e9s",
+  "description": "API Ticket Tout — avantages salariés dématérialisés",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
@@ -69,5 +69,11 @@
     "ts-jest": "^29.4.12",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.68.0"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "bun",
+      "version": "^1.4.0"
+    }
   }
 }

@@ -27,11 +27,11 @@ beforeEach(async () => {
 
 describe('findById', () => {
   it('returns the account', async () => {
-    const account = await signUp(context.app, 'trouve@cartepro.test');
+    const account = await signUp(context.app, 'trouve@tickettout.test');
 
     const found = await users.findById(account.id);
 
-    expect(found?.email).toBe('trouve@cartepro.test');
+    expect(found?.email).toBe('trouve@tickettout.test');
     expect(found?.role).toBe(ROLES.EMPLOYEE);
   });
 
@@ -44,40 +44,40 @@ describe('findById', () => {
 
 describe('findByEmail', () => {
   it('returns the account', async () => {
-    await signUp(context.app, 'par.email@cartepro.test');
+    await signUp(context.app, 'par.email@tickettout.test');
 
-    expect((await users.findByEmail('par.email@cartepro.test'))?.email).toBe(
-      'par.email@cartepro.test',
+    expect((await users.findByEmail('par.email@tickettout.test'))?.email).toBe(
+      'par.email@tickettout.test',
     );
   });
 
   it('returns null for an address nobody uses', async () => {
-    expect(await users.findByEmail('personne@cartepro.test')).toBeNull();
+    expect(await users.findByEmail('personne@tickettout.test')).toBeNull();
   });
 });
 
 describe('findManyByIds', () => {
   it('resolves several accounts in one call', async () => {
-    const first = await signUp(context.app, 'un@cartepro.test');
-    const second = await signUp(context.app, 'deux@cartepro.test');
-    await signUp(context.app, 'trois@cartepro.test');
+    const first = await signUp(context.app, 'un@tickettout.test');
+    const second = await signUp(context.app, 'deux@tickettout.test');
+    await signUp(context.app, 'trois@tickettout.test');
 
     const found = await users.findManyByIds([first.id, second.id]);
 
     expect(found.map((user) => user.email).sort()).toEqual([
-      'deux@cartepro.test',
-      'un@cartepro.test',
+      'deux@tickettout.test',
+      'un@tickettout.test',
     ]);
   });
 
   it('returns nothing for an empty list rather than asking for `IN ()`', async () => {
-    await signUp(context.app, 'present@cartepro.test');
+    await signUp(context.app, 'present@tickettout.test');
 
     expect(await users.findManyByIds([])).toEqual([]);
   });
 
   it('ignores an id that matches nothing instead of failing', async () => {
-    const account = await signUp(context.app, 'melange@cartepro.test');
+    const account = await signUp(context.app, 'melange@tickettout.test');
 
     const found = await users.findManyByIds([
       account.id,
@@ -90,7 +90,7 @@ describe('findManyByIds', () => {
 
 describe('setRole', () => {
   it('writes the role and says a row moved', async () => {
-    const account = await signUp(context.app, 'promu@cartepro.test');
+    const account = await signUp(context.app, 'promu@tickettout.test');
 
     expect(await users.setRole(account.id, ROLES.ADMIN)).toBe(true);
     expect((await users.findById(account.id))?.role).toBe(ROLES.ADMIN);
@@ -105,19 +105,19 @@ describe('setRole', () => {
 
 describe('the constraints the schema carries', () => {
   it('refuses a second account on the same address', async () => {
-    await signUp(context.app, 'unique@cartepro.test');
+    await signUp(context.app, 'unique@tickettout.test');
 
     await expect(
       context.dataSource.getRepository(User).insert({
         name: 'Doublon',
-        email: 'unique@cartepro.test',
+        email: 'unique@tickettout.test',
         emailVerified: false,
       }),
     ).rejects.toThrow(/duplicate key|unique/i);
   });
 
   it('closes the sessions of a deleted account', async () => {
-    const account = await signUp(context.app, 'supprime@cartepro.test');
+    const account = await signUp(context.app, 'supprime@tickettout.test');
 
     await context.dataSource.getRepository(User).delete({ id: account.id });
 

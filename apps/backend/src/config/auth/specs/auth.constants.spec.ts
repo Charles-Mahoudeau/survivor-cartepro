@@ -9,8 +9,8 @@ describe('parseTrustedOrigins', () => {
 
   it('reads several, trimming the whitespace a .env leaves behind', () => {
     expect(
-      parseTrustedOrigins('http://localhost:3000, https://cartepro.fr'),
-    ).toEqual(['http://localhost:3000', 'https://cartepro.fr']);
+      parseTrustedOrigins('http://localhost:3000, https://tickettout.fr'),
+    ).toEqual(['http://localhost:3000', 'https://tickettout.fr']);
   });
 
   it('drops empty entries rather than trusting an empty origin', () => {

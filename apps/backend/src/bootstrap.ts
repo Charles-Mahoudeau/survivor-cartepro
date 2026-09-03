@@ -1,4 +1,9 @@
-import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  RequestMethod,
+  ValidationPipe,
+  VersioningType,
+} from '@nestjs/common';
 import type { INestApplication } from '@nestjs/common';
 import type { NextFunction, Request, Response } from 'express';
 import { Reflector } from '@nestjs/core';
@@ -10,6 +15,12 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { auth, trustedOrigins } from './config/auth/auth';
 import { AUTH_BASE_PATH } from './config/auth/auth.constants';
 import { buildOpenApiDocument } from './swagger';
+
+/** Nest routes answer under this prefix; `/auth` and `/health` are outside it. */
+export const API_PREFIX = 'api';
+
+/** URI versioning, so `/api/v1/...` is what a client calls. */
+export const API_DEFAULT_VERSION = '1';
 
 /**
  * When a reverse proxy fronts this API, set `trust proxy` on the Express
@@ -28,10 +39,18 @@ import { buildOpenApiDocument } from './swagger';
  *
  * Better Auth is then plain middleware, before anything Nest registers — so its
  * routes cross neither the validation pipe, nor the serializer, nor the request
- * log, and Nest can own no route below `/auth`.
+ * log, and Nest can own no route below `/auth`. The global prefix is a Nest
+ * concern only, which is why `/auth` stays where the client expects it.
+ *
+ * ClassSerializerInterceptor is what makes `@Exclude()` on an entity actually
+ * remove the property from a response, so it is registered before the first
+ * entity exists.
  *
  * Helmet runs with CSP off: /docs renders its UI from a CDN, and the rest of
  * the API answers JSON where CSP is not the control that matters.
+ *
+ * The OpenAPI document is built last, once the prefix and the version are set,
+ * or it would describe paths nobody can call.
  *
  * `withDocs` is off in tests, where building the OpenAPI document costs a full
  * introspection pass and no assertion reads it.
@@ -58,6 +77,18 @@ export async function configureApp(
     new LoggingInterceptor(),
     new ClassSerializerInterceptor(reflector),
   );
+
+  app.setGlobalPrefix(API_PREFIX, {
+    exclude: [
+      { path: 'docs', method: RequestMethod.ALL },
+      { path: 'health', method: RequestMethod.GET },
+    ],
+  });
+
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: API_DEFAULT_VERSION,
+  });
 
   if (!withDocs) {
     return;

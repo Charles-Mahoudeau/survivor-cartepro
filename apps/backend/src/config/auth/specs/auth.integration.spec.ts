@@ -37,13 +37,13 @@ describe('sign-up', () => {
     const response = await post('/sign-up/email')
       .send({
         name: 'Camille Dupont',
-        email: 'camille@cartepro.test',
+        email: 'camille@tickettout.test',
         password: VALID_PASSWORD,
       })
       .expect(200);
 
     expect(bodyOf<{ user: unknown }>(response).user).toMatchObject({
-      email: 'camille@cartepro.test',
+      email: 'camille@tickettout.test',
       name: 'Camille Dupont',
       emailVerified: false,
     });
@@ -56,7 +56,7 @@ describe('sign-up', () => {
     await post('/sign-up/email')
       .send({
         name: 'Trop court',
-        email: 'court@cartepro.test',
+        email: 'court@tickettout.test',
         password: 'onzecarac.x',
       })
       .expect(400)
@@ -71,19 +71,19 @@ describe('sign-up', () => {
     await post('/sign-up/email')
       .send({
         name: 'Juste assez',
-        email: 'douze@cartepro.test',
+        email: 'douze@tickettout.test',
         password: 'douzecarac.x',
       })
       .expect(200);
   });
 
   it('refuses an address that already has an account', async () => {
-    await signUp(context.app, 'doublon@cartepro.test');
+    await signUp(context.app, 'doublon@tickettout.test');
 
     await post('/sign-up/email')
       .send({
         name: 'Doublon',
-        email: 'doublon@cartepro.test',
+        email: 'doublon@tickettout.test',
         password: VALID_PASSWORD,
       })
       .expect(422);
@@ -92,7 +92,7 @@ describe('sign-up', () => {
 
 describe('roles', () => {
   it('gives a new account the employee role, and only that one', async () => {
-    const { id } = await signUp(context.app, 'salarie@cartepro.test');
+    const { id } = await signUp(context.app, 'salarie@tickettout.test');
 
     const rows: Array<{ role: string }> = await context.dataSource.query(
       `SELECT role FROM "user" WHERE id = $1`,
@@ -106,7 +106,7 @@ describe('roles', () => {
   it('never lets the request choose its own role, whether it is refused or ignored', async () => {
     await post('/sign-up/email').send({
       name: 'Opportuniste',
-      email: 'escalade@cartepro.test',
+      email: 'escalade@tickettout.test',
       password: VALID_PASSWORD,
       role: ROLES.ADMIN,
     });
@@ -120,7 +120,7 @@ describe('roles', () => {
   });
 
   it('replaces the role rather than accumulating one, through the code that grants it', async () => {
-    const { id } = await signUp(context.app, 'promu@cartepro.test');
+    const { id } = await signUp(context.app, 'promu@tickettout.test');
 
     await context.app.get(UserRepo).setRole(id, ROLES.ADMIN);
 
@@ -136,14 +136,14 @@ describe('roles', () => {
 
 describe('sign-in', () => {
   it('answers a wrong password and a stranger identically, so accounts cannot be enumerated', async () => {
-    await signUp(context.app, 'connu@cartepro.test');
+    await signUp(context.app, 'connu@tickettout.test');
 
     const wrongPassword = await post('/sign-in/email')
-      .send({ email: 'connu@cartepro.test', password: 'mauvaismotdepasse' })
+      .send({ email: 'connu@tickettout.test', password: 'mauvaismotdepasse' })
       .expect(401);
 
     const unknownAccount = await post('/sign-in/email')
-      .send({ email: 'inconnu@cartepro.test', password: VALID_PASSWORD })
+      .send({ email: 'inconnu@tickettout.test', password: VALID_PASSWORD })
       .expect(401);
 
     expect(bodyOf<{ message: string }>(unknownAccount).message).toBe(
@@ -152,14 +152,14 @@ describe('sign-in', () => {
   });
 
   it('refuses a banned account with its own message', async () => {
-    const { id } = await signUp(context.app, 'banni@cartepro.test');
+    const { id } = await signUp(context.app, 'banni@tickettout.test');
     await context.dataSource.query(
       `UPDATE "user" SET banned = true WHERE id = $1`,
       [id],
     );
 
     const response = await post('/sign-in/email')
-      .send({ email: 'banni@cartepro.test', password: VALID_PASSWORD })
+      .send({ email: 'banni@tickettout.test', password: VALID_PASSWORD })
       .expect(403);
 
     const refusal = bodyOf<{ code: string; message: string }>(response);
@@ -170,12 +170,12 @@ describe('sign-in', () => {
 
 describe('rate limit', () => {
   it('answers 429 on the sixth attempt within the window', async () => {
-    await signUp(context.app, 'brute@cartepro.test');
+    await signUp(context.app, 'brute@tickettout.test');
 
     const statuses: number[] = [];
     for (let attempt = 1; attempt <= 6; attempt++) {
       const response = await post('/sign-in/email').send({
-        email: 'brute@cartepro.test',
+        email: 'brute@tickettout.test',
         password: 'mauvaismotdepasse',
       });
       statuses.push(response.status);
@@ -185,13 +185,16 @@ describe('rate limit', () => {
   });
 
   it('cannot be escaped by rotating X-Forwarded-For', async () => {
-    await signUp(context.app, 'usurpe@cartepro.test');
+    await signUp(context.app, 'usurpe@tickettout.test');
 
     const statuses: number[] = [];
     for (let attempt = 1; attempt <= 6; attempt++) {
       const response = await post('/sign-in/email')
         .set('X-Forwarded-For', `203.0.113.${attempt}`)
-        .send({ email: 'usurpe@cartepro.test', password: 'mauvaismotdepasse' });
+        .send({
+          email: 'usurpe@tickettout.test',
+          password: 'mauvaismotdepasse',
+        });
       statuses.push(response.status);
     }
 
@@ -199,24 +202,24 @@ describe('rate limit', () => {
   });
 
   it('counts a correct password too, so a valid guess does not reset it', async () => {
-    await signUp(context.app, 'melange@cartepro.test');
+    await signUp(context.app, 'melange@tickettout.test');
 
     for (let attempt = 1; attempt <= 5; attempt++) {
       await post('/sign-in/email').send({
-        email: 'melange@cartepro.test',
+        email: 'melange@tickettout.test',
         password: 'mauvaismotdepasse',
       });
     }
 
     await post('/sign-in/email')
-      .send({ email: 'melange@cartepro.test', password: VALID_PASSWORD })
+      .send({ email: 'melange@tickettout.test', password: VALID_PASSWORD })
       .expect(429);
   });
 });
 
 describe('sign-out', () => {
   it('deletes the session row and stops resolving the cookie', async () => {
-    const account = await signUp(context.app, 'sortie@cartepro.test');
+    const account = await signUp(context.app, 'sortie@tickettout.test');
 
     const before: Array<{ count: string }> = await context.dataSource.query(
       `SELECT count(*) FROM session WHERE user_id = $1`,
@@ -240,7 +243,7 @@ describe('sign-out', () => {
   });
 
   it('refuses a state-changing call from an untrusted origin', async () => {
-    const account = await signUp(context.app, 'csrf@cartepro.test');
+    const account = await signUp(context.app, 'csrf@tickettout.test');
 
     await api(context.app)
       .post(`${AUTH_BASE_PATH}/sign-out`)
@@ -252,7 +255,7 @@ describe('sign-out', () => {
 
 describe('the schema the library writes into', () => {
   it('lands in our snake_case columns, with a version 7 primary key', async () => {
-    const account = await signUp(context.app, 'colonnes@cartepro.test');
+    const account = await signUp(context.app, 'colonnes@tickettout.test');
 
     const rows: Array<{
       id: string;
@@ -270,7 +273,7 @@ describe('the schema the library writes into', () => {
   });
 
   it('keeps the password in its own table, never on the account', async () => {
-    const account = await signUp(context.app, 'secret@cartepro.test');
+    const account = await signUp(context.app, 'secret@tickettout.test');
 
     const credentials: Array<{ password: string; provider_id: string }> =
       await context.dataSource.query(
@@ -291,7 +294,7 @@ describe('the schema the library writes into', () => {
   });
 
   it('records the address the middleware resolved, not one a client can claim', async () => {
-    const account = await signUp(context.app, 'trace@cartepro.test');
+    const account = await signUp(context.app, 'trace@tickettout.test');
 
     const sessions: Array<{ ip_address: string; user_agent: string }> =
       await context.dataSource.query(
@@ -309,7 +312,7 @@ describe('the schema the library writes into', () => {
       .set('X-Forwarded-For', '198.51.100.7')
       .send({
         name: 'Usurpateur',
-        email: 'forge@cartepro.test',
+        email: 'forge@tickettout.test',
         password: VALID_PASSWORD,
       })
       .expect(200);
@@ -326,9 +329,9 @@ describe('the schema the library writes into', () => {
   });
 
   it('counts sign-in attempts in the rate limit table', async () => {
-    await signUp(context.app, 'compteur@cartepro.test');
+    await signUp(context.app, 'compteur@tickettout.test');
     await post('/sign-in/email').send({
-      email: 'compteur@cartepro.test',
+      email: 'compteur@tickettout.test',
       password: 'mauvaismotdepasse',
     });
 

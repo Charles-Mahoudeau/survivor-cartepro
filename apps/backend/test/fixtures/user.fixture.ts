@@ -12,7 +12,7 @@ export const TRUSTED_ORIGIN = 'http://localhost:3000';
 export const VALID_PASSWORD = 'correcthorsebatterystaple';
 
 /** `session.user_agent` is filled from this header; supertest sends none. */
-export const TEST_USER_AGENT = 'cartepro-integration/1.0';
+export const TEST_USER_AGENT = 'tickettout-integration/1.0';
 
 export interface SignedUpAccount {
   id: string;
