@@ -27,6 +27,9 @@ jobs:
           # Save docker images
           docker save cartepro-backend:latest cartepro-frontend:latest | gzip > release/docker-images.tar.gz
 
+          # Setup .env
+          mv artifact/.env.artifact release/.env
+
           # Set execution permissions
           chmod +x release/start.sh
 
