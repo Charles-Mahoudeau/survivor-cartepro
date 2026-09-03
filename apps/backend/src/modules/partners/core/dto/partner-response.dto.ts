@@ -1,15 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
-
-class PartnerCategorySummaryDto {
-  @ApiProperty()
-  @Expose()
-  slug: string;
-
-  @ApiProperty()
-  @Expose()
-  displayName: string;
-}
+import { PartnerCategorySummaryDto } from './partner-category-summary.dto';
 
 export class PartnerResponseDto {
   @ApiProperty()
