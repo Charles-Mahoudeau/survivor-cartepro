@@ -17,6 +17,7 @@ export class InitEntities1788378016423 implements MigrationInterface {
         await queryRunner.query(`CREATE TABLE "partner_review" ("id" uuid NOT NULL DEFAULT uuidv7(), "from_status" "public"."partner_status_enum" NOT NULL, "to_status" "public"."partner_status_enum" NOT NULL, "reason" text NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "partner_id" uuid NOT NULL, "decided_by" uuid NOT NULL, CONSTRAINT "PK_a39252bce9be48bf22ef3041873" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "user" ("id" uuid NOT NULL DEFAULT uuidv7(), CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "partner_category" ("slug" text NOT NULL, "display_name" text NOT NULL, CONSTRAINT "PK_7215da3aa69e553bbe934c13209" PRIMARY KEY ("slug"))`);
+        // This type was already created earlier in this migration, so it must not be recreated here.
         // await queryRunner.query(`CREATE TYPE "public"."partner_status_enum" AS ENUM('pending', 'active', 'refused', 'banned')`);
         await queryRunner.query(`CREATE TABLE "partner" ("id" uuid NOT NULL DEFAULT uuidv7(), "legal_name" text NOT NULL, "trade_name" text NOT NULL, "siren" character(9) NOT NULL, "business_purpose" text NOT NULL, "status" "public"."partner_status_enum" NOT NULL DEFAULT 'pending', "address_line" text NOT NULL, "postal_code" text NOT NULL, "city" text NOT NULL, "latitude" numeric(9,6) NOT NULL, "longitude" numeric(9,6) NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "owner_id" uuid NOT NULL, CONSTRAINT "UQ_446e72eaf26f806375d832fe897" UNIQUE ("siren"), CONSTRAINT "REL_0c34acbc91d4ac6b200969f5ff" UNIQUE ("owner_id"), CONSTRAINT "PK_8f34ff11ddd5459eacbfacd48ca" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TYPE "public"."payment_capture_mode_enum" AS ENUM('qr_code', 'manual_code')`);
@@ -73,6 +74,7 @@ export class InitEntities1788378016423 implements MigrationInterface {
         await queryRunner.query(`DROP TABLE "payment"`);
         await queryRunner.query(`DROP TYPE "public"."payment_capture_mode_enum"`);
         await queryRunner.query(`DROP TABLE "partner"`);
+        // This type is dropped later in this migration, so it must not be dropped again here.
         // await queryRunner.query(`DROP TYPE "public"."partner_status_enum"`);
         await queryRunner.query(`DROP TABLE "partner_category"`);
         await queryRunner.query(`DROP TABLE "user"`);
