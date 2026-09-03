@@ -40,3 +40,6 @@ result-*
 !.vscode/extensions.json
 !.vscode/settings.json
 *.swp
+
+# Agent working notes
+.context
