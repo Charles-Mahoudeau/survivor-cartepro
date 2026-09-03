@@ -26,6 +26,10 @@ import { buildDataSourceOptions } from './data-source';
           DATABASE_NAME: configService.get<string>('DATABASE_NAME'),
           DATABASE_LOGGING: configService.get<string>('DATABASE_LOGGING'),
         }),
+        // The source globs stay out of the running application: they resolve
+        // to nothing in a bundle, so an entity that reaches the connection
+        // through them here would be missing in production and in CI.
+        entities: [],
         autoLoadEntities: true,
         migrationsRun: true,
       }),
