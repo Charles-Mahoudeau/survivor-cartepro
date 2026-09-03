@@ -2,11 +2,7 @@ import { createParamDecorator, type ExecutionContext } from '@nestjs/common';
 import type { Request } from 'express';
 import type { AuthSession, AuthUser } from '@/config/auth/auth';
 
-/**
- * The shape `SessionGuard` attaches to the request once it has resolved a
- * session. Declared here so the guard and the decorator cannot disagree about
- * the property name.
- */
+/** What `SessionGuard` attaches once it has resolved a session. */
 export interface RequestWithSession extends Request {
   session?: AuthSession;
 }
@@ -14,18 +10,13 @@ export interface RequestWithSession extends Request {
 /**
  * Hands the handler the authenticated account.
  *
- * The two type arguments are the ones `createParamDecorator` takes: what the
- * decorator accepts at the call site, and what it hands the handler. `undefined`
- * for the first because this decorator takes no argument — `@CurrentUser('email')`
- * is a compile error rather than a silently ignored string. `AuthUser` for the
- * second, inferred from the Better Auth instance, so the handler receives the
- * account with its plugin columns (`role`, `banned`, `banExpires`) and not an
- * `any` that would make every read of them unchecked.
+ * The type arguments are what the decorator accepts and what it returns.
+ * `undefined` makes `@CurrentUser('email')` a compile error rather than a
+ * silently ignored string; `AuthUser` keeps `role`, `banned` and `banExpires`
+ * typed instead of `any`.
  *
- * It never resolves the session itself: `SessionGuard` has already done the read
- * and refused the request if there was none, so a route reaching this decorator
- * always has one. A parameter decorator that re-read the session would double
- * the query count of every guarded route.
+ * It never resolves the session itself: `SessionGuard` has already done the
+ * read, and a second one would double the query count of every guarded route.
  */
 export const CurrentUser = createParamDecorator<undefined, AuthUser>(
   (_, context: ExecutionContext): AuthUser => {

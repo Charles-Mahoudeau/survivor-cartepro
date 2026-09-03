@@ -2,11 +2,9 @@
  * Whether a ban is still in force at a given instant.
  *
  * `banned` alone is not the answer: the admin plugin writes an expiry alongside
- * it, and reading only the flag would keep a temporary ban permanent — the
- * account would never come back and nothing would say why.
+ * it, and reading only the flag would make every temporary ban permanent.
  *
- * The instant is a parameter rather than a call to `Date.now()` so the boundary
- * can be tested at all, including the exact millisecond of expiry.
+ * The instant is a parameter so the boundary can be tested at all.
  */
 export function isBanActive(
   user: { banned?: boolean | null; banExpires?: Date | null },

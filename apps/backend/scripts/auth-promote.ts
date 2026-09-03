@@ -9,14 +9,12 @@ import { connect, describeConnection, fail } from './db-common';
 /**
  * Grants a role to an existing account, by email.
  *
- * Every route the admin plugin exposes already requires an administrator, so
- * without an out-of-band step there is no way for the first one to exist. This
- * is that step, and it is deliberately a script rather than an endpoint: an
- * HTTP route that hands out the admin role is a route someone eventually calls.
+ * Every admin route already requires an administrator, so the first one has to
+ * come from outside. A script and not an endpoint: an HTTP route that hands out
+ * the admin role is a route someone eventually calls.
  *
- * It writes through `UserRepo`, the same repository the application uses, built
- * by hand because there is no Nest container here. No raw SQL, and no second
- * place that knows how a role is stored.
+ * It writes through `UserRepo`, built by hand since there is no Nest container
+ * here, so no second place knows how a role is stored.
  */
 const [email, requestedRole = ROLES.ADMIN] = process.argv.slice(2);
 

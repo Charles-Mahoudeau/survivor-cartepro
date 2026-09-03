@@ -12,15 +12,10 @@ import {
 import { User } from './user.entity';
 
 /**
- * One row per open session.
+ * One row per open session. It is what makes signing out mean something: the
+ * row is deleted, so the cookie stops resolving on the next request.
  *
- * This table is what makes signing out mean something: the row is deleted, so
- * the cookie that carried it stops resolving on the next request. A stateless
- * signed token would stay valid until it expired, and there would be nothing to
- * revoke when an account is banned.
- *
- * `ON DELETE CASCADE` is what closes every session of a deleted account without
- * a second query.
+ * `ON DELETE CASCADE` closes every session of a deleted account.
  */
 @Entity('session')
 export class Session {

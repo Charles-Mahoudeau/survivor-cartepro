@@ -8,20 +8,14 @@ import {
 } from 'typeorm';
 
 /**
- * A key for the third-party surface the brief asks for: an HR system reading a
- * balance without a human session (§3.3).
+ * A key for the third-party surface of §3.3 — an HR system reading a balance
+ * without a human session. No route consumes one yet.
  *
- * No route consumes one yet. The table is declared now so it lands in the same
- * migration as the rest of authentication rather than arriving alone later, and
- * so `db:generate` has nothing to propose the day the plugin is used.
+ * `reference_id` carries no foreign key on purpose: the plugin declares none,
+ * and a key for an HR system is more plausibly attached to an employer than to
+ * a person. Constraining it to `user.id` would have to be undone later.
  *
- * `reference_id` carries no foreign key, deliberately. The plugin declares none,
- * and what a key belongs to is not settled: a key for an HR system is more
- * plausibly attached to an employer than to a person. Constraining it to
- * `user.id` today would have to be undone by the lot that answers the question.
- *
- * The rate limit columns are the plugin's own, per key, and unrelated to the
- * `rate_limit` table, which counts requests per address on the sign-in routes.
+ * The rate limit columns here are per key, unrelated to the `rate_limit` table.
  */
 @Entity('api_key')
 export class ApiKey {
@@ -39,7 +33,7 @@ export class ApiKey {
   @Column('text')
   key: string;
 
-  /** Human-readable head of the key, so a holder can recognise which one it is. */
+  /** Head of the key, so a holder can recognise which one it is. */
   @Column('text', { nullable: true })
   start: string | null;
 
@@ -69,7 +63,7 @@ export class ApiKey {
   @Column('boolean', { nullable: true, default: true })
   rateLimitEnabled: boolean | null;
 
-  /** Milliseconds. A day by default, which is the plugin's own quota window. */
+  /** Milliseconds; a day, the plugin's own quota window. */
   @Column('integer', { nullable: true, default: 86400000 })
   rateLimitTimeWindow: number | null;
 
@@ -85,7 +79,7 @@ export class ApiKey {
   @Column('timestamptz', { nullable: true })
   expiresAt: Date | null;
 
-  /** JSON, written and read by the plugin. Not parsed by this codebase. */
+  /** JSON, written and read by the plugin only. */
   @Column('text', { nullable: true })
   permissions: string | null;
 

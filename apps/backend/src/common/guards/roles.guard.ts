@@ -13,14 +13,17 @@ import type { Role } from '@/config/auth/auth.constants';
 /**
  * Refuses a request whose role is not one the route accepts.
  *
- * It reads the session `SessionGuard` attached and never resolves one itself,
- * so the two guards cost one database read between them. Nest runs global
- * guards in registration order, which is what makes that safe — this one is
- * registered second.
+ * It reads the session `SessionGuard` attached, so the two guards cost one
+ * database read between them — which is why registration order matters, this
+ * one being second.
  *
- * A route with no `@Roles` is accepted: authentication was already required by
- * the guard before it, and demanding a role list on every route would push
- * every author to write `@Roles(USER, ADMIN)` until it means nothing.
+ * A route with no `@Roles` is accepted: authentication was already required,
+ * and demanding a list everywhere would push every author to write
+ * `@Roles(EMPLOYEE, PARTNER, ADMIN)` until it means nothing.
+ *
+ * The expected list is widened rather than the value asserted to be a `Role`:
+ * the column holds a free string and can already carry a role this build does
+ * not know.
  */
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -38,11 +41,6 @@ export class RolesGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest<RequestWithSession>();
     const role = request.session?.user.role;
-
-    // The column holds a free string — it can already carry a role this build
-    // does not know, such as one added by a later lot. The question asked here
-    // is whether that string is among the names the route accepts, so the list
-    // is widened rather than the value asserted to be a `Role` it may not be.
     const accepted: readonly string[] = required;
 
     if (!role || !accepted.includes(role)) {

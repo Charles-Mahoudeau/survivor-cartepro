@@ -104,14 +104,12 @@ describe('a route restricted to a role', () => {
     expect(bodyOf<{ role: string }>(response).role).toBe(ROLES.ADMIN);
   });
 
-  it('takes a promotion into account on the very next request', async () => {
+  it('takes a promotion into account on the very next request, same cookie', async () => {
     const account = await signUp(context.app, 'promu@cartepro.test');
     await get('/probe/admin', account.cookie).expect(403);
 
     await grantRole(context, account.id, ROLES.ADMIN);
 
-    // No new sign-in, the same cookie: this is what the absence of a session
-    // cookie cache buys. With one, the old role would answer until it expired.
     await get('/probe/admin', account.cookie).expect(200);
   });
 
@@ -127,13 +125,10 @@ describe('a route restricted to a role', () => {
 });
 
 describe('a banned account', () => {
-  it('is refused on a session that predates the ban', async () => {
+  it('is refused on a session that predates a ban written straight onto the columns', async () => {
     const account = await signUp(context.app, 'banni@cartepro.test');
     await get('/probe/any', account.cookie).expect(200);
 
-    // Written straight onto the columns, the way a data fix or a script would.
-    // The plugin's own ban route revokes the sessions, so it never reaches this
-    // branch — this is the case the guard exists for.
     await banAccount(context, account.id);
 
     const response = await get('/probe/any', account.cookie).expect(403);

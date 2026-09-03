@@ -12,15 +12,12 @@ import { UserRepo } from './repos/user.repo';
 import { UserService } from './services/user.service';
 
 /**
- * Owns the five tables authentication runs on.
+ * Owns the six tables authentication runs on. `forFeature` is what registers
+ * them: an entity the connection never hears about is one `db:generate` drops.
  *
- * `forFeature` is what registers the entities: `autoLoadEntities` only sees what
- * a feature module declares, and an entity the connection never hears about is
- * an entity `db:generate` will propose to drop.
- *
- * Only `UserService` is exported. `UserRepo` stays in — the rule that a module
- * depends on the services of another, never on its repositories, is only worth
- * anything if the repository is not reachable in the first place.
+ * Only `UserService` is exported — the rule that a module depends on services
+ * and not repositories is worth something only if the repository is out of
+ * reach.
  */
 @Module({
   imports: [

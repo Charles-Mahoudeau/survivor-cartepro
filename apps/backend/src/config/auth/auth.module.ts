@@ -6,21 +6,15 @@ import { SessionGuard } from '@/common/guards/session.guard';
 /**
  * Turns authentication on for the whole application.
  *
- * It declares no controller, and that is the point: signing up, signing in and
- * signing out are routes Better Auth already serves under `/auth`, which the
- * frontend calls directly through its own client. Re-exposing them behind a
- * NestJS controller would be a second, thinner copy of an API that already
- * exists, with a second place for its contract to drift.
+ * It declares no controller: signing up, in and out are routes Better Auth
+ * already serves, which the frontend calls directly. What Nest needs is the
+ * pair of guards, so every business route added later is protected by default.
  *
- * What NestJS does need is the pair of guards, so that every business route
- * added later is protected by default and can name the roles it accepts. They
- * are `APP_GUARD` providers, and the order below is the order Nest runs them:
- * `SessionGuard` first, because `RolesGuard` reads the session it attaches.
- * Swapping them makes every role check see an undefined role and refuse
- * everything, which a test that only covers the happy path would not catch.
+ * The order below is the order Nest runs them — `SessionGuard` first, because
+ * `RolesGuard` reads the session it attaches. Swapped, every role check sees an
+ * undefined role and refuses everything.
  *
- * `@Global` because the guards are instantiated from this module's injector and
- * must resolve wherever a controller lives.
+ * `@Global` because the guards resolve from this module's injector.
  */
 @Global()
 @Module({

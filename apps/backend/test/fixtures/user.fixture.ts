@@ -11,12 +11,7 @@ export const TRUSTED_ORIGIN = 'http://localhost:3000';
 
 export const VALID_PASSWORD = 'correcthorsebatterystaple';
 
-/**
- * Supertest sends no `User-Agent`, where a real client always does. Setting one
- * is not decoration: `session.user_agent` is filled from this header, and
- * without it the column is empty for a reason that belongs to the test client
- * rather than to the code.
- */
+/** `session.user_agent` is filled from this header; supertest sends none. */
 export const TEST_USER_AGENT = 'cartepro-integration/1.0';
 
 export interface SignedUpAccount {
@@ -27,13 +22,9 @@ export interface SignedUpAccount {
 }
 
 /**
- * Creates an account the way a real client does, through the sign-up route.
- *
- * Inserting rows directly would be faster and wrong twice over: a `user` with
- * no `account` row cannot sign in, and hashing a password by hand would be this
- * suite's own second implementation of the thing under test. Going through the
- * route also means the fixture exercises the same path the assertions do, so a
- * broken column mapping fails here rather than three tests later.
+ * Creates an account through the sign-up route. Inserting rows directly would
+ * be wrong twice: a `user` with no `account` cannot sign in, and hashing by
+ * hand would be a second implementation of the thing under test.
  */
 export async function signUp(
   app: INestApplication,
@@ -54,11 +45,8 @@ export async function signUp(
 }
 
 /**
- * Grants a role out of band, the way the promotion script does.
- *
- * Deliberately not through `/auth/admin/set-role`: that route needs an
- * administrator to already exist, which is the very thing a test setting up the
- * first one cannot assume.
+ * Grants a role out of band, like the promotion script. Not through
+ * `/auth/admin/set-role`, which needs an administrator to already exist.
  */
 export async function grantRole(
   { dataSource }: TestApp,

@@ -14,8 +14,6 @@ let users: UserRepo;
 
 beforeAll(async () => {
   context = await createTestApp();
-  // Resolved from the container, not constructed: the point of an integration
-  // test is that the wiring under test is the wiring that runs.
   users = context.app.get(UserRepo);
 });
 

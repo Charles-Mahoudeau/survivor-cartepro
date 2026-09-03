@@ -2,14 +2,12 @@ import { existsSync, readFileSync } from 'node:fs';
 import { CONN_FILE, type TestConnection } from './container-registry';
 
 /**
- * Runs in every worker, BEFORE the spec file is required — which is the whole
- * point of the file.
+ * Runs in every worker BEFORE the spec is required, which is the whole point:
+ * `auth.ts` builds its pool and reads NODE_ENV at module scope, so anything set
+ * later is set too late.
  *
- * `src/config/auth/auth.ts` builds its connection pool and reads NODE_ENV at
- * module scope, so anything set after the first import of that module is set
- * too late: the pool would point at the developer's database and the library
- * would have captured an empty environment. Setting the variables here is what
- * makes the import that follows see the container.
+ * The secret only has to be long enough; the origin is what the CSRF check
+ * compares against.
  */
 if (!existsSync(CONN_FILE)) {
   throw new Error(
@@ -29,9 +27,6 @@ process.env.DATABASE_PASSWORD = conn.password;
 process.env.DATABASE_NAME = conn.database;
 process.env.DATABASE_LOGGING = 'false';
 
-// Boot-time validation (`env.schema.ts`) refuses to start without these, and
-// the values are the ones the assertions rely on: the secret only has to be
-// long enough, the origin is what the CSRF check compares against.
 process.env.BETTER_AUTH_SECRET =
   process.env.BETTER_AUTH_SECRET ?? 'integration-secret-at-least-32-characters';
 process.env.BETTER_AUTH_URL = 'http://localhost:3001';

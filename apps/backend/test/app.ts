@@ -15,14 +15,10 @@ export interface TestApp {
 /**
  * Boots the real application against the ephemeral database.
  *
- * The whole `AppModule` is wired, not a hand-picked subset: the guards are
- * registered as `APP_GUARD` by `AuthModule`, the entities by `UserModule`, and
- * a spec that assembled a smaller graph would be asserting on a composition
- * that never runs. `configureApp` is the same function `main.ts` calls, so the
- * middleware order under test is the deployed one.
- *
- * Documentation is skipped: building the OpenAPI document costs a full
- * introspection pass per application and no assertion reads it.
+ * The whole `AppModule`, not a hand-picked subset: a spec that assembled a
+ * smaller graph would assert on a composition that never runs. `configureApp`
+ * is what `main.ts` calls, so the middleware order under test is the deployed
+ * one.
  */
 export async function createTestApp(): Promise<TestApp> {
   const moduleRef = await Test.createTestingModule({
@@ -37,21 +33,15 @@ export async function createTestApp(): Promise<TestApp> {
   return { app, dataSource: app.get(DataSource) };
 }
 
-/**
- * Empties the tables. Call it in `beforeEach`, then build the fixtures the test
- * needs — see `db/truncate.ts` for why it is a truncation and not a rollback.
- */
+/** Call it in `beforeEach`, then build the fixtures the test needs. */
 export async function resetDatabase({ dataSource }: TestApp): Promise<void> {
   await truncateAll(dataSource);
 }
 
 /**
- * Closes both pools.
- *
- * `app.close()` releases TypeORM's. Better Auth holds a second one, built at
- * module scope from the environment, and nothing in the Nest lifecycle knows
- * about it — left open, Jest hangs after the last assertion with no failure to
- * point at.
+ * Closes both pools. `app.close()` releases TypeORM's; Better Auth holds a
+ * second one no part of the Nest lifecycle knows about, and left open it hangs
+ * Jest with no failure to point at.
  */
 export async function closeTestApp({ app }: TestApp): Promise<void> {
   await app.close();

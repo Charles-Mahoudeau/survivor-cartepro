@@ -10,9 +10,7 @@ describe('role constants', () => {
     expect(new Set(values).size).toBe(values.length);
   });
 
-  it('only treats declared roles as administrators', () => {
-    // A typo here does not fail anywhere: the guard would simply never match,
-    // and every administration route would answer 403 to everyone, forever.
+  it('only treats declared roles as administrators, a typo here refusing everyone forever', () => {
     const declared: readonly string[] = Object.values(ROLES);
     for (const role of ADMIN_ROLES) {
       expect(declared).toContain(role);
@@ -27,10 +25,7 @@ describe('role constants', () => {
 });
 
 describe('sign-in rate limit', () => {
-  it('lets the sixth attempt of a minute be the one refused', () => {
-    // The acceptance criterion is phrased on the sixth attempt, the option on
-    // the number allowed. Off by one here and the suite still passes while the
-    // criterion does not.
+  it('allows five per minute, so the sixth attempt is the one refused', () => {
     expect(SIGN_IN_RATE_LIMIT.max).toBe(5);
     expect(SIGN_IN_RATE_LIMIT.window).toBe(60);
   });

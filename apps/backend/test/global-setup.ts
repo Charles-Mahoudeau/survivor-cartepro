@@ -8,22 +8,21 @@ import {
 } from './container-registry';
 
 /**
- * Postgres 18, not "some Postgres".
- *
- * Every primary key of this schema defaults to `uuidv7()`, a builtin that
- * arrived in 18. An older image would fail the migration on the first table —
- * which is the behaviour we want: the harness cannot silently run the suite on
- * a version the schema does not support.
+ * Postgres 18, not "some Postgres": every primary key defaults to `uuidv7()`, a
+ * builtin that arrived in 18, so an older image fails on the first table rather
+ * than running the suite on a version the schema does not support.
  */
 const IMAGE = 'postgres:18-alpine';
 
 /**
- * Runs once, before the whole integration suite.
+ * Runs once before the suite: starts an ephemeral Postgres, applies the real
+ * migrations with the real script, and writes the connection for the workers.
  *
- * Starts an ephemeral Postgres, applies the real migrations to it with the real
- * script, and writes the connection where every worker will read it. The
- * database is never the developer's: a suite that truncates tables between
- * tests has no business pointing at anything someone might have data in.
+ * Never the developer's database — a suite that truncates between tests has no
+ * business pointing at anything someone might have data in.
+ *
+ * Migration output is captured rather than inherited, and re-emitted only when
+ * it fails.
  */
 export default async function globalSetup(): Promise<void> {
   console.log(`\n🐘 [integration] starting ${IMAGE}...`);
@@ -44,8 +43,6 @@ export default async function globalSetup(): Promise<void> {
 
   console.log('🐘 [integration] applying migrations...');
   try {
-    // Output captured rather than inherited: the migration detail is noise when
-    // it works, and the only time it is worth reading is when it does not.
     execFileSync('bun', ['scripts/db-migrate.ts'], {
       cwd: process.cwd(),
       stdio: 'pipe',

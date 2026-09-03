@@ -13,26 +13,15 @@ import { Session } from './session.entity';
 /**
  * An account able to sign in.
  *
- * The shape is Better Auth's, because Better Auth reads and writes this table
- * through its own connection. What is ours is the schema: these entities are
- * what `db:generate` diffs, so the table is created, altered and dropped by our
- * migrations like every other table of this API — and a foreign key from a
- * business table to `user.id` is an ordinary relation rather than a reference
- * to something the ORM cannot see.
+ * The shape is Better Auth's, the schema is ours: `db:generate` diffs these
+ * entities, so a foreign key from a business table to `user.id` is an ordinary
+ * relation rather than a reference to something the ORM cannot see.
  *
- * Nothing here runs at runtime for authentication. Better Auth does not go
- * through TypeORM, so `@CreateDateColumn` and friends describe the DDL, not a
- * lifecycle: the timestamps that land in this table are the ones the library
- * writes.
+ * Nothing here runs for authentication. The library does not go through
+ * TypeORM, so `@CreateDateColumn` and friends describe the DDL, not a lifecycle.
  *
- * Columns are snake_case, like the rest of the schema. Better Auth is told the
- * mapping in `src/config/auth/auth.ts` — one place, next to the connection that
- * uses it.
- *
- * `role`, `banned`, `banReason` and `banExpires` come from the admin plugin.
- * They are declared here rather than left to the library because the schema is
- * ours: a column no entity declares is a column `db:generate` would propose to
- * drop.
+ * The admin plugin's columns are declared here too: a column no entity declares
+ * is one `db:generate` would propose to drop.
  */
 @Entity('user')
 export class User {
@@ -51,7 +40,7 @@ export class User {
   @Column('text', { nullable: true })
   image: string | null;
 
-  /** `user` when the account is created by sign-up, from the plugin default. */
+  /** `employee` on sign-up, from the plugin default. */
   @Column('text', { nullable: true })
   role: string | null;
 

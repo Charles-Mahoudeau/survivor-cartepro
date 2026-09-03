@@ -1,20 +1,12 @@
-// FIRST, before anything else is evaluated. Better Auth reads NODE_ENV once,
-// when its module loads, and that single read decides whether cookies are
-// Secure and whether an unproxied request gets an IP. A module imported above
-// this line would capture an empty environment.
+// FIRST: Better Auth reads NODE_ENV once, when its module loads, and that read
+// decides whether cookies are Secure and whether a request gets an IP.
 import './config/env/load-env';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { configureApp } from './bootstrap';
 
-/**
- * Composition root.
- *
- * It creates the application, hands it to `configureApp` — which is also what
- * the integration suite calls, so the middleware order under test is the one
- * that runs — and listens.
- */
+/** Composition root. `configureApp` is what the integration suite calls too. */
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 

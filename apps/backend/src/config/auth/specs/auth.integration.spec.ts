@@ -102,7 +102,7 @@ describe('roles', () => {
     expect(rows[0].role).toBe(ROLES.EMPLOYEE);
   });
 
-  it('never lets the request choose its own role', async () => {
+  it('never lets the request choose its own role, whether it is refused or ignored', async () => {
     await post('/sign-up/email').send({
       name: 'Opportuniste',
       email: 'escalade@cartepro.test',
@@ -110,9 +110,6 @@ describe('roles', () => {
       role: ROLES.ADMIN,
     });
 
-    // The status is not the point and would lock in a mechanism: the library
-    // may refuse the unknown field or ignore it, and either is fine. What must
-    // hold is that no account ends up carrying a role it asked for.
     const admins: Array<{ email: string }> = await context.dataSource.query(
       `SELECT email FROM "user" WHERE role = $1`,
       [ROLES.ADMIN],
@@ -139,7 +136,7 @@ describe('roles', () => {
 });
 
 describe('sign-in', () => {
-  it('refuses a wrong password and a stranger with the same status', async () => {
+  it('answers a wrong password and a stranger identically, so accounts cannot be enumerated', async () => {
     await signUp(context.app, 'connu@cartepro.test');
 
     const wrongPassword = await post('/sign-in/email')
@@ -150,8 +147,6 @@ describe('sign-in', () => {
       .send({ email: 'inconnu@cartepro.test', password: VALID_PASSWORD })
       .expect(401);
 
-    // Same message both ways: telling them apart is how a dispositif's user
-    // list gets enumerated from the outside.
     expect(bodyOf<{ message: string }>(unknownAccount).message).toBe(
       bodyOf<{ message: string }>(wrongPassword).message,
     );
@@ -243,7 +238,7 @@ describe('sign-out', () => {
 });
 
 describe('the schema the library writes into', () => {
-  it('lands in our snake_case columns, with a uuidv7 primary key', async () => {
+  it('lands in our snake_case columns, with a version 7 primary key', async () => {
     const account = await signUp(context.app, 'colonnes@cartepro.test');
 
     const rows: Array<{
@@ -258,8 +253,6 @@ describe('the schema the library writes into', () => {
     expect(rows).toHaveLength(1);
     expect(rows[0].email_verified).toBe(false);
     expect(rows[0].created_at).toBeInstanceOf(Date);
-    // The thirteenth hex digit of a UUID is its version. 7, because the column
-    // defaults to `uuidv7()` and the library was told not to generate ids.
     expect(rows[0].id[14]).toBe('7');
   });
 
@@ -284,7 +277,7 @@ describe('the schema the library writes into', () => {
     expect(columns).toEqual([]);
   });
 
-  it('records the address and the agent of the session', async () => {
+  it('records the address and the agent, which an empty NODE_ENV would leave blank', async () => {
     const account = await signUp(context.app, 'trace@cartepro.test');
 
     const sessions: Array<{ ip_address: string; user_agent: string }> =
@@ -293,8 +286,6 @@ describe('the schema the library writes into', () => {
         [account.id],
       );
 
-    // Empty would mean the library captured an environment that is neither
-    // development nor test — the NODE_ENV it reads once, at module load.
     expect(sessions[0].ip_address).toBe('127.0.0.1');
     expect(sessions[0].user_agent).toBe(TEST_USER_AGENT);
   });

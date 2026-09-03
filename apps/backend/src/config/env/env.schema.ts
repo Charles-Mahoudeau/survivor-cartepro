@@ -22,24 +22,13 @@ export const EnvSchema = z.object({
   DATABASE_NAME: z.string().min(1).default('cartepro'),
   DATABASE_LOGGING: z.enum(['true', 'false']).default('true'),
 
-  /**
-   * Signs session cookies and every token Better Auth mints. Thirty-two
-   * characters is the library's own floor, restated here so a short value fails
-   * at boot rather than as a warning nobody reads.
-   */
+  /** Thirty-two is the library's floor; a short value fails at boot, not later. */
   BETTER_AUTH_SECRET: z.string().min(32),
 
-  /**
-   * Public URL of this API. Better Auth builds callback URLs from it and trusts
-   * its origin, so it must be the URL clients actually reach — not `0.0.0.0`.
-   */
+  /** The URL clients actually reach — not `0.0.0.0`. Its origin is trusted. */
   BETTER_AUTH_URL: z.url(),
 
-  /**
-   * Origins allowed to carry a session cookie, comma-separated. The frontend
-   * runs on its own port, so it is a different origin even in development, and
-   * an empty list means nothing can sign in from a browser.
-   */
+  /** Comma-separated. Empty means nobody can sign in from a browser. */
   AUTH_TRUSTED_ORIGINS: z.string().min(1),
 });
 

@@ -9,14 +9,10 @@ import {
 
 /**
  * Short-lived proofs: an email change, a password reset, an address
- * confirmation.
+ * confirmation. Empty in this lot, since nothing sends mail yet.
  *
- * The table stays empty in this lot — nothing sends mail yet — but it is part
- * of the schema Better Auth expects, and a missing table is a runtime failure
- * on the first flow that needs one rather than a boot failure.
- *
- * `identifier` is what a row is looked up by, and it is not unique: an address
- * can have several pending proofs at once. Hence the plain index.
+ * `identifier` is not unique — an address can have several pending proofs — so
+ * the index is a plain one.
  */
 @Entity('verification')
 export class Verification {

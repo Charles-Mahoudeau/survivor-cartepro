@@ -2,11 +2,9 @@ import { join } from 'node:path';
 import type { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 
 /**
- * Where `global-setup` writes the connection of the ephemeral container.
- *
- * A file rather than a global, because Jest runs setup once in the main process
- * and the specs in a worker: nothing set on `globalThis` by the first survives
- * into the second. The file is read again in every worker.
+ * Where `global-setup` writes the connection. A file and not a global: setup
+ * runs in the main process, the specs in a worker, and nothing on `globalThis`
+ * survives between the two.
  */
 export const CONN_FILE = join(process.cwd(), '.testcontainer.json');
 

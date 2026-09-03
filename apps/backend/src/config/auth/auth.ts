@@ -1,5 +1,5 @@
-// FIRST: see the note in `main.ts`. Better Auth captures NODE_ENV when its
-// module loads, so the environment has to exist before the import below.
+// FIRST: Better Auth captures NODE_ENV when its module loads, so the
+// environment has to exist before the import below.
 import '../env/load-env';
 import { apiKey } from '@better-auth/api-key';
 import { betterAuth } from 'better-auth';
@@ -25,9 +25,9 @@ import {
 } from './auth.schema';
 
 /**
- * Origins allowed to carry a session cookie to this API. The same list feeds
- * CORS in the composition root: two lists that drift produce a refusal whose
- * cause is invisible client-side.
+ * Origins allowed to carry a session cookie. The same list feeds CORS in the
+ * composition root: two lists that drift produce a refusal whose cause is
+ * invisible client-side.
  */
 export function trustedOrigins(): string[] {
   return parseTrustedOrigins(process.env.AUTH_TRUSTED_ORIGINS);
@@ -36,26 +36,18 @@ export function trustedOrigins(): string[] {
 /**
  * The single Better Auth instance.
  *
- * It reads `process.env` directly rather than through `ConfigService`, for the
- * same reason `data-source.ts` does: the role script loads this file with no
- * Nest container running, so anything it needs must be readable without one.
+ * It reads `process.env` directly, like `data-source.ts`: the promotion script
+ * loads this file with no Nest container running.
  *
- * The connection is its own `pg.Pool`, separate from the one TypeORM holds:
- * Better Auth talks to Postgres through Kysely and cannot borrow a TypeORM
- * connection. It is the same database and the same five tables — the schema is
- * ours, declared in `src/modules/user/entities/` and migrated by
- * `db:generate`, and the library is told where our columns are.
+ * The pool is its own — the library talks to Postgres through Kysely and cannot
+ * borrow TypeORM's. Same database, same six tables: the schema is ours, and the
+ * library is told where our columns are.
  *
- * Ids are left to the database (`generateId: false`), so a row gets the same
- * `uuidv7()` default as every other row of this schema rather than a
- * library-generated string. That is what makes a foreign key from a business
- * table to `user.id` an ordinary `uuid` relation.
+ * `generateId: false` leaves ids to the database, so a row gets the `uuidv7()`
+ * default every other row of this schema gets.
  *
- * There is no `cookieCache`. Caching the session in a signed cookie removes a
- * query per request, but it also keeps a revoked session and a stale role alive
- * until the cache expires — and this plugin set exists to ban accounts and to
- * change roles. One read per guarded request is the price of both taking effect
- * on the next one.
+ * No `cookieCache`: it would keep a revoked session and a stale role alive
+ * until it expired, and this plugin set exists to ban accounts and change roles.
  */
 export const authOptions = {
   appName: 'CartePro',
@@ -88,36 +80,25 @@ export const authOptions = {
   },
 
   /**
-   * Counted in the database rather than in memory: an in-process counter resets
-   * on every restart, which on a deployment day hands an attacker a fresh
-   * budget each time.
+   * `enabled` is pinned rather than left to the library, which derives it from
+   * the NODE_ENV it captured once — a security control that switches off on an
+   * environment name is not one. Counted in the database, since a process-local
+   * counter resets on every deployment.
    */
   rateLimit: {
-    /**
-     * Explicit rather than left to the default, which is "on in production".
-     * That default is read from the NODE_ENV the library captures once at load,
-     * so an environment that arrives late turns the limiter off without a word
-     * — and this is a security control, not a convenience. On everywhere means
-     * the behaviour under test is the behaviour deployed.
-     */
     enabled: true,
     storage: 'database',
     modelName: AUTH_RATE_LIMIT_MODEL_NAME,
     fields: AUTH_MODEL_FIELDS.rateLimit,
-    customRules: {
-      '/sign-in/email': SIGN_IN_RATE_LIMIT,
-    },
+    customRules: { '/sign-in/email': SIGN_IN_RATE_LIMIT },
   },
 
+  /**
+   * `disableOriginCheck` is pinned for the same reason: the library computes it
+   * as `disableOriginCheck ?? isTest()`, so `NODE_ENV=test` — or a stray `TEST`
+   * variable — turns the CSRF origin check off without a word.
+   */
   advanced: {
-    /**
-     * Pinned, not left to the default. The library computes it as
-     * `disableOriginCheck ?? isTest()`, so `NODE_ENV=test` — or a stray `TEST`
-     * variable, which `isTest()` also honours — turns the CSRF origin check off
-     * without a word. That is a security control disappearing on an
-     * environment name, and it also makes any test that claims to cover it
-     * vacuous: the assertion passes because nothing is checked.
-     */
     disableOriginCheck: false,
     database: { generateId: false },
   },
@@ -131,23 +112,14 @@ export const authOptions = {
       bannedUserMessage: BANNED_USER_MESSAGE,
       schema: AUTH_ADMIN_SCHEMA,
     }),
-    /**
-     * Keys for the third-party surface the brief asks for (§3.3, an HR system
-     * reading a balance). No route consumes them yet — the plugin is enabled
-     * here so the table exists in the same migration as the rest of
-     * authentication, rather than arriving alone later.
-     */
+    /** For the third-party surface of §3.3. No route consumes a key yet. */
     apiKey({ schema: AUTH_API_KEY_SCHEMA }),
-    /**
-     * Publishes the schema of the routes below `/auth`, which `swagger.ts`
-     * merges into the document Nest builds. Its own Scalar page is off: this
-     * API renders one documentation page, not two.
-     */
+    /** Publishes the schema `swagger.ts` folds into the Nest document. */
     openAPI({ disableDefaultReference: true }),
   ],
 } as const satisfies Parameters<typeof betterAuth>[0];
 
-/** The single Better Auth instance, shared by the HTTP handler and the guards. */
+/** Shared by the HTTP handler and the guards. */
 export const auth = betterAuth(authOptions);
 
 export type Auth = typeof auth;

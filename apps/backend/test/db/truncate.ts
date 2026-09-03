@@ -1,31 +1,19 @@
 import type { DataSource } from 'typeorm';
 
-/**
- * Never emptied: TypeORM's migration history, applied once when the container
- * boots. Truncating it would make the next spec run against an empty schema.
- */
+/** TypeORM's history; truncating it would leave the next spec no schema. */
 const PROTECTED_TABLES = new Set(['migrations', 'typeorm_metadata']);
 
 /**
  * Empties every application table, keeping the migrated schema.
  *
- * Truncation rather than a transaction rolled back per test, for a reason
- * specific to this application: Better Auth writes through its OWN connection
- * pool. A test that opened a TypeORM transaction would build fixtures the
- * library cannot see, and the library's own writes would survive the rollback —
- * the isolation would be an illusion in both directions.
+ * Truncation and not a rollback, for a reason specific to this application:
+ * Better Auth writes through its OWN pool. Fixtures built inside a TypeORM
+ * transaction would be invisible to it, and its writes would survive the
+ * rollback — the isolation would be an illusion in both directions.
  *
- * Committing for real also keeps the things worth testing observable: unique
- * constraints actually raise, cascades actually cascade, and the rate limit
- * counter is a row like any other.
- *
- * `rate_limit` deserves a note. Its key is address plus path, and every request
- * of the suite comes from the same address — so a spec that signs in six times
- * would hand the next one a 429 for reasons that have nothing to do with it.
- * Clearing it between tests is not tidiness, it is what keeps the specs
- * independent of their order.
- *
- * `CASCADE` handles the foreign key order, `RESTART IDENTITY` the sequences.
+ * `rate_limit` is cleared with the rest. Its key is address plus path and every
+ * request comes from the same address, so a spec that signs in six times would
+ * hand the next one a 429 of its own making.
  */
 export async function truncateAll(dataSource: DataSource): Promise<void> {
   const rows: Array<{ tablename: string }> = await dataSource.query(

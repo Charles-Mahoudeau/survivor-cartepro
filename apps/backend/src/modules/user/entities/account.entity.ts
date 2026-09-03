@@ -15,12 +15,9 @@ import { User } from './user.entity';
 /**
  * A way of proving one is a given user.
  *
- * The password hash lives here, not on `user`. That separation is what keeps it
- * out of every projection that serves a profile: a query that selects a user
- * cannot accidentally carry a credential it never joined.
+ * The password hash lives here, not on `user`: a query that selects a user
+ * cannot carry a credential it never joined.
  *
- * A credential account has `providerId = 'credential'` and a `password`; a
- * social account would have tokens and no password. The pair
  * (`issuer`, `accountId`) is unique, so linking the same external identity
  * twice is refused by the database rather than by a check someone can forget.
  */
