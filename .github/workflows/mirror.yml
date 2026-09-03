@@ -5,7 +5,6 @@ on:
     branches: [main]
 
 env:
-  REPOSITORY: EpitechPGE3-2026/G-SVR-500-NAN-5-1-survivor-3
   REPOSITORY_URL: git@github.com:EpitechPGE3-2026/G-SVR-500-NAN-5-1-survivor-3.git
 
 concurrency:
@@ -13,10 +12,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  mirror:
-    if: github.repository != env.REPOSITORY
-    name: Mirror repository to Epitech GitHub
+  prerequisites:
+    name: 'Prerequisites'
     runs-on: ubuntu-latest
+    outputs:
+      is_mirror_repository: ${{ steps.mirror_repository_check.outputs.is_mirror }}
+    steps:
+      - name: 'Check repository url'
+        id: mirror_repository_check
+        run: |
+          MIRROR_REPOSITORY=$(echo '${{ env.REPOSITORY_URL }}' | sed -e 's/:/\//' -e 's/@/:\/\//')
+          if [ "$MIRROR_REPOSITORY" = '${{ github.repositoryUrl }}' ]
+          then
+            echo "is_mirror=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_mirror=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  mirror:
+    name: Mirror repository to Epitech GitHub
+    needs: [prerequisites]
+    runs-on: ubuntu-latest
+    if: ${{ needs.prerequisites.outputs.is_mirror_repository == 'false' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
