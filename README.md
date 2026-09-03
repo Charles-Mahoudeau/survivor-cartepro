@@ -34,7 +34,8 @@ La documentation sur http://localhost:3001/docs.
 Les migrations en attente s'appliquent au démarrage de l'application.
 
 Détail des scripts et des conventions dans
-[apps/backend/README.md](apps/backend/README.md). Les choix d'authentification
+[apps/backend/README.md](apps/backend/README.md) et
+[apps/frontend/README.md](apps/frontend/README.md). Les choix d'authentification
 sont documentés dans [docs/design/authentication.md](docs/design/authentication.md).
 
 La base écoute sur le port `5432`. Surchargeable par `DATABASE_PORT`.
