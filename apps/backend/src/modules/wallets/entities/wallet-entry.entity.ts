@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
 } from 'typeorm';
@@ -15,6 +16,9 @@ import { WalletEntryDirection } from '@/modules/wallets/enums/wallet-entry-direc
 import { WalletEntryKind } from '@/modules/wallets/enums/wallet-entry-kind.enum';
 
 @Entity()
+@Index('IDX_wallet_entry_wallet_id', ['wallet'])
+@Index('IDX_wallet_entry_payment_id', ['payment'])
+@Index('IDX_wallet_entry_allocation_id', ['allocation'])
 @Check('CHK_wallet_entry_amount_positive', 'amount > 0')
 export class WalletEntry {
   @PrimaryGeneratedUuidV7Column()

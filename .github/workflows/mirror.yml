@@ -12,12 +12,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  prerequisites:
+    name: 'Prerequisites'
+    runs-on: ubuntu-latest
+    outputs:
+      is_mirror_repository: ${{ steps.mirror_repository_check.outputs.is_mirror }}
+    steps:
+      - name: 'Check repository url'
+        id: mirror_repository_check
+        run: |
+          MIRROR_REPOSITORY=$(echo '${{ env.REPOSITORY_URL }}' | sed -e 's/:/\//' -e 's/@/:\/\//')
+          if [ "$MIRROR_REPOSITORY" = '${{ github.repositoryUrl }}' ]
+          then
+            echo "is_mirror=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_mirror=false" >> "$GITHUB_OUTPUT"
+          fi
+
   mirror:
     name: Mirror repository to Epitech GitHub
+    needs: [prerequisites]
     runs-on: ubuntu-latest
+    if: ${{ needs.prerequisites.outputs.is_mirror_repository == 'false' }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Mirror repository

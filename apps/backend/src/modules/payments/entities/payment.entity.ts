@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -17,6 +18,8 @@ import { PaymentToken } from '@/modules/payments/entities/payment-token.entity';
 import { CaptureMode } from '@/modules/payments/enums/capture-mode.enum';
 
 @Entity()
+@Index('IDX_payment_wallet_id', ['wallet'])
+@Index('IDX_payment_partner_id', ['partner'])
 @Check('CHK_payment_amount_positive', 'amount > 0')
 export class Payment {
   @PrimaryGeneratedUuidV7Column()

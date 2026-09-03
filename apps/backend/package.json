@@ -1,7 +1,7 @@
 {
-  "name": "@cartepro/backend",
+  "name": "@tickettout/backend",
   "version": "0.0.1",
-  "description": "API CartePro — avantages salariés dématérialisés",
+  "description": "API Ticket Tout — avantages salariés dématérialisés",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
@@ -9,12 +9,13 @@
     "start": "PORT=3001 bun src/main.ts",
     "build": "bun scripts/build.ts",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint \"{src,scripts}/**/*.ts\" --fix",
-    "lint:check": "eslint \"{src,scripts}/**/*.ts\"",
-    "format": "prettier --write \"{src,scripts}/**/*.ts\"",
-    "format:check": "prettier --check \"{src,scripts}/**/*.ts\"",
+    "lint": "eslint \"{src,scripts,test}/**/*.ts\" --fix",
+    "lint:check": "eslint \"{src,scripts,test}/**/*.ts\"",
+    "format": "prettier --write \"{src,scripts,test}/**/*.ts\"",
+    "format:check": "prettier --check \"{src,scripts,test}/**/*.ts\"",
     "test": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest",
     "test:unit": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:integration": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest --config jest.integration.config.js",
     "test:watch": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest --watch",
     "test:cov": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest --coverage",
     "typeorm": "bunx --bun typeorm -d src/config/database/data-source.ts",
@@ -23,9 +24,11 @@
     "db:revert": "bun scripts/db-revert.ts",
     "db:show": "bun scripts/db-show.ts",
     "db:drop": "bun scripts/db-drop.ts",
-    "db:reset": "bun scripts/db-reset.ts"
+    "db:reset": "bun scripts/db-reset.ts",
+    "auth:promote": "bun scripts/auth-promote.ts"
   },
   "dependencies": {
+    "@better-auth/api-key": "^1.7.2",
     "@nestjs/common": "^12.0.1",
     "@nestjs/config": "^12.0.0",
     "@nestjs/core": "^12.0.1",
@@ -33,6 +36,7 @@
     "@nestjs/swagger": "^12.0.1",
     "@nestjs/typeorm": "^12.0.1",
     "@scalar/nestjs-api-reference": "^1.2.17",
+    "better-auth": "^1.7.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "dotenv": "^17.4.2",
@@ -48,19 +52,28 @@
     "@eslint/js": "^10.0.1",
     "@jest/globals": "^30.5.0",
     "@nestjs/testing": "^12.0.1",
+    "@testcontainers/postgresql": "^12.1.0",
     "@types/bun": "^1.4.0",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^26.4.0",
     "@types/pg": "^8.23.1",
+    "@types/supertest": "^7.2.1",
     "chalk": "^6.0.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.6",
     "globals": "^17.11.0",
     "jest": "^30.5.0",
     "prettier": "^3.9.6",
+    "supertest": "^7.2.2",
     "ts-jest": "^29.4.12",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.68.0"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "bun",
+      "version": "^1.4.0"
+    }
   }
 }

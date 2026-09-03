@@ -12,7 +12,7 @@ import {
 } from 'typeorm';
 import type { Relation } from 'typeorm';
 import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-generated-uuid-v7.column';
-import { User } from '@/modules/users/entities/user.entity';
+import { User } from '@/modules/user/entities/user.entity';
 import { PartnerCategory } from '@/modules/partners/entities/partner-category.entity';
 import { PartnerReview } from '@/modules/partners/entities/partner-review.entity';
 import { Payment } from '@/modules/payments/entities/payment.entity';
@@ -43,7 +43,6 @@ export class Partner {
   @Column({
     type: 'enum',
     enum: PartnerStatus,
-    enumName: 'partner_status_enum',
     default: PartnerStatus.PENDING,
   })
   status: PartnerStatus;

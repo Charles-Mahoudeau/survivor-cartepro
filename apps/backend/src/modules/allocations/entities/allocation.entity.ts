@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -10,10 +11,11 @@ import {
 import type { Relation } from 'typeorm';
 import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-generated-uuid-v7.column';
 import { Employer } from '@/modules/employers/entities/employer.entity';
-import { User } from '@/modules/users/entities/user.entity';
+import { User } from '@/modules/user/entities/user.entity';
 import { WalletEntry } from '@/modules/wallets/entities/wallet-entry.entity';
 
 @Entity()
+@Index('IDX_allocation_employer_id', ['employer'])
 @Check('CHK_allocation_amount_positive', 'amount > 0')
 export class Allocation {
   @PrimaryGeneratedUuidV7Column()

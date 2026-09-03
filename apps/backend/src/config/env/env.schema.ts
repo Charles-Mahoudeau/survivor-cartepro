@@ -21,6 +21,15 @@ export const EnvSchema = z.object({
   DATABASE_PASSWORD: z.string().min(1).default('cartepro'),
   DATABASE_NAME: z.string().min(1).default('cartepro'),
   DATABASE_LOGGING: z.enum(['true', 'false']).default('true'),
+
+  /** Thirty-two is the library's floor; a short value fails at boot, not later. */
+  BETTER_AUTH_SECRET: z.string().min(32),
+
+  /** The URL clients actually reach — not `0.0.0.0`. Its origin is trusted. */
+  BETTER_AUTH_URL: z.url(),
+
+  /** Comma-separated. Empty means nobody can sign in from a browser. */
+  AUTH_TRUSTED_ORIGINS: z.string().min(1),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

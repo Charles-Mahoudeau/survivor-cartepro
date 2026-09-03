@@ -1,29 +1,39 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class InitEntities1788378016423 implements MigrationInterface {
-    name = 'InitEntities1788378016423'
+export class BusinessSchema1788445099638 implements MigrationInterface {
+    name = 'BusinessSchema1788445099638'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`CREATE TYPE "public"."wallet_entry_direction_enum" AS ENUM('credit', 'debit')`);
         await queryRunner.query(`CREATE TYPE "public"."wallet_entry_kind_enum" AS ENUM('payment_sent', 'payment_received', 'refund_sent', 'refund_received')`);
         await queryRunner.query(`CREATE TABLE "wallet_entry" ("id" uuid NOT NULL DEFAULT uuidv7(), "direction" "public"."wallet_entry_direction_enum" NOT NULL, "amount" numeric(12,2) NOT NULL, "balance_after" numeric(12,2) NOT NULL, "kind" "public"."wallet_entry_kind_enum" NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "wallet_id" uuid NOT NULL, "payment_id" uuid, "allocation_id" uuid, CONSTRAINT "CHK_wallet_entry_amount_positive" CHECK (amount > 0), CONSTRAINT "PK_bbe01e358e16f9671488ec458bd" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE INDEX "IDX_wallet_entry_allocation_id" ON "wallet_entry"  ("allocation_id") `);
+        await queryRunner.query(`CREATE INDEX "IDX_wallet_entry_payment_id" ON "wallet_entry"  ("payment_id") `);
+        await queryRunner.query(`CREATE INDEX "IDX_wallet_entry_wallet_id" ON "wallet_entry"  ("wallet_id") `);
         await queryRunner.query(`CREATE TYPE "public"."wallet_status_enum" AS ENUM('active', 'disabled')`);
-        await queryRunner.query(`CREATE TABLE "wallet" ("id" uuid NOT NULL DEFAULT uuidv7(), "employee_ref" text, "balance" numeric(12,2) NOT NULL, "currency" character(3) NOT NULL DEFAULT 'EUR', "status" "public"."wallet_status_enum" NOT NULL DEFAULT 'active', "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "user_id" uuid NOT NULL, "employer_id" uuid, CONSTRAINT "CHK_wallet_balance_non_negative" CHECK (balance >= 0), CONSTRAINT "PK_bec464dd8d54c39c54fd32e2334" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE UNIQUE INDEX "IDX_50ffc3f933557933ab661572dc" ON "wallet"  ("employer_id", "employee_ref") `);
-        await queryRunner.query(`CREATE UNIQUE INDEX "IDX_5ca6b5ed2b5a796e6ab01eac09" ON "wallet"  ("user_id", "employer_id") `);
+        await queryRunner.query(`CREATE TABLE "wallet" ("id" uuid NOT NULL DEFAULT uuidv7(), "employee_ref" text, "balance" numeric(12,2) NOT NULL DEFAULT '0', "currency" character(3) NOT NULL DEFAULT 'EUR', "status" "public"."wallet_status_enum" NOT NULL DEFAULT 'active', "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "user_id" uuid NOT NULL, "employer_id" uuid, CONSTRAINT "CHK_wallet_balance_non_negative" CHECK (balance >= 0), CONSTRAINT "PK_bec464dd8d54c39c54fd32e2334" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE UNIQUE INDEX "IDX_wallet_employer_employee_ref" ON "wallet"  ("employer_id", "employee_ref") WHERE "employer_id" IS NOT NULL AND "employee_ref" IS NOT NULL`);
+        await queryRunner.query(`CREATE UNIQUE INDEX "IDX_wallet_user_employer" ON "wallet"  ("user_id", "employer_id") WHERE "employer_id" IS NOT NULL`);
+        await queryRunner.query(`CREATE INDEX "IDX_wallet_employer_id" ON "wallet"  ("employer_id") `);
+        await queryRunner.query(`CREATE INDEX "IDX_wallet_user_id" ON "wallet"  ("user_id") `);
         await queryRunner.query(`CREATE TABLE "employer" ("id" uuid NOT NULL DEFAULT uuidv7(), "name" text NOT NULL, "siren" character(9) NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "owner_id" uuid NOT NULL, CONSTRAINT "UQ_95346ec42017cacb95daaf228bc" UNIQUE ("siren"), CONSTRAINT "REL_22c9394e151d0c9a9f81a56304" UNIQUE ("owner_id"), CONSTRAINT "PK_74029e6b1f17a4c7c66d43cfd34" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "allocation" ("id" uuid NOT NULL DEFAULT uuidv7(), "label" text NOT NULL, "amount" numeric(12,2) NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "employer_id" uuid NOT NULL, "created_by" uuid NOT NULL, CONSTRAINT "CHK_allocation_amount_positive" CHECK (amount > 0), CONSTRAINT "PK_7df89c736595e454b6ae07264fe" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TYPE "public"."partner_status_enum" AS ENUM('pending', 'active', 'refused', 'banned')`);
-        await queryRunner.query(`CREATE TABLE "partner_review" ("id" uuid NOT NULL DEFAULT uuidv7(), "from_status" "public"."partner_status_enum" NOT NULL, "to_status" "public"."partner_status_enum" NOT NULL, "reason" text NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "partner_id" uuid NOT NULL, "decided_by" uuid NOT NULL, CONSTRAINT "PK_a39252bce9be48bf22ef3041873" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TABLE "user" ("id" uuid NOT NULL DEFAULT uuidv7(), CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE INDEX "IDX_allocation_employer_id" ON "allocation"  ("employer_id") `);
+        await queryRunner.query(`CREATE TYPE "public"."partner_review_from_status_enum" AS ENUM('pending', 'active', 'refused', 'banned')`);
+        await queryRunner.query(`CREATE TYPE "public"."partner_review_to_status_enum" AS ENUM('pending', 'active', 'refused', 'banned')`);
+        await queryRunner.query(`CREATE TABLE "partner_review" ("id" uuid NOT NULL DEFAULT uuidv7(), "from_status" "public"."partner_review_from_status_enum" NOT NULL, "to_status" "public"."partner_review_to_status_enum" NOT NULL, "reason" text NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "partner_id" uuid NOT NULL, "decided_by" uuid NOT NULL, CONSTRAINT "PK_a39252bce9be48bf22ef3041873" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE INDEX "IDX_partner_review_partner_id" ON "partner_review"  ("partner_id") `);
         await queryRunner.query(`CREATE TABLE "partner_category" ("slug" text NOT NULL, "display_name" text NOT NULL, CONSTRAINT "PK_7215da3aa69e553bbe934c13209" PRIMARY KEY ("slug"))`);
-        // await queryRunner.query(`CREATE TYPE "public"."partner_status_enum" AS ENUM('pending', 'active', 'refused', 'banned')`);
+        await queryRunner.query(`CREATE TYPE "public"."partner_status_enum" AS ENUM('pending', 'active', 'refused', 'banned')`);
         await queryRunner.query(`CREATE TABLE "partner" ("id" uuid NOT NULL DEFAULT uuidv7(), "legal_name" text NOT NULL, "trade_name" text NOT NULL, "siren" character(9) NOT NULL, "business_purpose" text NOT NULL, "status" "public"."partner_status_enum" NOT NULL DEFAULT 'pending', "address_line" text NOT NULL, "postal_code" text NOT NULL, "city" text NOT NULL, "latitude" numeric(9,6) NOT NULL, "longitude" numeric(9,6) NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "owner_id" uuid NOT NULL, CONSTRAINT "UQ_446e72eaf26f806375d832fe897" UNIQUE ("siren"), CONSTRAINT "REL_0c34acbc91d4ac6b200969f5ff" UNIQUE ("owner_id"), CONSTRAINT "PK_8f34ff11ddd5459eacbfacd48ca" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TYPE "public"."payment_capture_mode_enum" AS ENUM('qr_code', 'manual_code')`);
         await queryRunner.query(`CREATE TABLE "payment" ("id" uuid NOT NULL DEFAULT uuidv7(), "amount" numeric(12,2) NOT NULL, "capture_mode" "public"."payment_capture_mode_enum" NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "wallet_id" uuid NOT NULL, "partner_id" uuid NOT NULL, "payment_token_id" uuid NOT NULL, CONSTRAINT "REL_f5bee89d475347000913172cc9" UNIQUE ("payment_token_id"), CONSTRAINT "CHK_payment_amount_positive" CHECK (amount > 0), CONSTRAINT "PK_fcaec7df5adf9cac408c686b2ab" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE INDEX "IDX_payment_partner_id" ON "payment"  ("partner_id") `);
+        await queryRunner.query(`CREATE INDEX "IDX_payment_wallet_id" ON "payment"  ("wallet_id") `);
         await queryRunner.query(`CREATE TYPE "public"."payment_token_status_enum" AS ENUM('live', 'consumed', 'revoked')`);
-        await queryRunner.query(`CREATE TABLE "payment_token" ("id" uuid NOT NULL DEFAULT uuidv7(), "short_code" character(8) NOT NULL, "status" "public"."payment_token_status_enum" NOT NULL, "expires_at" TIMESTAMP WITH TIME ZONE NOT NULL, "consumed_at" TIMESTAMP WITH TIME ZONE, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "wallet_id" uuid NOT NULL, CONSTRAINT "PK_dd7d291c180f33c6ed2b707c179" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "payment_token" ("id" uuid NOT NULL DEFAULT uuidv7(), "short_code" character(8) NOT NULL, "status" "public"."payment_token_status_enum" NOT NULL DEFAULT 'live', "expires_at" TIMESTAMP WITH TIME ZONE NOT NULL, "consumed_at" TIMESTAMP WITH TIME ZONE, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "wallet_id" uuid NOT NULL, CONSTRAINT "PK_dd7d291c180f33c6ed2b707c179" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE UNIQUE INDEX "IDX_e0929abab7954045fa56b68db7" ON "payment_token"  ("short_code") WHERE "status" = 'live'`);
+        await queryRunner.query(`CREATE INDEX "IDX_payment_token_wallet_id" ON "payment_token"  ("wallet_id") `);
         await queryRunner.query(`CREATE TABLE "partner_to_category" ("partner_id" uuid NOT NULL, "category_slug" text NOT NULL, CONSTRAINT "PK_3c5a4dce278726dca0eea386ae8" PRIMARY KEY ("partner_id", "category_slug"))`);
         await queryRunner.query(`CREATE INDEX "IDX_7caabe483ddd70a09fa83da6ee" ON "partner_to_category"  ("partner_id") `);
         await queryRunner.query(`CREATE INDEX "IDX_a6d8550715cd3df77bd7f8e9db" ON "partner_to_category"  ("category_slug") `);
@@ -43,7 +53,7 @@ export class InitEntities1788378016423 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "payment" ADD CONSTRAINT "FK_f5bee89d475347000913172cc9c" FOREIGN KEY ("payment_token_id") REFERENCES "payment_token"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "payment_token" ADD CONSTRAINT "FK_173746812c601aedeab25486aaf" FOREIGN KEY ("wallet_id") REFERENCES "wallet"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "partner_to_category" ADD CONSTRAINT "FK_7caabe483ddd70a09fa83da6eee" FOREIGN KEY ("partner_id") REFERENCES "partner"("id") ON DELETE CASCADE ON UPDATE CASCADE`);
-        await queryRunner.query(`ALTER TABLE "partner_to_category" ADD CONSTRAINT "FK_a6d8550715cd3df77bd7f8e9db2" FOREIGN KEY ("category_slug") REFERENCES "partner_category"("slug") ON DELETE CASCADE ON UPDATE CASCADE`);
+        await queryRunner.query(`ALTER TABLE "partner_to_category" ADD CONSTRAINT "FK_a6d8550715cd3df77bd7f8e9db2" FOREIGN KEY ("category_slug") REFERENCES "partner_category"("slug") ON DELETE NO ACTION ON UPDATE NO ACTION`);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
@@ -67,23 +77,33 @@ export class InitEntities1788378016423 implements MigrationInterface {
         await queryRunner.query(`DROP INDEX "public"."IDX_a6d8550715cd3df77bd7f8e9db"`);
         await queryRunner.query(`DROP INDEX "public"."IDX_7caabe483ddd70a09fa83da6ee"`);
         await queryRunner.query(`DROP TABLE "partner_to_category"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_payment_token_wallet_id"`);
         await queryRunner.query(`DROP INDEX "public"."IDX_e0929abab7954045fa56b68db7"`);
         await queryRunner.query(`DROP TABLE "payment_token"`);
         await queryRunner.query(`DROP TYPE "public"."payment_token_status_enum"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_payment_wallet_id"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_payment_partner_id"`);
         await queryRunner.query(`DROP TABLE "payment"`);
         await queryRunner.query(`DROP TYPE "public"."payment_capture_mode_enum"`);
         await queryRunner.query(`DROP TABLE "partner"`);
-        // await queryRunner.query(`DROP TYPE "public"."partner_status_enum"`);
-        await queryRunner.query(`DROP TABLE "partner_category"`);
-        await queryRunner.query(`DROP TABLE "user"`);
-        await queryRunner.query(`DROP TABLE "partner_review"`);
         await queryRunner.query(`DROP TYPE "public"."partner_status_enum"`);
+        await queryRunner.query(`DROP TABLE "partner_category"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_partner_review_partner_id"`);
+        await queryRunner.query(`DROP TABLE "partner_review"`);
+        await queryRunner.query(`DROP TYPE "public"."partner_review_to_status_enum"`);
+        await queryRunner.query(`DROP TYPE "public"."partner_review_from_status_enum"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_allocation_employer_id"`);
         await queryRunner.query(`DROP TABLE "allocation"`);
         await queryRunner.query(`DROP TABLE "employer"`);
-        await queryRunner.query(`DROP INDEX "public"."IDX_5ca6b5ed2b5a796e6ab01eac09"`);
-        await queryRunner.query(`DROP INDEX "public"."IDX_50ffc3f933557933ab661572dc"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_wallet_user_id"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_wallet_employer_id"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_wallet_user_employer"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_wallet_employer_employee_ref"`);
         await queryRunner.query(`DROP TABLE "wallet"`);
         await queryRunner.query(`DROP TYPE "public"."wallet_status_enum"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_wallet_entry_wallet_id"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_wallet_entry_payment_id"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_wallet_entry_allocation_id"`);
         await queryRunner.query(`DROP TABLE "wallet_entry"`);
         await queryRunner.query(`DROP TYPE "public"."wallet_entry_kind_enum"`);
         await queryRunner.query(`DROP TYPE "public"."wallet_entry_direction_enum"`);

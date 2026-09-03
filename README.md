@@ -1,4 +1,4 @@
-# CartePro
+# Ticket Tout
 
 Dispositif d'avantages salariés dématérialisés — trois espaces : salarié,
 partenaire, administration.
@@ -18,9 +18,14 @@ docker/       stack de développement local (PostgreSQL 18)
 
 ```bash
 bun install
-cp apps/backend/.env.example apps/backend/.env
+cp .env.example .env
+echo "BETTER_AUTH_SECRET=$(openssl rand -base64 32)" >> .env
 bun run dev
 ```
+
+Un seul `.env`, à la racine : `docker compose` le lit, et le backend le trouve
+en remontant depuis son dossier. `BETTER_AUTH_SECRET` n'a pas de valeur par
+défaut utilisable — l'application refuse de démarrer sans.
 
 `bun run dev` démarre la base puis toutes les applications en mode watch.
 Le frontend répond sur http://localhost:3000.
@@ -29,7 +34,8 @@ La documentation sur http://localhost:3001/docs.
 Les migrations en attente s'appliquent au démarrage de l'application.
 
 Détail des scripts et des conventions dans
-[apps/backend/README.md](apps/backend/README.md).
+[apps/backend/README.md](apps/backend/README.md). Les choix d'authentification
+sont documentés dans [docs/design/authentication.md](docs/design/authentication.md).
 
 La base écoute sur le port `5432`. Surchargeable par `DATABASE_PORT`.
 Le fichier `compose.override.yaml` permet de surcharger le compose de production pour les options de développement.

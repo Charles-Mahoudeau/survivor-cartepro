@@ -14,6 +14,7 @@ import { PaymentTokenStatus } from '@/modules/payments/enums/payment-token-statu
 import { Wallet } from '@/modules/wallets/entities/wallet.entity';
 
 @Entity()
+@Index('IDX_payment_token_wallet_id', ['wallet'])
 @Index(['shortCode'], { unique: true, where: `"status" = 'live'` })
 export class PaymentToken {
   @PrimaryGeneratedUuidV7Column()
@@ -28,7 +29,11 @@ export class PaymentToken {
   @Column({ type: 'char', length: 8 })
   shortCode: string;
 
-  @Column({ type: 'enum', enum: PaymentTokenStatus })
+  @Column({
+    type: 'enum',
+    enum: PaymentTokenStatus,
+    default: PaymentTokenStatus.LIVE,
+  })
   status: PaymentTokenStatus;
 
   @Column({ type: 'timestamptz' })

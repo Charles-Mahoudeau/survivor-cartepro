@@ -14,13 +14,21 @@ import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-genera
 import { Employer } from '@/modules/employers/entities/employer.entity';
 import { PaymentToken } from '@/modules/payments/entities/payment-token.entity';
 import { Payment } from '@/modules/payments/entities/payment.entity';
-import { User } from '@/modules/users/entities/user.entity';
+import { User } from '@/modules/user/entities/user.entity';
 import { WalletEntry } from '@/modules/wallets/entities/wallet-entry.entity';
 import { WalletStatus } from '@/modules/wallets/enums/wallet-status.enum';
 
 @Entity()
-@Index(['user', 'employer'], { unique: true })
-@Index(['employer', 'employeeRef'], { unique: true })
+@Index('IDX_wallet_user_id', ['user'])
+@Index('IDX_wallet_employer_id', ['employer'])
+@Index('IDX_wallet_user_employer', ['user', 'employer'], {
+  unique: true,
+  where: '"employer_id" IS NOT NULL',
+})
+@Index('IDX_wallet_employer_employee_ref', ['employer', 'employeeRef'], {
+  unique: true,
+  where: '"employer_id" IS NOT NULL AND "employee_ref" IS NOT NULL',
+})
 @Check('CHK_wallet_balance_non_negative', 'balance >= 0')
 export class Wallet {
   @PrimaryGeneratedUuidV7Column()
@@ -37,7 +45,7 @@ export class Wallet {
   @Column({ type: 'text', nullable: true })
   employeeRef: string | null;
 
-  @Column({ type: 'numeric', precision: 12, scale: 2 })
+  @Column({ type: 'numeric', precision: 12, scale: 2, default: 0 })
   balance: number;
 
   @Column({ type: 'char', length: 3, default: 'EUR' })
