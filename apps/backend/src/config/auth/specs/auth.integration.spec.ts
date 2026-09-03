@@ -12,8 +12,30 @@ import {
   VALID_PASSWORD,
 } from '../../../../test/fixtures/user.fixture';
 import { api, bodyOf } from '../../../../test/http';
+import { truncateRateLimit } from '../../../../test/db/truncate';
 import { UserRepo } from '@/modules/user/repos/user.repo';
 import { AUTH_BASE_PATH, ROLES } from '../auth.constants';
+
+/** Rounds thrown away so the first hash of the process does not skew a median. */
+const TIMING_WARMUP_ROUNDS = 2;
+
+/** Rounds kept. A median over an odd count needs no interpolation. */
+const TIMING_SAMPLE_ROUNDS = 7;
+
+/**
+ * How far apart the two medians may sit.
+ *
+ * Measured on this build they land within half a percent of each other, around
+ * 54 ms either way, because the library hashes a decoy for an address it does
+ * not know. The leak this guards against is the version that skips that hash:
+ * an authentication request doing no password work answers in 4 ms, a ratio
+ * near fourteen. So the band leaves room for a loaded runner and still sits an
+ * order of magnitude short of what it has to catch.
+ */
+const MAX_TIMING_RATIO = 1.5;
+
+const median = (samples: number[]): number =>
+  [...samples].sort((a, b) => a - b)[Math.floor(samples.length / 2)];
 
 let context: TestApp;
 const post = (path: string, cookie?: string[]) => {
@@ -181,6 +203,49 @@ describe('sign-in', () => {
       bodyOf<{ message: string }>(wrongPassword).message,
     );
   });
+
+  it('takes as long to refuse a stranger as it does a wrong password', async () => {
+    await signUp(context.app, 'connu@tickettout.test');
+
+    const timeRefusal = async (email: string, password: string) => {
+      await truncateRateLimit(context.dataSource);
+      const started = performance.now();
+      await post('/sign-in/email').send({ email, password }).expect(401);
+      return performance.now() - started;
+    };
+
+    const wrongPassword: number[] = [];
+    const unknownAccount: number[] = [];
+
+    for (
+      let round = 0;
+      round < TIMING_WARMUP_ROUNDS + TIMING_SAMPLE_ROUNDS;
+      round++
+    ) {
+      const wrong = await timeRefusal(
+        'connu@tickettout.test',
+        'mauvaismotdepasse',
+      );
+      const unknown = await timeRefusal(
+        'inconnu@tickettout.test',
+        VALID_PASSWORD,
+      );
+
+      if (round < TIMING_WARMUP_ROUNDS) {
+        continue;
+      }
+
+      wrongPassword.push(wrong);
+      unknownAccount.push(unknown);
+    }
+
+    const wrongMedian = median(wrongPassword);
+    const unknownMedian = median(unknownAccount);
+    const slower = Math.max(wrongMedian, unknownMedian);
+    const faster = Math.min(wrongMedian, unknownMedian);
+
+    expect(slower / faster).toBeLessThan(MAX_TIMING_RATIO);
+  }, 60_000);
 
   it('refuses a banned account with its own message', async () => {
     const { id } = await signUp(context.app, 'banni@tickettout.test');

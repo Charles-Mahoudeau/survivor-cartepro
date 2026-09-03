@@ -33,3 +33,14 @@ export async function truncateAll(dataSource: DataSource): Promise<void> {
     `TRUNCATE TABLE ${tables.join(', ')} RESTART IDENTITY CASCADE`,
   );
 }
+
+/**
+ * Empties the rate limit table alone, leaving every fixture in place.
+ *
+ * A spec that measures how long a refusal takes needs more attempts than the
+ * sign-in limit allows, and it cannot reach for `truncateAll`: that would drop
+ * the very account whose password it is getting wrong.
+ */
+export async function truncateRateLimit(dataSource: DataSource): Promise<void> {
+  await dataSource.query(`TRUNCATE TABLE "rate_limit"`);
+}
