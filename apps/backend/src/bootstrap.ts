@@ -5,7 +5,7 @@ import {
   VersioningType,
 } from '@nestjs/common';
 import type { INestApplication } from '@nestjs/common';
-import type { NextFunction, Request, Response } from 'express';
+import type { Express, NextFunction, Request, Response } from 'express';
 import { Reflector } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
@@ -23,10 +23,15 @@ export const API_PREFIX = 'api';
 export const API_DEFAULT_VERSION = '1';
 
 /**
- * When a reverse proxy fronts this API, set `trust proxy` on the Express
- * instance for it — `resolveClientAddress` then resolves the real client
- * address instead of the proxy's.
+ * Which senders of `x-forwarded-for` are believed. The delivered artifact puts
+ * Traefik in front of the backend on a Docker bridge network, so the private
+ * ranges — `uniquelocal` — are exactly the proxy.
+ *
+ * An address and not a hop count: a count trusts whoever opened the connection,
+ * which hands a direct caller the header back. Loopback is deliberately absent,
+ * so a client reaching this process directly cannot claim an address.
  */
+export const TRUSTED_PROXIES = 'uniquelocal';
 
 /**
  * Everything an application instance needs beyond its modules. The integration
@@ -60,6 +65,9 @@ export async function configureApp(
   { withDocs = true }: { withDocs?: boolean } = {},
 ): Promise<void> {
   const reflector = app.get(Reflector);
+
+  const httpServer = app.getHttpAdapter().getInstance() as Express;
+  httpServer.set('trust proxy', TRUSTED_PROXIES);
 
   app.use(helmet({ contentSecurityPolicy: false }));
   app.enableCors({ origin: trustedOrigins(), credentials: true });
