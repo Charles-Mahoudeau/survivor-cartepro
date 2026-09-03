@@ -19,6 +19,8 @@ import { WalletEntry } from '@/modules/wallets/entities/wallet-entry.entity';
 import { WalletStatus } from '@/modules/wallets/enums/wallet-status.enum';
 
 @Entity()
+@Index('IDX_wallet_user_id', ['user'])
+@Index('IDX_wallet_employer_id', ['employer'])
 @Index('IDX_wallet_user_employer', ['user', 'employer'], {
   unique: true,
   where: '"employer_id" IS NOT NULL',

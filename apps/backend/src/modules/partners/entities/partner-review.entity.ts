@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
 } from 'typeorm';
@@ -12,6 +13,7 @@ import { Partner } from '@/modules/partners/entities/partner.entity';
 import { PartnerStatus } from '@/modules/partners/enums/partner-status.enum';
 
 @Entity()
+@Index('IDX_partner_review_partner_id', ['partner'])
 export class PartnerReview {
   @PrimaryGeneratedUuidV7Column()
   id: string;

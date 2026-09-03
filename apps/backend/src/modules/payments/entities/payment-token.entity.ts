@@ -14,6 +14,7 @@ import { PaymentTokenStatus } from '@/modules/payments/enums/payment-token-statu
 import { Wallet } from '@/modules/wallets/entities/wallet.entity';
 
 @Entity()
+@Index('IDX_payment_token_wallet_id', ['wallet'])
 @Index(['shortCode'], { unique: true, where: `"status" = 'live'` })
 export class PaymentToken {
   @PrimaryGeneratedUuidV7Column()
