@@ -2,6 +2,8 @@ import type { DataSource, DeepPartial } from 'typeorm';
 import { Partner } from '@/modules/partners/core/entities/partner.entity';
 import { PartnerStatus } from '@/modules/partners/core/enums/partner-status.enum';
 
+let fixtureSequence = 0;
+
 export class PartnerFixture {
   static create(
     dataSource: DataSource,
@@ -11,7 +13,7 @@ export class PartnerFixture {
     const partner = dataSource.getRepository(Partner).create({
       legalName: 'Test Partner',
       tradeName: 'Test Partner',
-      siren: `${Date.now()}00000`.slice(0, 9),
+      siren: `${String(Date.now()).slice(-7)}${String(++fixtureSequence).padStart(2, '0')}`,
       businessPurpose: 'Test business purpose',
       status: PartnerStatus.ACTIVE,
       addressLine: '1 Test Street',
