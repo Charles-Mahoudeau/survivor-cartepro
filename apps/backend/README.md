@@ -61,7 +61,7 @@ construit avec le même `basePath` : cette API n'en réexpose aucune.
 | `GET /auth/get-session`    | La session courante, ou `null`.                     |
 | `/auth/admin/*`            | Liste, rôle, bannissement. Réservé au rôle `admin`. |
 
-Le contrat complet des 45 routes est fusionné dans `/docs` : elles n'ont pas de
+Le contrat complet des 50 routes est fusionné dans `/docs` : elles n'ont pas de
 décorateur NestJS, donc leur schéma vient du plugin OpenAPI de la bibliothèque.
 
 Ces routes ne traversent ni le pipe de validation, ni le sérialiseur, ni le log

@@ -35,23 +35,24 @@ encaisser.
 
 ## 2. Décisions verrouillées
 
-| #   | Décision                                                                                   | Raison                                                                                                                                                                     |
-| --- | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| D1  | Better Auth porte la **logique** d'authentification, pas le schéma.                        | Mots de passe, sessions, rôles et bannissement sont du code déjà écrit et déjà audité. Les tables, elles, sont du domaine de ce dépôt.                                     |
-| D2  | Le schéma appartient à TypeORM : six entities, migrations par `db:generate`.               | §3. Une seule source de vérité, un seul migrateur, et une clé étrangère métier vers `user.id` devient une relation ordinaire.                                              |
-| D3  | Aucun second migrateur. Le schéma s'applique au démarrage comme les autres.                | Le dépôt promet déjà « récupérer une branche et lancer le serveur suffit à être sur son schéma ». Une promesse, un mécanisme.                                              |
-| D4  | Montage à `/auth`, pas à `/api/auth`.                                                      | Le préfixe global `api` et le versioning d'URI ne s'appliquent qu'au routeur NestJS, et le handler est monté avant lui. Le client web utilise le même `basePath`. Voir O9. |
-| D5  | Pas de plugin `organization`.                                                              | Il modélise des espaces à plusieurs membres avec invitations ; le sujet décrit un compte partenaire unique. Refusé le 2026-09-01.                                          |
-| D6  | Pas de `cookieCache`.                                                                      | §11 — un cache garde un compte banni et un rôle périmé vivants jusqu'à son expiration. Ce lot existe pour bannir et promouvoir.                                            |
-| D7  | Clés primaires `uuid` avec défaut `uuidv7()`, comme toutes les tables.                     | `generateId: false` laisse la base générer. Sans ça les identifiants d'auth seraient des chaînes base62 et les FK métier des colonnes `text`.                              |
-| D8  | La bibliothèque `@thallesp/nestjs-better-auth` n'est pas utilisée.                         | §7.1 — elle déclare `@nestjs/common@^11.1.6` en peer non optionnelle, ce dépôt est en NestJS 12.                                                                           |
-| D9  | Longueur minimale de mot de passe : 12 caractères.                                         | Recommandation ANSSI-PG-078 pour un compte sans second facteur. La valeur par défaut de la bibliothèque est 8.                                                             |
-| D10 | Limitation de débit activée, stockée en base.                                              | Les routes d'authentification sont la surface brute-forçable de ce lot. Le stockage mémoire perd son compteur à chaque redémarrage.                                        |
-| D11 | **Aucun controller NestJS d'authentification.**                                            | §5.2 — le client Better Auth du frontend appelle `/auth/*` directement. Un controller qui les réexpose est une seconde copie du contrat.                                   |
-| D12 | Colonnes en `snake_case`, mapping **calculé**, jamais recopié.                             | §4.2 — le mapping et la stratégie de nommage partagent une seule implémentation, donc ils ne peuvent pas diverger.                                                         |
-| D13 | `NODE_ENV` est chargé **avant** le premier import de la bibliothèque.                      | §7.4 — elle le lit une seule fois, au chargement de son module, et cette lecture décide des cookies `Secure` et du repli d'adresse IP.                                     |
-| D14 | Limitation de débit et contrôle d'origine **épinglés**, jamais déduits de l'environnement. | §7.4 — les deux défauts de la bibliothèque se calculent depuis `NODE_ENV`. Un contrôle de sécurité qui s'éteint sur un nom d'environnement n'en est pas un.                |
-| D15 | Isolation des tests par TRUNCATE, suite en série.                                          | §12 — Better Auth écrit par son propre pool : un rollback de transaction TypeORM ne verrait rien de ses écritures et ne les annulerait pas.                                |
+| #   | Décision                                                                                   | Raison                                                                                                                                                                                                 |
+| --- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| D1  | Better Auth porte la **logique** d'authentification, pas le schéma.                        | Mots de passe, sessions, rôles et bannissement sont du code déjà écrit et déjà audité. Les tables, elles, sont du domaine de ce dépôt.                                                                 |
+| D2  | Le schéma appartient à TypeORM : six entities, migrations par `db:generate`.               | §3. Une seule source de vérité, un seul migrateur, et une clé étrangère métier vers `user.id` devient une relation ordinaire.                                                                          |
+| D3  | Aucun second migrateur. Le schéma s'applique au démarrage comme les autres.                | Le dépôt promet déjà « récupérer une branche et lancer le serveur suffit à être sur son schéma ». Une promesse, un mécanisme.                                                                          |
+| D4  | Montage à `/auth`, pas à `/api/auth`.                                                      | Le préfixe global `api` et le versioning d'URI ne s'appliquent qu'au routeur NestJS, et le handler est monté avant lui. Le client web utilise le même `basePath`. Voir O9.                             |
+| D5  | Pas de plugin `organization`.                                                              | Il modélise des espaces à plusieurs membres avec invitations ; le sujet décrit un compte partenaire unique. Refusé le 2026-09-01.                                                                      |
+| D6  | Pas de `cookieCache`.                                                                      | §11 — un cache garde un compte banni et un rôle périmé vivants jusqu'à son expiration. Ce lot existe pour bannir et promouvoir.                                                                        |
+| D7  | Clés primaires `uuid` avec défaut `uuidv7()`, comme toutes les tables.                     | `generateId: false` laisse la base générer. Sans ça les identifiants d'auth seraient des chaînes base62 et les FK métier des colonnes `text`.                                                          |
+| D8  | La bibliothèque `@thallesp/nestjs-better-auth` n'est pas utilisée.                         | §7.1 — elle déclare `@nestjs/common@^11.1.6` en peer non optionnelle, ce dépôt est en NestJS 12.                                                                                                       |
+| D9  | Longueur minimale de mot de passe : 12 caractères.                                         | Recommandation ANSSI-PG-078 pour un compte sans second facteur. La valeur par défaut de la bibliothèque est 8.                                                                                         |
+| D10 | Limitation de débit activée, stockée en base.                                              | Les routes d'authentification sont la surface brute-forçable de ce lot. Le stockage mémoire perd son compteur à chaque redémarrage.                                                                    |
+| D11 | **Aucun controller NestJS d'authentification.**                                            | §5.2 — le client Better Auth du frontend appelle `/auth/*` directement. Un controller qui les réexpose est une seconde copie du contrat.                                                               |
+| D12 | Colonnes en `snake_case`, mapping **calculé**, jamais recopié.                             | §4.2 — le mapping et la stratégie de nommage partagent une seule implémentation, donc ils ne peuvent pas diverger.                                                                                     |
+| D13 | `NODE_ENV` est chargé **avant** le premier import de la bibliothèque.                      | §7.4 — elle le lit une seule fois, au chargement de son module, et cette lecture décide des cookies `Secure` et du repli d'adresse IP.                                                                 |
+| D14 | Limitation de débit et contrôle d'origine **épinglés**, jamais déduits de l'environnement. | §7.4 — les deux défauts de la bibliothèque se calculent depuis `NODE_ENV`. Un contrôle de sécurité qui s'éteint sur un nom d'environnement n'en est pas un.                                            |
+| D15 | Isolation des tests par TRUNCATE, suite en série.                                          | §12 — Better Auth écrit par son propre pool : un rollback de transaction TypeORM ne verrait rien de ses écritures et ne les annulerait pas.                                                            |
+| D16 | `trust proxy` fixé aux plages privées, jamais à un nombre de sauts.                        | §7.2 — l'artefact place Traefik devant le backend, donc l'adresse du proxy est privée. Un nombre de sauts croit quiconque ouvre la connexion : mesuré, il rend au client son propre `X-Forwarded-For`. |
 
 ## 3. Pourquoi le schéma est à nous
 
@@ -160,7 +161,7 @@ Les identifiants sont bien des UUIDv7 : un compte créé par inscription reçoit
 
 ### 5.1 Routes servies par Better Auth
 
-47 routes sous `/auth`. Celles qui portent ce lot :
+50 routes sous `/auth`. Celles qui portent ce lot :
 
 | Méthode | Route                    | Rôle requis | Effet                                                       |
 | ------- | ------------------------ | ----------- | ----------------------------------------------------------- |
@@ -189,7 +190,7 @@ Deux contraintes rendent d'ailleurs la duplication coûteuse :
   celles qu'il ne connaît pas — `GET /auth/inexistant` renvoie `404` sans passer
   la main au routeur NestJS. Une route NestJS d'authentification devrait donc
   vivre ailleurs que sous `/auth`, avec un nommage qui ment.
-- Le contrat des 47 routes est déjà publié : le plugin `openAPI` en produit le
+- Le contrat des 50 routes est déjà publié : le plugin `openAPI` en produit le
   schéma, que `swagger.ts` fusionne dans le document NestJS (§7.5).
 
 Ce que NestJS apporte, c'est la **garde**, pas la route : le jour où une route
@@ -423,6 +424,18 @@ Trois choses rendent ce montage correct, vérifiées et non supposées :
    son routeur pendant `app.listen()`. C'est aussi pourquoi `setGlobalPrefix` ne
    déplace pas `/auth` : il ne réécrit que les routes du routeur NestJS.
 
+**L'adresse du client est résolue, jamais crue.** Le handler se construit à
+partir des seuls en-têtes — il ne voit pas la socket — donc il lit
+`x-forwarded-for`, et la limitation de débit se clé sur le résultat.
+`resolveClientAddress` remplace cet en-tête par l'adresse qu'Express a résolue.
+Il le **remplace** et ne l'ajoute pas : une chaîne à deux valeurs ferait échouer
+la résolution de la bibliothèque sur toutes les requêtes, pas seulement sur les
+usurpées. Express n'accorde sa confiance qu'aux plages privées (D16), ce qui
+désigne Traefik dans l'artefact et exclut le loopback, si bien qu'un appelant
+qui joint ce processus directement ne peut pas réclamer une adresse. Sans ce
+contrôle, la limitation se contourne en faisant tourner l'en-tête — mesuré avant
+correctif : six échecs de connexion, aucun `429`.
+
 ### 7.3 Ce que les routes `/auth` ne traversent pas
 
 | Élément global               | Traverse `/auth` ? | Conséquence                                                              |
@@ -432,7 +445,7 @@ Trois choses rendent ce montage correct, vérifiées et non supposées :
 | `LoggingInterceptor`         | **non**            | Aucune ligne de log sur les routes d'authentification.                   |
 | `ValidationPipe`             | **non**            | Better Auth valide avec ses propres schémas Zod.                         |
 | `ClassSerializerInterceptor` | **non**            | Les réponses sont celles de la bibliothèque, pas des instances d'entity. |
-| Document OpenAPI de NestJS   | **non**            | Les 47 routes sont absentes de `/docs` sans traitement (§7.5).           |
+| Document OpenAPI de NestJS   | **non**            | Les 50 routes sont absentes de `/docs` sans traitement (§7.5).           |
 
 L'absence de log n'est pas une régression de traçabilité : la denylist de
 redaction masque déjà les identifiants de connexion, et une route non loggée ne
@@ -497,7 +510,7 @@ Le plugin `openAPI` publie le schéma des routes d'authentification sur
 `GET /auth/open-api/generate-schema`, et `auth.api.generateOpenAPISchema()` le
 rend en mémoire. `buildOpenApiDocument()` fusionne ses `paths` et ses
 `components.schemas` dans le document NestJS au démarrage, préfixés par le
-`basePath` — 48 chemins au total, dont 45 d'authentification et `/health`.
+`basePath` — 51 chemins au total, dont 50 d'authentification et `/health`.
 
 Le rendu Scalar par défaut du plugin est désactivé : une seule page de
 documentation, celle du dépôt. Le schéma de sécurité déclaré est le cookie de
@@ -675,13 +688,13 @@ métier existe, ses routes exercent le même code et ce fichier peut partir.
 
 ### 12.3 Ce que couvre l'intégration
 
-43 tests, trois specs.
+51 tests, trois specs.
 
-| Spec                                | Ce qui est couvert                                                                                                                                                                                                                                                                                                                                                                        |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auth.integration.spec.ts`          | Inscription, longueur de mot de passe (11 refusé, 12 accepté), doublon d'adresse, rôle par défaut et non choisi par le client, réponse identique entre mot de passe faux et compte inconnu, message de bannissement, débit (`[401 ×5, 429]`), déconnexion et origine hostile. Plus le schéma : colonnes `snake_case`, PK v7, mot de passe absent de `user`, adresse et agent enregistrés. |
-| `session.guard.integration.spec.ts` | 401 sans session et sur un jeton mort, 200 avec, 401 après déconnexion, route publique, 403 pour un salarié et pour un partenaire, 200 pour un administrateur, promotion **et** rétrogradation prises en compte à la requête suivante, bannissement hors bande et échéance dépassée.                                                                                                      |
-| `user.repo.integration.spec.ts`     | Les quatre méthodes du repo, l'unicité de l'adresse levée par la base, et la cascade qui ferme les sessions d'un compte supprimé.                                                                                                                                                                                                                                                         |
+| Spec                                | Ce qui est couvert                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auth.integration.spec.ts`          | Inscription, longueur de mot de passe (11 refusé, 12 accepté), doublon d'adresse, rôle par défaut et non choisi par le client, réponse identique entre mot de passe faux et compte inconnu, message de bannissement, débit (`[401 ×5, 429]`), déconnexion et origine hostile. Plus les routes d'administration (liste, changement de rôle, bannissement) refusées à un salarié et acceptées d'un administrateur, et le schéma : colonnes `snake_case`, PK v7, mot de passe absent de `user`, adresse et agent enregistrés. |
+| `session.guard.integration.spec.ts` | 401 sans session et sur un jeton mort, 200 avec, 401 après déconnexion, route publique, 403 pour un salarié et pour un partenaire, 200 pour un administrateur, promotion **et** rétrogradation prises en compte à la requête suivante, bannissement hors bande et échéance dépassée.                                                                                                                                                                                                                                       |
+| `user.repo.integration.spec.ts`     | Les quatre méthodes du repo, l'unicité de l'adresse levée par la base, et la cascade qui ferme les sessions d'un compte supprimé.                                                                                                                                                                                                                                                                                                                                                                                          |
 
 Les trois critères d'acceptation de l'issue EPI-45 sont couverts par une
 assertion chacun, dans la première spec.
