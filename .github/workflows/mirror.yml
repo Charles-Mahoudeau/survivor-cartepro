@@ -5,6 +5,7 @@ on:
     branches: [main]
 
 env:
+  REPOSITORY: EpitechPGE3-2026/G-SVR-500-NAN-5-1-survivor-3
   REPOSITORY_URL: git@github.com:EpitechPGE3-2026/G-SVR-500-NAN-5-1-survivor-3.git
 
 concurrency:
@@ -13,11 +14,12 @@ concurrency:
 
 jobs:
   mirror:
+    if: github.repository != env.REPOSITORY
     name: Mirror repository to Epitech GitHub
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Mirror repository
