@@ -4,6 +4,6 @@ import { PartnerCategoriesModule } from '@/modules/partners/categories/partner-c
 import { PartnersCoreModule } from '@/modules/partners/core';
 
 @Module({
-  imports: [PartnersCoreModule, PartnerCategoriesModule, PartnerReviewsModule],
+  imports: [PartnerCategoriesModule, PartnerReviewsModule, PartnersCoreModule],
 })
 export class PartnersModule {}
