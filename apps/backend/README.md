@@ -1,6 +1,6 @@
-# @cartepro/backend
+# @tickettout/backend
 
-API NestJS du dispositif CartePro.
+API NestJS du dispositif Ticket Tout.
 
 ## Stack
 
@@ -25,7 +25,7 @@ bun run dev
 Pour ne lancer que cette application, la base tournant déjà :
 
 ```bash
-bun run --filter '@cartepro/backend' dev
+bun run --filter '@tickettout/backend' dev
 ```
 
 - API : http://localhost:3000

@@ -5,7 +5,7 @@ Instructions pour les agents qui travaillent sur ce dépôt. Elles complètent l
 
 ## Projet
 
-**CartePro** — dispositif d'avantages salariés dématérialisés, trois espaces
+**Ticket Tout** — dispositif d'avantages salariés dématérialisés, trois espaces
 (salarié, partenaire, administration). Projet Epitech tek3, cahier des charges
 `JEB/DNI/2026-002`.
 
@@ -64,7 +64,7 @@ Points d'entrée, par situation :
 | `bun run format:check`                                   | Gate Prettier                            |
 | `bun run test`                                           | Tests unitaires                          |
 | `bun run build`                                          | Compilation                              |
-| `bun run --filter '@cartepro/backend' db:generate <Nom>` | Génère une migration depuis les entities |
+| `bun run --filter '@tickettout/backend' db:generate <Nom>` | Génère une migration depuis les entities |
 
 La CI rejoue les cinq mêmes gates sur chaque push d'une pull request
 (`.github/workflows/ci.yml`). Ne jamais annoncer un gate vert sans en avoir lu
