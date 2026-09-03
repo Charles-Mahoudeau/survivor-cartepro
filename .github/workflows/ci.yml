@@ -5,6 +5,10 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+    # `ready_for_review` ne fait pas partie des types par défaut : sans lui, une
+    # PR ouverte en brouillon puis passée prête ne déclencherait jamais rien,
+    # puisque les jobs se sautent tant qu'elle est en brouillon.
+    types: [opened, synchronize, reopened, ready_for_review]
 
 # A new push cancels the run still going for the commit it replaced. Every
 # task runs to completion so one review shows every failure.
