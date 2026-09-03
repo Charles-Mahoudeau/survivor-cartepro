@@ -12,6 +12,8 @@ async function bootstrap() {
 
   await configureApp(app);
 
+  app.enableShutdownHooks();
+
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') ?? 3000;
   const host = configService.get<string>('HOST') ?? '0.0.0.0';

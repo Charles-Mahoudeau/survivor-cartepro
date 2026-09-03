@@ -1,5 +1,6 @@
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import type { INestApplication } from '@nestjs/common';
+import type { NextFunction, Request, Response } from 'express';
 import { Reflector } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
@@ -9,6 +10,12 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { auth, trustedOrigins } from './config/auth/auth';
 import { AUTH_BASE_PATH } from './config/auth/auth.constants';
 import { buildOpenApiDocument } from './swagger';
+
+/**
+ * When a reverse proxy fronts this API, set `trust proxy` on the Express
+ * instance for it — `resolveClientAddress` then resolves the real client
+ * address instead of the proxy's.
+ */
 
 /**
  * Everything an application instance needs beyond its modules. The integration
@@ -37,7 +44,7 @@ export async function configureApp(
 
   app.use(helmet({ contentSecurityPolicy: false }));
   app.enableCors({ origin: trustedOrigins(), credentials: true });
-  app.use(AUTH_BASE_PATH, toNodeHandler(auth));
+  app.use(AUTH_BASE_PATH, resolveClientAddress, toNodeHandler(auth));
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -71,4 +78,30 @@ export async function configureApp(
       authentication: { preferredSecurityScheme: 'cookie' },
     }),
   );
+}
+
+/**
+ * Replaces `x-forwarded-for` with the address Express resolved.
+ *
+ * The auth handler is built from headers alone — it never sees the socket — so
+ * it reads that header, and with no trusted-proxy list it believes whatever a
+ * single-value one says. Rate limiting keys on the result, so a client rotating
+ * the header gets a fresh bucket per request and the sign-in limit never fires.
+ *
+ * `req.ip` is the socket address while Express trusts no proxy, and the real
+ * client address once `trust proxy` is configured for the reverse proxy in
+ * front. Overwriting rather than appending is the point: whatever the client
+ * sent is discarded.
+ */
+function resolveClientAddress(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+): void {
+  if (req.ip) {
+    req.headers['x-forwarded-for'] = req.ip;
+  } else {
+    delete req.headers['x-forwarded-for'];
+  }
+  next();
 }

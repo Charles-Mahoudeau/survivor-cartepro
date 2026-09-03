@@ -185,6 +185,20 @@ describe('rate limit', () => {
     expect(statuses).toEqual([401, 401, 401, 401, 401, 429]);
   });
 
+  it('cannot be escaped by rotating X-Forwarded-For', async () => {
+    await signUp(context.app, 'usurpe@cartepro.test');
+
+    const statuses: number[] = [];
+    for (let attempt = 1; attempt <= 6; attempt++) {
+      const response = await post('/sign-in/email')
+        .set('X-Forwarded-For', `203.0.113.${attempt}`)
+        .send({ email: 'usurpe@cartepro.test', password: 'mauvaismotdepasse' });
+      statuses.push(response.status);
+    }
+
+    expect(statuses).toEqual([401, 401, 401, 401, 401, 429]);
+  });
+
   it('counts a correct password too, so a valid guess does not reset it', async () => {
     await signUp(context.app, 'melange@cartepro.test');
 

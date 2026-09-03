@@ -1,7 +1,26 @@
-import { Global, Module } from '@nestjs/common';
+import {
+  Global,
+  Injectable,
+  Module,
+  type OnApplicationShutdown,
+} from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { SessionGuard } from '@/common/guards/session.guard';
+import { authOptions } from './auth';
+
+/**
+ * Closes the pool Better Auth built at module scope.
+ *
+ * Nothing else in the Nest lifecycle knows about it: TypeORM's own pool is
+ * released by its module, this one would stay open until the process dies.
+ */
+@Injectable()
+export class AuthConnection implements OnApplicationShutdown {
+  async onApplicationShutdown(): Promise<void> {
+    await authOptions.database.end();
+  }
+}
 
 /**
  * Turns authentication on for the whole application.
@@ -19,6 +38,7 @@ import { SessionGuard } from '@/common/guards/session.guard';
 @Global()
 @Module({
   providers: [
+    AuthConnection,
     { provide: APP_GUARD, useClass: SessionGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
   ],

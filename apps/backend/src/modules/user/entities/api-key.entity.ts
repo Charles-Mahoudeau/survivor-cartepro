@@ -16,6 +16,10 @@ import {
  * a person. Constraining it to `user.id` would have to be undone later.
  *
  * The rate limit columns here are per key, unrelated to the `rate_limit` table.
+ *
+ * `key`, `config_id` and `reference_id` are indexed because the plugin declares
+ * them so. `db:generate` would never propose them on its own: it only adds an
+ * index alongside a column it is creating.
  */
 @Entity('api_key')
 export class ApiKey {
@@ -23,13 +27,15 @@ export class ApiKey {
   id: string;
 
   /** Which key configuration this row follows. One config, named, by default. */
+  @Index()
   @Column('text', { default: 'default' })
   configId: string;
 
   @Column('text', { nullable: true })
   name: string | null;
 
-  /** The hashed key. Never served back after creation. */
+  /** The hashed key, looked up on every authenticated third-party request. */
+  @Index()
   @Column('text')
   key: string;
 

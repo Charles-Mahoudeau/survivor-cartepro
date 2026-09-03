@@ -3,7 +3,6 @@ import { Test } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
 import { AppModule } from '@/app.module';
 import { configureApp } from '@/bootstrap';
-import { authOptions } from '@/config/auth/auth';
 import { ProbeController } from './probe.controller';
 import { truncateAll } from './db/truncate';
 
@@ -39,11 +38,10 @@ export async function resetDatabase({ dataSource }: TestApp): Promise<void> {
 }
 
 /**
- * Closes both pools. `app.close()` releases TypeORM's; Better Auth holds a
- * second one no part of the Nest lifecycle knows about, and left open it hangs
- * Jest with no failure to point at.
+ * Closes both pools. `app.close()` runs the shutdown hooks, and `AuthConnection`
+ * is the one that ends the pool Better Auth built — ending it here as well
+ * would be a second `end()` on the same pool, which `pg` rejects.
  */
 export async function closeTestApp({ app }: TestApp): Promise<void> {
   await app.close();
-  await authOptions.database.end();
 }

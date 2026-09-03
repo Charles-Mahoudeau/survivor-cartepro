@@ -21,8 +21,12 @@ export class UserRepo {
     return this.users.findOne({ where: { id } });
   }
 
+  /**
+   * Lowercased first: Better Auth stores every address that way, and the column
+   * is plain `text`. Looking one up as it was typed finds nothing.
+   */
   findByEmail(email: string): Promise<User | null> {
-    return this.users.findOne({ where: { email } });
+    return this.users.findOne({ where: { email: email.toLowerCase() } });
   }
 
   /**
