@@ -11,7 +11,7 @@ import { DefaultNamingStrategy, type NamingStrategyInterface } from 'typeorm';
  * `a_c`, which is what makes an acronym like `SIRETNumber` land on
  * `siret_number` rather than `s_i_r_e_t_number`.
  */
-function snakeCase(str: string): string {
+export function snakeCase(str: string): string {
   return str
     .replaceAll(/([A-Z])([A-Z])([a-z])/g, '$1_$2$3')
     .replaceAll(/([a-z0-9])([A-Z])/g, '$1_$2')

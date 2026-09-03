@@ -57,13 +57,13 @@ Points d'entrée, par situation :
 
 ## Commandes
 
-| Commande                                                 | Effet                                    |
-| -------------------------------------------------------- | ---------------------------------------- |
-| `bun run dev`                                            | Base + toutes les applications en watch  |
-| `bun run typecheck` / `lint:check`                       | Gates de types et de lint                |
-| `bun run format:check`                                   | Gate Prettier                            |
-| `bun run test`                                           | Tests unitaires                          |
-| `bun run build`                                          | Compilation                              |
+| Commande                                                   | Effet                                    |
+| ---------------------------------------------------------- | ---------------------------------------- |
+| `bun run dev`                                              | Base + toutes les applications en watch  |
+| `bun run typecheck` / `lint:check`                         | Gates de types et de lint                |
+| `bun run format:check`                                     | Gate Prettier                            |
+| `bun run test`                                             | Tests unitaires                          |
+| `bun run build`                                            | Compilation                              |
 | `bun run --filter '@tickettout/backend' db:generate <Nom>` | Génère une migration depuis les entities |
 
 La CI rejoue les cinq mêmes gates sur chaque push d'une pull request

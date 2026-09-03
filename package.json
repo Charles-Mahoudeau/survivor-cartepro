@@ -18,6 +18,7 @@
     "format:check": "prettier --check \"**/*.{ts,js,mjs,json,md,yml}\"",
     "test": "turbo run test",
     "test:unit": "turbo run test:unit",
+    "test:integration": "turbo run test:integration",
     "db:up": "docker compose up postgres -d",
     "db:down": "docker compose down postgres",
     "db:nuke": "docker compose down postgres -v",

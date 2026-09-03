@@ -42,5 +42,8 @@ result-*
 !.vscode/settings.json
 *.swp
 
+# Testcontainers connection, written by the integration globalSetup
+.testcontainer.json
+
 # Agent working notes
 .context

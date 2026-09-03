@@ -37,10 +37,10 @@ PostgreSQL, l'API sur le port 3001 et l'interface sur le port 3000.
 L'écran de connexion propose trois raccourcis, un par profil. Ils ouvrent
 directement l'espace correspondant, sans mot de passe à saisir.
 
-| Profil         | Identité affichée | Adresse électronique          |
-| -------------- | ----------------- | ----------------------------- |
-| Salariée       | Marie Dupont      | marie.dupont@entreprise.fr    |
-| Partenaire     | KostumParty       | contact@kostumparty.fr        |
+| Profil         | Identité affichée | Adresse électronique           |
+| -------------- | ----------------- | ------------------------------ |
+| Salariée       | Marie Dupont      | marie.dupont@entreprise.fr     |
+| Partenaire     | KostumParty       | contact@kostumparty.fr         |
 | Administration | Jean Leclerc      | jean.leclerc@ministere.gouv.fr |
 
 Le champ d'adresse et le champ de mot de passe restent utilisables. Ils

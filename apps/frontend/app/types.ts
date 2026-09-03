@@ -1,22 +1,18 @@
-export type Role = "employee" | "partner" | "admin";
+export type Role = 'employee' | 'partner' | 'admin';
 
 export type View =
-  | "login"
-  | "employee-dashboard"
-  | "employee-pay"
-  | "employee-history"
-  | "employee-catalog"
-  | "partner-dashboard"
-  | "partner-profile"
-  | "admin-dashboard"
-  | "admin-partner-detail";
+  | 'login'
+  | 'employee-dashboard'
+  | 'employee-pay'
+  | 'employee-history'
+  | 'employee-catalog'
+  | 'partner-dashboard'
+  | 'partner-profile'
+  | 'admin-dashboard'
+  | 'admin-partner-detail';
 
 export type PartnerStatus =
-  | "pending"
-  | "active"
-  | "suspended"
-  | "rejected"
-  | "closed";
+  'pending' | 'active' | 'suspended' | 'rejected' | 'closed';
 
 export interface Decision {
   id: string;
@@ -42,7 +38,7 @@ export interface Partner {
 
 export interface WalletEntry {
   id: string;
-  direction: "credit" | "debit";
+  direction: 'credit' | 'debit';
   amount_cents: number;
   kind: string;
   partner_name?: string;
