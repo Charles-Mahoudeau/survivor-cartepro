@@ -12,8 +12,8 @@ import {
 import type { Relation } from 'typeorm';
 import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-generated-uuid-v7.column';
 import { Employer } from '@/modules/employers/entities/employer.entity';
-import { PaymentToken } from '@/modules/payments/entities/payment-token.entity';
-import { Payment } from '@/modules/payments/entities/payment.entity';
+import { PaymentToken } from '@/modules/payments/core/entities/payment-token.entity';
+import { Payment } from '@/modules/payments/core/entities/payment.entity';
 import { User } from '@/modules/user/entities/user.entity';
 import { WalletEntry } from '@/modules/wallets/entities/wallet-entry.entity';
 import { WalletStatus } from '@/modules/wallets/enums/wallet-status.enum';

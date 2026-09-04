@@ -9,8 +9,8 @@ import {
 } from 'typeorm';
 import type { Relation } from 'typeorm';
 import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-generated-uuid-v7.column';
-import { Payment } from '@/modules/payments/entities/payment.entity';
-import { PaymentTokenStatus } from '@/modules/payments/enums/payment-token-status.enum';
+import { Payment } from '@/modules/payments/core/entities/payment.entity';
+import { PaymentTokenStatus } from '@/modules/payments/core/enums/payment-token-status.enum';
 import { Wallet } from '@/modules/wallets/entities/wallet.entity';
 
 @Entity()

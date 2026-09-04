@@ -15,7 +15,7 @@ import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-genera
 import { User } from '@/modules/user/entities/user.entity';
 import { PartnerCategory } from '@/modules/partners/categories/entities/partner-category.entity';
 import { PartnerReview } from '@/modules/partners/reviews/entities/partner-review.entity';
-import { Payment } from '@/modules/payments/entities/payment.entity';
+import { Payment } from '@/modules/payments/core/entities/payment.entity';
 import { PartnerStatus } from '@/modules/partners/core/enums/partner-status.enum';
 
 @Entity()

@@ -10,7 +10,7 @@ import {
 import type { Relation } from 'typeorm';
 import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-generated-uuid-v7.column';
 import { Allocation } from '@/modules/allocations/entities/allocation.entity';
-import { Payment } from '@/modules/payments/entities/payment.entity';
+import { Payment } from '@/modules/payments/core/entities/payment.entity';
 import { Wallet } from '@/modules/wallets/entities/wallet.entity';
 import { WalletEntryDirection } from '@/modules/wallets/enums/wallet-entry-direction.enum';
 import { WalletEntryKind } from '@/modules/wallets/enums/wallet-entry-kind.enum';
