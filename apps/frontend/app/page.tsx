@@ -14,6 +14,7 @@ import type {
 
 import { BlocMarque } from "@/components/composites/brand-block";
 import { Card } from "@/components/composites/card";
+import { PiedDePage } from "@/components/composites/pied-de-page";
 import { BandeauSimulation } from "@/components/composites/simulation-banner";
 
 /** Le partenaire connecté sur le compte de démonstration. */
@@ -339,11 +340,7 @@ function LoginPage({ onLogin }: { onLogin: (role: Role) => void }) {
         </div>
       </main>
 
-      <footer className="px-6 py-4 border-t border-[color:var(--border)]">
-        <p className="font-display text-xs text-[color:var(--muted-foreground)] text-center">
-          Ministère du Job et Bonheur · JEB/DNI/2026-002 · Données de démonstration
-        </p>
-      </footer>
+      <PiedDePage />
     </div>
   );
 }
@@ -1181,6 +1178,10 @@ function AppShell({
           {children}
         </div>
       </main>
+
+      <div className="md:pl-[240px] pb-[72px] md:pb-0">
+        <PiedDePage />
+      </div>
     </div>
   );
 }

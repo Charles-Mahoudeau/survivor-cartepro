@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 
 import { ROLES } from '@/lib/auth/constants';
+import { PiedDePage } from '@/components/composites/pied-de-page';
 import { RoleGate } from '@/lib/auth/role-gate';
 
 /**
@@ -28,6 +29,10 @@ export default function Layout({ children, sidebar }: LayoutProps<'/me'>) {
           </Suspense>
         </div>
       </main>
+
+      <div className="pb-[72px] md:pb-0 md:pl-[240px]">
+        <PiedDePage />
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { BlocMarque } from "@/components/composites/brand-block";
 import { Card } from "@/components/composites/card";
 import { SignOutButton } from "@/components/composites/sign-out.client";
+import { PiedDePage } from "@/components/composites/pied-de-page";
 import { BandeauSimulation } from "@/components/composites/simulation-banner";
 import type { CurrentUser } from "@/lib/auth/session";
 
@@ -44,6 +45,8 @@ export function EspacePlaceholder({
           </dl>
         </Card>
       </main>
+
+      <PiedDePage />
     </>
   );
 }

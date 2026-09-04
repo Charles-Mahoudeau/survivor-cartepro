@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { BlocMarque } from "./brand-block";
+import { PiedDePage } from "./pied-de-page";
 import { BandeauSimulation } from "./simulation-banner";
 
 export function AuthShell({
@@ -32,6 +33,8 @@ export function AuthShell({
           {children}
         </div>
       </main>
+
+      <PiedDePage />
     </>
   );
 }
