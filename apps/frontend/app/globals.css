@@ -7,8 +7,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-spectral), Georgia, serif;
-  --font-heading: var(--font-marianne), system-ui, sans-serif;
+  --font-sans: Spectral, Georgia, serif;
+  --font-heading: Marianne, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -149,7 +149,7 @@
   body {
     @apply bg-background text-foreground font-sans;
   }
-  html {
+  html body {
     @apply font-sans;
   }
   h1,
@@ -162,15 +162,15 @@
   }
 }
 @theme inline {
-  --font-serif: var(--font-spectral), Georgia, serif;
-  --font-display: var(--font-marianne), system-ui, sans-serif;
+  --font-serif: Spectral, Georgia, serif;
+  --font-display: Marianne, system-ui, sans-serif;
 }
 
 /* Compatibilité avec la maquette Ticket Tout : elle nomme les rôles
    typographiques `font-display` et `font-mono-data`, et porte les statuts
    par des classes plutôt que par des utilitaires. */
 .font-display {
-  font-family: var(--font-marianne), system-ui, sans-serif;
+  font-family: Marianne, system-ui, sans-serif;
 }
 
 .font-mono-data {
@@ -247,4 +247,43 @@
 .badge-pending {
   background: var(--warning-light);
   color: var(--warning);
+}
+
+/* Direction artistique posée sur le DSFR : les primitives de couleur du DSFR
+   prennent les valeurs des jetons ci-dessus. Tout ce qui n'a pas de jeton ici
+   garde la valeur de la bibliothèque. Thème clair uniquement. */
+:root:not([data-fr-theme='dark']) {
+  --blue-france-sun-113-625: var(--primary);
+  --blue-france-sun-113-625-hover: var(--primary-light);
+  --blue-france-sun-113-625-active: var(--primary-dark);
+  --blue-france-main-525: var(--primary-light);
+  --blue-france-975-75: var(--secondary);
+  --blue-france-975-75-hover: #dfe5f0;
+  --blue-france-975-75-active: #d1d9e8;
+  --blue-france-950-100: var(--secondary);
+  --blue-france-950-100-hover: #dfe5f0;
+  --blue-france-950-100-active: #d1d9e8;
+  --blue-france-925-125: #e3e8f2;
+  --blue-france-850-200: #c5cfe3;
+
+  --grey-1000-50: var(--card);
+  --grey-1000-50-hover: var(--muted);
+  --grey-1000-50-active: #e6e6e3;
+  --grey-975-75: var(--background);
+  --grey-975-75-hover: #ebebe8;
+  --grey-975-75-active: #e1e1de;
+  --grey-950-100: var(--muted);
+  --grey-950-100-hover: #e3e3e0;
+  --grey-950-100-active: #d6d6d3;
+  --grey-925-125: #e5e9f0;
+  --grey-900-175: var(--border);
+  --grey-200-850: var(--foreground);
+  --grey-200-850-hover: #4a4a5e;
+  --grey-200-850-active: #5c5c72;
+  --grey-425-625: var(--muted-foreground);
+  --grey-625-425: var(--muted-foreground);
+
+  --error-425-625: var(--destructive);
+  --error-425-625-hover: #e05a5a;
+  --error-425-625-active: #e77474;
 }
