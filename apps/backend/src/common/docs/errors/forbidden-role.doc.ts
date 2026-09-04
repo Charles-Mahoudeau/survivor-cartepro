@@ -1,7 +1,7 @@
 import { ApiResponse } from '@nestjs/swagger';
 import { ERROR_CODES } from '@/common/constants/error-codes.constant';
 
-/** Reused by every route restricted to a role — the code is the guard's, not the wallet's. */
+/** Raised by `RolesGuard` on every route carrying `@Roles(...)`. */
 export const ForbiddenRoleDoc = () => {
   return ApiResponse({
     status: 403,
