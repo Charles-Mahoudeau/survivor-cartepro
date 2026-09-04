@@ -1,5 +1,8 @@
+import { BlocMarque } from "@/components/composites/brand-block";
+import { Card } from "@/components/composites/card";
+import { SignOutButton } from "@/components/composites/sign-out.client";
+import { BandeauSimulation } from "@/components/composites/simulation-banner";
 import type { CurrentUser } from "@/lib/auth/session";
-import { SignOutButton } from "./sign-out.client";
 
 /**
  * Placeholder for the screens of the frontend specification. It exists so the
@@ -13,24 +16,38 @@ export function EspacePlaceholder({
   user: CurrentUser;
 }) {
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-12">
-      <div className="flex items-baseline justify-between gap-4">
-        <h1 className="font-display text-2xl font-bold">{titre}</h1>
+    <>
+      <header className="flex items-center justify-between gap-4 border-b border-[color:var(--border)] bg-[color:var(--card)] px-6 py-4">
+        <BlocMarque compact />
         <SignOutButton />
-      </div>
+      </header>
+      <BandeauSimulation />
 
-      <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 border border-input p-4 text-sm">
-        <dt className="font-medium">Compte</dt>
-        <dd>{user.name}</dd>
-        <dt className="font-medium">Adresse</dt>
-        <dd>{user.email}</dd>
-        <dt className="font-medium">Rôle</dt>
-        <dd>{user.role}</dd>
-      </dl>
+      <main className="mx-auto w-full max-w-[640px] flex-1 px-4 py-10">
+        <h1 className="mb-2 font-display text-2xl font-semibold text-[color:var(--foreground)]">
+          {titre}
+        </h1>
+        <p className="mb-6 font-serif text-sm text-[color:var(--muted-foreground)]">
+          Session ouverte. Les écrans de cet espace restent à construire.
+        </p>
 
-      <p className="text-sm text-muted-foreground">
-        Dispositif de simulation, sans valeur monétaire réelle.
-      </p>
-    </main>
+        <Card className="p-6">
+          <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3">
+            <dt className="font-display text-xs font-medium uppercase tracking-wider text-[color:var(--muted-foreground)]">
+              Compte
+            </dt>
+            <dd className="font-serif text-sm">{user.name}</dd>
+            <dt className="font-display text-xs font-medium uppercase tracking-wider text-[color:var(--muted-foreground)]">
+              Adresse
+            </dt>
+            <dd className="font-mono-data text-sm">{user.email}</dd>
+            <dt className="font-display text-xs font-medium uppercase tracking-wider text-[color:var(--muted-foreground)]">
+              Rôle
+            </dt>
+            <dd className="font-serif text-sm">{user.role}</dd>
+          </dl>
+        </Card>
+      </main>
+    </>
   );
 }

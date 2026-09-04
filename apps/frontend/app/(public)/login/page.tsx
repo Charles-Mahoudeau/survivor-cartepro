@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 
+import { AuthShell } from "@/components/composites/auth-shell";
 import { LoginForm } from "./login-form.client";
 
 export const metadata: Metadata = {
@@ -14,17 +14,13 @@ export const metadata: Metadata = {
  */
 export default function LoginPage() {
   return (
-    <main className="mx-auto flex w-full max-w-sm flex-col gap-6 px-6 py-16">
-      <h1 className="font-display text-2xl font-bold">Connexion</h1>
+    <AuthShell
+      titre="Connexion à Ticket Tout"
+      sousTitre="Accédez à votre espace personnel selon votre profil."
+    >
       <Suspense fallback={null}>
         <LoginForm />
       </Suspense>
-      <p className="text-sm text-muted-foreground">
-        Pas encore de compte ?{" "}
-        <Link href="/signup" className="underline">
-          Créer un compte
-        </Link>
-      </p>
-    </main>
+    </AuthShell>
   );
 }

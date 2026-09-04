@@ -1,8 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
+import {
+  AlerteAuth,
+  BoutonAuth,
+  ChampAuth,
+} from "@/components/composites/auth-field";
+import { Card } from "@/components/composites/card";
 import { authClient } from "@/lib/auth/client";
 import { MIN_PASSWORD_LENGTH } from "@/lib/auth/constants";
 import {
@@ -17,6 +24,9 @@ export function SignUpForm() {
   const [pending, startTransition] = useTransition();
   const [failure, setFailure] = useState<AuthErrorCode | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // React resets the form once the action settles; only the password should go.
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
 
   async function submit(formData: FormData) {
     setFailure(null);
@@ -46,61 +56,58 @@ export function SignUpForm() {
   const busy = submitting || pending;
 
   return (
-    <form action={submit} className="flex flex-col gap-4">
-      {failure ? (
-        <p
-          role="alert"
-          className="border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+    <>
+      <form action={submit}>
+        <Card className="mb-4 p-6">
+          <div className="space-y-4">
+            {failure ? (
+              <AlerteAuth>{AUTH_ERROR_MESSAGES[failure]}</AlerteAuth>
+            ) : null}
+
+            <ChampAuth
+              label="Nom et prénom"
+              name="name"
+              type="text"
+              autoComplete="name"
+              placeholder="Marie Dupont"
+              value={name}
+              onChange={setName}
+            />
+            <ChampAuth
+              label="Adresse e-mail"
+              name="email"
+              type="email"
+              autoComplete="email"
+              placeholder="vous@exemple.fr"
+              value={email}
+              onChange={setEmail}
+            />
+            <ChampAuth
+              label="Mot de passe"
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              placeholder="••••••••••••"
+              minLength={MIN_PASSWORD_LENGTH}
+              aide={`${MIN_PASSWORD_LENGTH} caractères minimum.`}
+            />
+
+            <BoutonAuth disabled={busy}>
+              {busy ? "Création…" : "Créer mon compte"}
+            </BoutonAuth>
+          </div>
+        </Card>
+      </form>
+
+      <p className="text-center font-serif text-sm text-[color:var(--muted-foreground)]">
+        Vous avez déjà un compte ?{" "}
+        <Link
+          href="/login"
+          className="text-[color:var(--primary)] hover:underline"
         >
-          {AUTH_ERROR_MESSAGES[failure]}
-        </p>
-      ) : null}
-
-      <label className="flex flex-col gap-1.5 text-sm">
-        <span className="font-medium">Nom et prénom</span>
-        <input
-          name="name"
-          type="text"
-          autoComplete="name"
-          required
-          className="border border-input bg-background px-3 py-2 text-base"
-        />
-      </label>
-
-      <label className="flex flex-col gap-1.5 text-sm">
-        <span className="font-medium">Adresse électronique</span>
-        <input
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-          className="border border-input bg-background px-3 py-2 text-base"
-        />
-      </label>
-
-      <label className="flex flex-col gap-1.5 text-sm">
-        <span className="font-medium">Mot de passe</span>
-        <input
-          name="password"
-          type="password"
-          autoComplete="new-password"
-          required
-          minLength={MIN_PASSWORD_LENGTH}
-          aria-describedby="password-rule"
-          className="border border-input bg-background px-3 py-2 text-base"
-        />
-        <span id="password-rule" className="text-muted-foreground">
-          {MIN_PASSWORD_LENGTH} caractères minimum.
-        </span>
-      </label>
-
-      <button
-        type="submit"
-        disabled={busy}
-        className="border border-primary px-4 py-2 text-sm font-medium text-primary disabled:opacity-60"
-      >
-        {busy ? "Création…" : "Créer mon compte"}
-      </button>
-    </form>
+          Se connecter
+        </Link>
+      </p>
+    </>
   );
 }

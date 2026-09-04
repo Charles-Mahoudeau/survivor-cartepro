@@ -23,7 +23,7 @@ export function SignOutButton() {
       type="button"
       onClick={signOut}
       disabled={pending}
-      className="border border-input px-3 py-1.5 text-sm disabled:opacity-60"
+      className="shrink-0 rounded border border-[color:var(--border)] px-3 py-1.5 font-display text-xs font-medium text-[color:var(--muted-foreground)] transition-colors hover:border-[color:var(--primary)] hover:text-[color:var(--primary)] disabled:opacity-50"
     >
       {pending ? "Déconnexion…" : "Se déconnecter"}
     </button>

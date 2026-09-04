@@ -12,6 +12,10 @@ import type {
   WalletEntry,
 } from "./types";
 
+import { BlocMarque } from "@/components/composites/brand-block";
+import { Card } from "@/components/composites/card";
+import { BandeauSimulation } from "@/components/composites/simulation-banner";
+
 /** Le partenaire connecté sur le compte de démonstration. */
 const DEMO_PARTNER = MOCK_PARTNERS[1];
 
@@ -29,34 +33,6 @@ function Montant({ cents, className = "" }: { cents: number; className?: string 
  * septembre 2026. Elle est présentée en bandeau permanent plutôt qu'accolée à
  * chaque montant, afin de rester lisible sans alourdir les chiffres.
  */
-function BandeauSimulation() {
-  return (
-    <div
-      role="status"
-      className="flex items-start gap-3 border-b border-[color:var(--warning-border)] bg-[color:var(--warning-light)] px-4 py-2.5 md:px-6"
-    >
-      <svg
-        viewBox="0 0 24 24"
-        className="mt-0.5 w-4 h-4 shrink-0 text-[color:var(--warning)]"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        aria-hidden="true"
-      >
-        <path d="M10.3 3.9 2.5 18a1.5 1.5 0 0 0 1.3 2.3h16.4A1.5 1.5 0 0 0 21.5 18L13.7 3.9a1.5 1.5 0 0 0-2.6 0Z" />
-        <path d="M12 9v4.5M12 17v.5" />
-      </svg>
-      <p className="font-display text-xs leading-relaxed text-[color:var(--warning)]">
-        <span className="font-semibold">Simulation.</span>{" "}
-        <span className="font-normal">
-          Tous les montants affichés dans cette application sont fictifs. Aucune
-          somme réelle n’est détenue, transférée ni encaissée.
-        </span>
-      </p>
-    </div>
-  );
-}
-
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 }
@@ -98,34 +74,6 @@ function BadgeOfficiel() {
 }
 
 /* ─── Bloc-Marque (République Française) ─── */
-function BlocMarque({ compact = false }: { compact?: boolean }) {
-  return (
-    <div className="flex items-start gap-2.5 select-none" aria-label="République Française">
-      {/* Tricolore stripe */}
-      <div className="flex flex-col shrink-0">
-        <div className="flex h-full">
-          <div className={`${compact ? "w-1" : "w-1.5"} ${compact ? "h-7" : "h-9"} bg-[#002395]`} />
-          <div className={`${compact ? "w-1" : "w-1.5"} ${compact ? "h-7" : "h-9"} bg-white border-y border-[#E8E8E8]`} />
-          <div className={`${compact ? "w-1" : "w-1.5"} ${compact ? "h-7" : "h-9"} bg-[#ED2939]`} />
-        </div>
-      </div>
-      <div>
-        <div className={`font-display font-bold text-[color:var(--primary)] leading-tight ${compact ? "text-xs" : "text-sm"} tracking-wide uppercase`}>
-          République
-        </div>
-        <div className={`font-display font-bold text-[color:var(--primary)] leading-tight ${compact ? "text-xs" : "text-sm"} tracking-wide uppercase`}>
-          Française
-        </div>
-        {!compact && (
-          <div className="font-display text-[10px] text-[color:var(--muted-foreground)] tracking-widest uppercase mt-0.5">
-            Ticket Tout
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 /* ─── Sidebar ─── */
 function Sidebar({
   role, currentView, onNavigate, onLogout
@@ -261,14 +209,6 @@ function PageHeader({ title, subtitle, actions }: {
 }
 
 /* ─── Card ─── */
-function Card({ children, className = "", onClick }: { children: React.ReactNode; className?: string; onClick?: () => void }) {
-  return (
-    <div onClick={onClick} className={`bg-[color:var(--card)] border border-[color:var(--border)] rounded-[var(--radius)] ${className}`}>
-      {children}
-    </div>
-  );
-}
-
 /* ─── Button ─── */
 function Button({
   children, onClick, variant = "outline", size = "md", disabled = false, className = ""

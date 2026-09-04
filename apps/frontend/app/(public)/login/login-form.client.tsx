@@ -1,8 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 
+import {
+  AlerteAuth,
+  BoutonAuth,
+  ChampAuth,
+} from "@/components/composites/auth-field";
+import { Card } from "@/components/composites/card";
 import { authClient } from "@/lib/auth/client";
 import {
   AUTH_ERROR_MESSAGES,
@@ -18,6 +25,9 @@ export function LoginForm() {
   const [failure, setFailure] = useState<AuthErrorCode | null>(null);
   const [detail, setDetail] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // React resets the form once the action settles: without this the address has
+  // to be typed again after every refusal.
+  const [email, setEmail] = useState("");
 
   async function submit(formData: FormData) {
     setFailure(null);
@@ -49,45 +59,49 @@ export function LoginForm() {
   const busy = submitting || pending;
 
   return (
-    <form action={submit} className="flex flex-col gap-4">
-      {failure ? (
-        <p
-          role="alert"
-          className="border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+    <>
+      <form action={submit}>
+        <Card className="mb-4 p-6">
+          <div className="space-y-4">
+            {failure ? (
+              <AlerteAuth>
+                {detail ?? AUTH_ERROR_MESSAGES[failure]}
+              </AlerteAuth>
+            ) : null}
+
+            <ChampAuth
+              label="Adresse e-mail"
+              name="email"
+              type="email"
+              autoComplete="email"
+              placeholder="vous@exemple.fr"
+              value={email}
+              onChange={setEmail}
+            />
+            <ChampAuth
+              label="Mot de passe"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              placeholder="••••••••••••"
+            />
+
+            <BoutonAuth disabled={busy}>
+              {busy ? "Connexion…" : "Se connecter"}
+            </BoutonAuth>
+          </div>
+        </Card>
+      </form>
+
+      <p className="text-center font-serif text-sm text-[color:var(--muted-foreground)]">
+        Pas encore de compte ?{" "}
+        <Link
+          href="/signup"
+          className="text-[color:var(--primary)] hover:underline"
         >
-          {detail ?? AUTH_ERROR_MESSAGES[failure]}
-        </p>
-      ) : null}
-
-      <label className="flex flex-col gap-1.5 text-sm">
-        <span className="font-medium">Adresse électronique</span>
-        <input
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-          className="border border-input bg-background px-3 py-2 text-base"
-        />
-      </label>
-
-      <label className="flex flex-col gap-1.5 text-sm">
-        <span className="font-medium">Mot de passe</span>
-        <input
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          className="border border-input bg-background px-3 py-2 text-base"
-        />
-      </label>
-
-      <button
-        type="submit"
-        disabled={busy}
-        className="border border-primary px-4 py-2 text-sm font-medium text-primary disabled:opacity-60"
-      >
-        {busy ? "Connexion…" : "Se connecter"}
-      </button>
-    </form>
+          Créer un compte
+        </Link>
+      </p>
+    </>
   );
 }

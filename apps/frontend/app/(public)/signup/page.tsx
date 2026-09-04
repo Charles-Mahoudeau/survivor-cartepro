@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
+import { AuthShell } from "@/components/composites/auth-shell";
 import { SignUpForm } from "./signup-form.client";
 
 export const metadata: Metadata = {
@@ -13,15 +13,11 @@ export const metadata: Metadata = {
  */
 export default function SignUpPage() {
   return (
-    <main className="mx-auto flex w-full max-w-sm flex-col gap-6 px-6 py-16">
-      <h1 className="font-display text-2xl font-bold">Créer un compte</h1>
+    <AuthShell
+      titre="Créer un compte Ticket Tout"
+      sousTitre="Votre espace salarié, pour dépenser vos avantages chez les partenaires."
+    >
       <SignUpForm />
-      <p className="text-sm text-muted-foreground">
-        Vous avez déjà un compte ?{" "}
-        <Link href="/login" className="underline">
-          Se connecter
-        </Link>
-      </p>
-    </main>
+    </AuthShell>
   );
 }

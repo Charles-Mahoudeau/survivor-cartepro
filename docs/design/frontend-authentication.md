@@ -177,6 +177,11 @@ apps/frontend/
 │   ├── errors.ts                     code → message
 │   └── role-gate.tsx                 <RoleGate>
 ├── components/composites/
+│   ├── brand-block.tsx               bloc-marque, extrait du prototype
+│   ├── simulation-banner.tsx         mention de simulation, extraite
+│   ├── card.tsx                      carte, extraite
+│   ├── auth-shell.tsx                en-tête + bandeau + colonne centrée
+│   ├── auth-field.tsx                champ, bouton et alerte des formulaires
 │   ├── sign-out.client.tsx           bouton de déconnexion
 │   └── espace-placeholder.tsx        écran d'attente d'un espace
 └── app/
@@ -195,6 +200,11 @@ apps/frontend/
 Deux écarts avec §3.1 de `frontend.md`, à porter là-bas : `me/layout.tsx` et
 `admin/layout.tsx` n'y figurent pas — seul `pro/layout.tsx` est listé, pour son bandeau
 de statut. Chaque espace a besoin du sien pour porter sa garde de rôle.
+
+`brand-block`, `simulation-banner` et `card` ne sont pas nouveaux : ils étaient définis
+à l'intérieur de `app/page.tsx`, le prototype. Ils en sont **sortis**, et le prototype les
+importe désormais — sinon les écrans d'authentification auraient été une seconde forme du
+même registre visuel, à côté de la première.
 
 Les trois `page.tsx` sont des **écrans d'attente**. Les seize écrans de `frontend.md` §6
 n'existent pas encore ; sans eux la garde n'aurait rien à garder et une connexion réussie
