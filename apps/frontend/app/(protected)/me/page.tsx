@@ -1,15 +1,14 @@
-import { redirect } from "next/navigation";
+import { redirect } from 'next/navigation';
 
-import { EspacePlaceholder } from "@/components/composites/espace-placeholder";
-import { getCurrentUser } from "@/lib/auth/session";
+import { MockApp } from '@/components/mock/mock-app';
+import { getCurrentUser } from '@/lib/auth/session';
 
 export default async function Page() {
-
   const user = await getCurrentUser();
 
   if (!user) {
-    redirect("/login");
+    redirect('/login');
   }
 
-  return <EspacePlaceholder titre="Mon portefeuille" user={user} />;
+  return <MockApp role="employee" userName={user.name} />;
 }

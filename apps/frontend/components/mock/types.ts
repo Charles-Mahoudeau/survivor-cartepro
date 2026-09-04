@@ -1,7 +1,6 @@
 export type Role = 'employee' | 'partner' | 'admin';
 
 export type View =
-  | 'login'
   | 'employee-dashboard'
   | 'employee-pay'
   | 'employee-history'
