@@ -16,6 +16,7 @@ import { WalletEntry } from '@/modules/wallets/entities/wallet-entry.entity';
 import { Wallet } from '@/modules/wallets/entities/wallet.entity';
 import { PaymentToken } from '@/modules/payments/core/entities/payment-token.entity';
 import { CaptureMode } from '@/modules/payments/core/enums/capture-mode.enum';
+import { PaymentStatus } from '@/modules/payments/core/enums/payment-status.enum';
 
 @Entity()
 @Index('IDX_payment_wallet_id', ['wallet'])
@@ -44,6 +45,13 @@ export class Payment {
 
   @Column({ type: 'enum', enum: CaptureMode })
   captureMode: CaptureMode;
+
+  @Column({
+    type: 'enum',
+    enum: PaymentStatus,
+    default: PaymentStatus.VALIDATED,
+  })
+  status: PaymentStatus;
 
   @OneToMany(() => WalletEntry, (entry) => entry.payment)
   walletEntries: Relation<WalletEntry>[];
