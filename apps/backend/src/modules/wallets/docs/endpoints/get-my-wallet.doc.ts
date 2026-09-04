@@ -1,10 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
+import { ForbiddenRoleDoc } from '@/common/docs';
 import { ApiOperation } from '@nestjs/swagger';
-import {
-  ForbiddenRoleDoc,
-  WalletNotFoundDoc,
-  WalletResponseDoc,
-} from '../commons';
+import { WalletNotFoundDoc, WalletResponseDoc } from '../commons';
 
 export const GetMyWalletDoc = () => {
   return applyDecorators(
