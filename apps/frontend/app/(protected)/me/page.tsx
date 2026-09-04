@@ -1,5 +1,6 @@
+import { Button } from '@codegouvfr/react-dsfr/Button';
+import { CallOut } from '@codegouvfr/react-dsfr/CallOut';
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { Suspense } from 'react';
 
 import { Card } from '@/components/composites/card';
@@ -7,9 +8,9 @@ import { DateTexte } from '@/components/composites/date-texte';
 import { Montant } from '@/components/composites/montant';
 import { MouvementLigne } from '@/components/composites/mouvement-ligne';
 import { PageHeader } from '@/components/composites/page-header';
-import { IconMap } from '@/components/icons';
 import { ME_CONTENT } from '@/content/me';
 import { getMyWalletHook, listMyWalletEntriesHook } from '@/hooks/api';
+import { StartDsfrOnHydration } from '@/lib/dsfr';
 
 import { BalanceSkeleton, MovementsSkeleton } from './skeletons';
 
@@ -24,32 +25,36 @@ export default function Page() {
 
   return (
     <div className="page-enter">
+      <StartDsfrOnHydration />
       <PageHeader title={wallet.title} subtitle={wallet.subtitle} />
 
       <Suspense fallback={<BalanceSkeleton />}>
         <BalanceCard />
       </Suspense>
 
-      <div className="mb-6 grid grid-cols-1 gap-3">
-        <Link
-          href="/me/partners"
-          className="flex flex-col items-center gap-2 rounded border border-[color:var(--border)] p-4 font-display text-sm font-medium text-[color:var(--foreground)] transition-all hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
+      <div className="fr-mb-4w">
+        <Button
+          priority="secondary"
+          iconId="fr-icon-map-pin-2-line"
+          linkProps={{ href: '/me/partners' }}
         >
-          <IconMap className="h-6 w-6" />
           {wallet.findPartner}
-        </Link>
+        </Button>
       </div>
 
       <div className="mb-3 flex items-center justify-between">
         <h2 className="font-display text-sm font-semibold text-[color:var(--foreground)]">
           {wallet.recentMovements}
         </h2>
-        <Link
-          href="/me/history"
-          className="font-display text-xs text-[color:var(--primary)] hover:underline"
+        <Button
+          priority="tertiary no outline"
+          size="small"
+          iconId="fr-icon-arrow-right-line"
+          iconPosition="right"
+          linkProps={{ href: '/me/history' }}
         >
           {wallet.seeAll}
-        </Link>
+        </Button>
       </div>
 
       <Suspense fallback={<MovementsSkeleton />}>
@@ -74,45 +79,37 @@ async function BalanceCard() {
   const readAt = new Date().toISOString();
 
   return (
-    <Card className="relative mb-4 overflow-hidden p-6 md:p-8">
-      <div
-        className="absolute bottom-0 left-0 top-0 flex w-1 flex-col"
-        aria-hidden="true"
-      >
-        <div className="flex-1 bg-[#002395]" />
-        <div className="flex-1 border-y border-[#E8E8E8] bg-white" />
-        <div className="flex-1 bg-[#ED2939]" />
-      </div>
-      <div className="pl-4">
-        <div className="mb-2 font-display text-xs font-medium uppercase tracking-wider text-[color:var(--muted-foreground)]">
-          {ME_CONTENT.wallet.balance}
-        </div>
-        {wallet ? (
-          <>
-            <div className="mb-1 font-display text-4xl font-bold text-[color:var(--primary)] md:text-5xl">
-              <Montant amount={wallet.balance} currency={wallet.currency} />
-            </div>
-            <div className="font-serif text-xs text-[color:var(--muted-foreground)]">
-              {ME_CONTENT.wallet.updatedAt}{' '}
-              <DateTexte iso={readAt} format="jour" /> à{' '}
-              <DateTexte iso={readAt} format="heure" />
-            </div>
-            {wallet.status === 'disabled' ? (
-              <p
-                role="status"
-                className="mt-3 font-serif text-xs text-[color:var(--warning)]"
-              >
-                {ME_CONTENT.wallet.disabled}
-              </p>
-            ) : null}
-          </>
-        ) : (
-          <p className="font-serif text-sm text-[color:var(--muted-foreground)]">
-            {ME_CONTENT.wallet.noWallet}
+    <CallOut
+      title={ME_CONTENT.wallet.balance}
+      titleAs="p"
+      bodyAs="div"
+      className="fr-mb-3w"
+    >
+      {wallet ? (
+        <>
+          <p className="fr-mb-1v font-display text-4xl font-bold text-[color:var(--primary)] md:text-5xl">
+            <Montant amount={wallet.balance} currency={wallet.currency} />
           </p>
-        )}
-      </div>
-    </Card>
+          <p className="fr-text--xs fr-mb-0 text-[color:var(--muted-foreground)]">
+            {ME_CONTENT.wallet.updatedAt}{' '}
+            <DateTexte iso={readAt} format="jour" /> à{' '}
+            <DateTexte iso={readAt} format="heure" />
+          </p>
+          {wallet.status === 'disabled' ? (
+            <p
+              role="status"
+              className="fr-text--sm fr-mt-2w fr-mb-0 text-[color:var(--warning)]"
+            >
+              {ME_CONTENT.wallet.disabled}
+            </p>
+          ) : null}
+        </>
+      ) : (
+        <p className="fr-text--sm fr-mb-0 text-[color:var(--muted-foreground)]">
+          {ME_CONTENT.wallet.noWallet}
+        </p>
+      )}
+    </CallOut>
   );
 }
 

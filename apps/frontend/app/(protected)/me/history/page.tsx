@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import { PageHeader } from '@/components/composites/page-header';
 import { ME_CONTENT } from '@/content/me';
 import { listMyWalletEntriesHook } from '@/hooks/api';
+import { StartDsfrOnHydration } from '@/lib/dsfr';
 
 import { MovementsSkeleton } from '../skeletons';
 import HistoryPageClient from './page.client';
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div className="page-enter">
+      <StartDsfrOnHydration />
       <PageHeader
         title={ME_CONTENT.history.title}
         subtitle={ME_CONTENT.history.subtitle}

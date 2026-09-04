@@ -1,12 +1,14 @@
 'use client';
 
+import { Button } from '@codegouvfr/react-dsfr/Button';
+import { SearchBar } from '@codegouvfr/react-dsfr/SearchBar';
+import { Tag } from '@codegouvfr/react-dsfr/Tag';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useAction } from 'next-safe-action/hooks';
 import { useEffect, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 
 import { CartePartenaire } from '@/components/composites/carte-partenaire';
-import { IconSearch } from '@/components/icons';
 import { ME_CONTENT } from '@/content/me';
 import type { PartnerPage } from '@/lib/api/schemas/backend/partner';
 import type { PartnerCategory } from '@/lib/api/schemas/backend/partner-category';
@@ -55,22 +57,22 @@ function SearchField({ value }: { value: string }) {
   }, [text, value, pathname, router, searchParams]);
 
   return (
-    <div className="relative mb-3">
-      <span
-        className="absolute left-3 top-1/2 -translate-y-1/2 text-[color:var(--muted-foreground)]"
-        aria-hidden="true"
-      >
-        <IconSearch />
-      </span>
-      <input
-        type="search"
-        value={text}
-        onChange={(event) => setText(event.target.value)}
-        placeholder={ME_CONTENT.partners.searchPlaceholder}
-        aria-label={ME_CONTENT.partners.searchLabel}
-        className="w-full rounded border border-[color:var(--border)] bg-[color:var(--card)] py-2.5 pl-9 pr-4 font-serif text-sm transition-colors focus:border-[color:var(--primary)] focus:outline-none"
-      />
-    </div>
+    <SearchBar
+      className="fr-mb-2w"
+      label={ME_CONTENT.partners.searchLabel}
+      onButtonClick={(submitted) => setText(submitted)}
+      allowEmptySearch
+      renderInput={({ className, id, placeholder, type }) => (
+        <input
+          className={className}
+          id={id}
+          type={type}
+          placeholder={placeholder || ME_CONTENT.partners.searchPlaceholder}
+          value={text}
+          onChange={(event) => setText(event.target.value)}
+        />
+      )}
+    />
   );
 }
 
@@ -107,30 +109,21 @@ function CategoryChips({
   ];
 
   return (
-    <div
-      role="group"
-      aria-label="Catégories"
-      className="mb-5 flex gap-2 overflow-x-auto pb-2"
-    >
-      {chips.map(({ slug, label }) => {
-        const active = slug === selected;
-        return (
-          <button
-            key={slug || 'all'}
-            type="button"
-            aria-pressed={active}
+    <ul className="fr-tags-group fr-mb-3w" role="group" aria-label="Catégories">
+      {chips.map(({ slug, label }) => (
+        <li key={slug || 'all'}>
+          <Tag
+            as="button"
+            small
+            pressed={slug === selected}
+            nativeButtonProps={{ type: 'button' }}
             onClick={() => select(slug)}
-            className={`shrink-0 rounded-full border px-3 py-1.5 font-display text-xs font-medium transition-colors ${
-              active
-                ? 'border-[color:var(--primary)] bg-[color:var(--primary)] text-white'
-                : 'border-[color:var(--border)] text-[color:var(--muted-foreground)] hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]'
-            }`}
           >
             {label}
-          </button>
-        );
-      })}
-    </div>
+          </Tag>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -177,8 +170,9 @@ export default function PartnersPageClient({
 
       {nextCursor ? (
         <div className="mt-6 text-center">
-          <button
+          <Button
             type="button"
+            priority="secondary"
             onClick={() =>
               execute({
                 cursor: nextCursor,
@@ -187,12 +181,11 @@ export default function PartnersPageClient({
               })
             }
             disabled={isPending}
-            className="inline-flex items-center justify-center gap-2 rounded border border-[color:var(--border)] bg-transparent px-4 py-2 font-display text-sm font-medium text-[color:var(--foreground)] transition-all hover:border-[color:var(--primary)] hover:text-[color:var(--primary)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPending
               ? ME_CONTENT.partners.loading
               : ME_CONTENT.partners.loadMore}
-          </button>
+          </Button>
         </div>
       ) : null}
     </>

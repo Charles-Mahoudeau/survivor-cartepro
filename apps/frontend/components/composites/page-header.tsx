@@ -12,11 +12,9 @@ export function PageHeader({
   return (
     <div className="mb-6 flex items-start justify-between gap-4 md:mb-8">
       <div>
-        <h1 className="font-display text-xl font-semibold leading-tight text-[color:var(--foreground)] md:text-2xl">
-          {title}
-        </h1>
+        <h1 className="fr-h3 fr-mb-1w">{title}</h1>
         {subtitle ? (
-          <p className="mt-1 font-serif text-sm text-[color:var(--muted-foreground)]">
+          <p className="fr-text--sm fr-mb-0 text-[color:var(--muted-foreground)]">
             {subtitle}
           </p>
         ) : null}
