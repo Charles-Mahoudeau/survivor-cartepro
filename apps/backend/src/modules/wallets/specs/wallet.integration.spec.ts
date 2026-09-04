@@ -13,13 +13,13 @@ import {
   createWalletEntry,
 } from '../../../../test/fixtures/wallet.fixture';
 import { api, apiPath, bodyOf } from '../../../../test/http';
-import { ROLES } from '../../../config/auth/auth.constants';
+import { ROLES } from '@/config/auth/auth.constants';
 import { PartnerFixture } from '../../partners/core/specs/partner.fixture';
 import { WALLET_OVERDRAFT_LIMIT } from '../constants';
 import { Wallet } from '../entities/wallet.entity';
-import { WalletEntryDirection } from '../enums/wallet-entry-direction.enum';
-import { WalletEntryKind } from '../enums/wallet-entry-kind.enum';
-import { WalletStatus } from '../enums/wallet-status.enum';
+import { WalletEntryDirection } from '@/modules/wallets/enums';
+import { WalletEntryKind } from '@/modules/wallets/enums';
+import { WalletStatus } from '@/modules/wallets/enums';
 
 let context: TestApp;
 const getMyWallet = (cookie: string[]) =>
