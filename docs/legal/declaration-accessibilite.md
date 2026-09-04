@@ -1,12 +1,5 @@
 # Déclaration d'accessibilité
 
-> Exigence 4 du courrier `JEB/DNI/2026-002` du 01/09/2026 (cabinet juridique).
-> Format imposé par l'arrêté du 20 septembre 2019 modifié — le texte ci-dessous
-> suit le modèle du RGAA 4.1 sans le réécrire. Le détail de l'évaluation est
-> dans [`audit-accessibilite-rgaa.md`](./audit-accessibilite-rgaa.md).
-
----
-
 Le **Ministère du Job et Bonheur** s'engage à rendre son service accessible
 conformément à l'article 47 de la loi n° 2005-102 du 11 février 2005.
 
