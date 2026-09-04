@@ -262,30 +262,12 @@ import { adminClient } from 'better-auth/client/plugins';
 import { backendInternalUrl } from '@/lib/env';
 import { AUTH_BASE_PATH } from './constants';
 
-function build() {
+export function authServerClient() {
   return createAuthClient({
     baseURL: backendInternalUrl(),
     basePath: AUTH_BASE_PATH,
     plugins: [adminClient()],
   });
-}
-
-let cached: ReturnType<typeof build> | null = null;
-
-/**
- * The server-side client, for reads a component makes and writes an action makes.
- *
- * It needs an explicit baseURL where the browser client needs none: the
- * container resolves no public hostname, and outside a browser the client falls
- * back to the relative '/api/auth', which fetch refuses.
- *
- * Built on first call rather than at import: the address is a runtime value, and
- * reading it while the bundle is being built would fail the build on a machine
- * that has no reason to know where the API lives.
- */
-export function authServerClient(): ReturnType<typeof build> {
-  cached ??= build();
-  return cached;
 }
 ```
 
@@ -1004,10 +986,16 @@ raisonnement que le commentaire de `trustedOrigins()` dans `auth.ts`.
 
 Elles vivent dans `apps/frontend/lib/env.ts`, documentées dans `.env.example`. En
 développement elles ont une valeur par défaut — `bun run dev` fonctionne sans rien
-configurer — et en production leur absence lève au premier appel plutôt que de produire
-une erreur de `fetch` incompréhensible. Le client serveur est construit à la première
-utilisation et non à l'import, sinon `next build` échouerait sur une machine qui n'a
-aucune raison de savoir où vit l'API.
+configurer — et en production leur absence lève plutôt que de produire une erreur de
+`fetch` incompréhensible.
+
+**Le client serveur est donc construit à l'appel, jamais à l'import.** Mesuré : construit
+au niveau du module, il fait échouer `next build` avec
+`Failed to collect configuration for /me — Missing required environment variable:
+BACKEND_INTERNAL_URL`, parce que la collecte des pages importe les modules sur une machine
+qui n'a aucune raison de connaître l'adresse de l'API. Mesuré aussi : une construction
+coûte **4 µs**, et `getCurrentUser` est déjà mémoïsé par requête — mémoriser l'instance
+n'achèterait rien.
 
 **Les deux fichiers compose doivent gagner un bloc `environment:` pour le service
 `frontend`**, qui n'en a aucun aujourd'hui. C'est un besoin créé par ce lot, distinct
