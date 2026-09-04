@@ -1,4 +1,4 @@
-import type { DataSource } from 'typeorm';
+import type { DataSource, DeepPartial } from 'typeorm';
 import { WalletEntry } from '@/modules/wallets/entities/wallet-entry.entity';
 import { Wallet } from '@/modules/wallets/entities/wallet.entity';
 import { WalletEntryDirection } from '@/modules/wallets/enums/wallet-entry-direction.enum';
@@ -22,7 +22,7 @@ export function createWallet(
 export function createWalletEntry(
   dataSource: DataSource,
   walletId: string,
-  overrides: Partial<WalletEntry> = {},
+  overrides: DeepPartial<WalletEntry> = {},
 ): Promise<WalletEntry> {
   return dataSource.getRepository(WalletEntry).save({
     wallet: { id: walletId },
