@@ -7,6 +7,18 @@ const nextConfig: NextConfig = {
   output: 'standalone',
 
   /**
+   * Every read is classified: cached with `use cache`, streamed behind
+   * `<Suspense>`, or private. A session read outside a boundary fails the
+   * build instead of being discovered in production.
+   */
+  cacheComponents: true,
+
+  /** `forbidden()` and `forbidden.tsx`, for a session whose role is refused. */
+  experimental: {
+    authInterrupts: true,
+  },
+
+  /**
    * The browser talks to /auth on its own origin, which keeps the session
    * cookie first-party and CORS out of the picture. In production the edge
    * router does that mapping; in development there is no edge, so Next stands
