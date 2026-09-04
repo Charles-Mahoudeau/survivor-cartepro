@@ -31,7 +31,7 @@ beforeEach(async () => {
   await resetDatabase(context);
 });
 
-describe('a route with no annotation', () => {
+describe('a route open to every role', () => {
   it('refuses a request that carries no session', async () => {
     const response = await get(apiPath('/probe/any')).expect(401);
     expect(bodyOf<{ message: string }>(response).message).toBe(
@@ -127,6 +127,34 @@ describe('a route restricted to a role', () => {
     await grantRole(context, account.id, ROLES.EMPLOYEE);
 
     await get(apiPath('/probe/admin'), account.cookie).expect(403);
+  });
+});
+
+describe('a route that declares no role', () => {
+  it('refuses an employee, rather than serving the omission', async () => {
+    const account = await signUp(context.app, 'oubli@tickettout.test');
+
+    const response = await get(
+      apiPath('/probe/unannotated'),
+      account.cookie,
+    ).expect(403);
+    expect(bodyOf<{ message: string }>(response).message).toBe(
+      'FORBIDDEN_ROLE',
+    );
+  });
+
+  it('refuses an administrator too — the omission is not a role question', async () => {
+    const account = await signUp(context.app, 'agent-oubli@tickettout.test');
+    await grantRole(context, account.id, ROLES.ADMIN);
+
+    await get(apiPath('/probe/unannotated'), account.cookie).expect(403);
+  });
+
+  it('serves the same account on a route that does declare the roles', async () => {
+    const account = await signUp(context.app, 'declare@tickettout.test');
+
+    await get(apiPath('/probe/unannotated'), account.cookie).expect(403);
+    await get(apiPath('/probe/any'), account.cookie).expect(200);
   });
 });
 
