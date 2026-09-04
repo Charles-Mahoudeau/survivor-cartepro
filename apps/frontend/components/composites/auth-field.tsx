@@ -1,3 +1,8 @@
+"use client";
+
+import { RiEyeLine, RiEyeOffLine } from "@remixicon/react";
+import { useState, type ReactNode } from "react";
+
 /** One labelled field of the authentication forms, styled like the prototype. */
 export function ChampAuth({
   label,
@@ -20,7 +25,9 @@ export function ChampAuth({
   value?: string;
   onChange?: (value: string) => void;
 }) {
+  const [revealed, setRevealed] = useState(false);
   const aideId = aide ? `${name}-aide` : undefined;
+  const revealable = type === "password";
 
   return (
     <div>
@@ -30,20 +37,45 @@ export function ChampAuth({
       >
         {label}
       </label>
-      <input
-        id={name}
-        name={name}
-        type={type}
-        autoComplete={autoComplete}
-        placeholder={placeholder}
-        minLength={minLength}
-        {...(onChange
-          ? { value: value ?? "", onChange: (e) => onChange(e.target.value) }
-          : {})}
-        aria-describedby={aideId}
-        required
-        className="w-full rounded border border-[color:var(--border)] bg-transparent px-3 py-2.5 font-serif text-sm transition-colors focus:border-[color:var(--primary)] focus:outline-none"
-      />
+
+      <div className="relative">
+        <input
+          id={name}
+          name={name}
+          type={revealable && revealed ? "text" : type}
+          autoComplete={autoComplete}
+          placeholder={placeholder}
+          minLength={minLength}
+          {...(onChange
+            ? { value: value ?? "", onChange: (e) => onChange(e.target.value) }
+            : {})}
+          aria-describedby={aideId}
+          required
+          className={`w-full rounded border border-[color:var(--border)] bg-transparent px-3 py-2.5 font-serif text-sm transition-colors focus:border-[color:var(--primary)] focus:outline-none ${
+            revealable ? "pr-11" : ""
+          }`}
+        />
+
+        {revealable ? (
+          <button
+            type="button"
+            onClick={() => setRevealed((shown) => !shown)}
+            aria-label={
+              revealed ? "Masquer le mot de passe" : "Afficher le mot de passe"
+            }
+            aria-pressed={revealed}
+            aria-controls={name}
+            className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-[color:var(--muted-foreground)] transition-colors hover:text-[color:var(--primary)] focus-visible:text-[color:var(--primary)] focus-visible:outline-none"
+          >
+            {revealed ? (
+              <RiEyeOffLine className="size-4" aria-hidden="true" />
+            ) : (
+              <RiEyeLine className="size-4" aria-hidden="true" />
+            )}
+          </button>
+        ) : null}
+      </div>
+
       {aide ? (
         <p
           id={aideId}
@@ -61,7 +93,7 @@ export function BoutonAuth({
   children,
   disabled,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   disabled?: boolean;
 }) {
   return (
@@ -72,17 +104,5 @@ export function BoutonAuth({
     >
       {children}
     </button>
-  );
-}
-
-/** Refusals are announced, not whispered: role="alert" moves focus to them. */
-export function AlerteAuth({ children }: { children: React.ReactNode }) {
-  return (
-    <p
-      role="alert"
-      className="rounded border border-[color:var(--destructive)] bg-[color:var(--destructive-light,transparent)] px-3 py-2.5 font-serif text-sm text-[color:var(--destructive)]"
-    >
-      {children}
-    </p>
   );
 }

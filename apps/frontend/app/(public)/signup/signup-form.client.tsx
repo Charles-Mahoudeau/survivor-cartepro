@@ -4,32 +4,27 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
+import { toast } from "sonner";
+
 import {
-  AlerteAuth,
   BoutonAuth,
   ChampAuth,
 } from "@/components/composites/auth-field";
 import { Card } from "@/components/composites/card";
 import { authClient } from "@/lib/auth/client";
 import { MIN_PASSWORD_LENGTH } from "@/lib/auth/constants";
-import {
-  AUTH_ERROR_MESSAGES,
-  toAuthError,
-  type AuthErrorCode,
-} from "@/lib/auth/errors";
+import { AUTH_ERROR_MESSAGES, toAuthError } from "@/lib/auth/errors";
 import { roleHome } from "@/lib/auth/guard";
 
 export function SignUpForm() {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [failure, setFailure] = useState<AuthErrorCode | null>(null);
   const [submitting, setSubmitting] = useState(false);
   // React resets the form once the action settles; only the password should go.
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
   async function submit(formData: FormData) {
-    setFailure(null);
     setSubmitting(true);
 
     // The role is never sent: the API assigns it from its own default, so a
@@ -41,12 +36,16 @@ export function SignUpForm() {
     });
 
     if (error || !data) {
-      setFailure(toAuthError(error));
+      toast.error(AUTH_ERROR_MESSAGES[toAuthError(error)]);
       setSubmitting(false);
       return;
     }
 
     // Sign-up opens the session itself, so there is nothing to sign in to.
+    // A refusal from a previous attempt must not survive onto the space the
+    // account just reached.
+    toast.dismiss();
+
     startTransition(() => {
       router.replace(roleHome(data.user.role));
       router.refresh();
@@ -60,10 +59,6 @@ export function SignUpForm() {
       <form action={submit}>
         <Card className="mb-4 p-6">
           <div className="space-y-4">
-            {failure ? (
-              <AlerteAuth>{AUTH_ERROR_MESSAGES[failure]}</AlerteAuth>
-            ) : null}
-
             <ChampAuth
               label="Nom et prénom"
               name="name"

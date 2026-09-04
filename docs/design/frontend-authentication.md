@@ -181,7 +181,7 @@ apps/frontend/
 │   ├── simulation-banner.tsx         mention de simulation, extraite
 │   ├── card.tsx                      carte, extraite
 │   ├── auth-shell.tsx                en-tête + bandeau + colonne centrée
-│   ├── auth-field.tsx                champ, bouton et alerte des formulaires
+│   ├── auth-field.tsx                champ (avec révélateur) et bouton
 │   ├── sign-out.client.tsx           bouton de déconnexion
 │   └── espace-placeholder.tsx        écran d'attente d'un espace
 └── app/
@@ -948,6 +948,14 @@ export const AUTH_ERROR_MESSAGES: Record<AuthErrorCode, string> = {
   UNKNOWN_ERROR: 'L’opération a échoué. Réessayez.',
 };
 ```
+
+Un refus s'annonce par un **toast** (`sonner`, monté une fois dans le layout racine),
+pas par un encart dans le formulaire : c'est le motif déjà en place sur DiscorAds, et
+sonner pose l'`aria-live` qui fait annoncer le message. Le toast est explicitement retiré
+avant une navigation réussie, sinon un refus précédent survit à l'écran d'arrivée.
+
+Le champ de mot de passe porte un bouton révélateur (`aria-pressed`, `aria-controls`),
+qui bascule le `type` entre `password` et `text`.
 
 Les libellés vivent dans `content/auth.ts`, comme le veut `D7` de `frontend.md` — une
 seule locale, un fichier par espace, formulations greppables. `BANNED_USER` est

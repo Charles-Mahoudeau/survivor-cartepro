@@ -4,34 +4,27 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 
+import { toast } from "sonner";
+
 import {
-  AlerteAuth,
   BoutonAuth,
   ChampAuth,
 } from "@/components/composites/auth-field";
 import { Card } from "@/components/composites/card";
 import { authClient } from "@/lib/auth/client";
-import {
-  AUTH_ERROR_MESSAGES,
-  toAuthError,
-  type AuthErrorCode,
-} from "@/lib/auth/errors";
+import { AUTH_ERROR_MESSAGES, toAuthError } from "@/lib/auth/errors";
 import { safeRedirect } from "@/lib/auth/guard";
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [pending, startTransition] = useTransition();
-  const [failure, setFailure] = useState<AuthErrorCode | null>(null);
-  const [detail, setDetail] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   // React resets the form once the action settles: without this the address has
   // to be typed again after every refusal.
   const [email, setEmail] = useState("");
 
   async function submit(formData: FormData) {
-    setFailure(null);
-    setDetail(null);
     setSubmitting(true);
 
     const { data, error } = await authClient.signIn.email({
@@ -41,15 +34,23 @@ export function LoginForm() {
 
     if (error || !data) {
       const code = toAuthError(error);
-      setFailure(code);
-      // The suspension sentence is written by the API, which alone knows why.
-      setDetail(code === "BANNED_USER" ? (error?.message ?? null) : null);
+      // A suspension is announced with the sentence the API wrote: it alone
+      // knows what it refuses.
+      toast.error(
+        code === "BANNED_USER"
+          ? (error?.message ?? AUTH_ERROR_MESSAGES[code])
+          : AUTH_ERROR_MESSAGES[code],
+      );
       setSubmitting(false);
       return;
     }
 
     // refresh() drops the router cache, so the previous visitor's pages are not
     // repainted for the account that just signed in.
+    // A refusal from a previous attempt must not survive onto the space the
+    // account just reached.
+    toast.dismiss();
+
     startTransition(() => {
       router.replace(safeRedirect(searchParams.get("next"), data.user.role));
       router.refresh();
@@ -63,12 +64,6 @@ export function LoginForm() {
       <form action={submit}>
         <Card className="mb-4 p-6">
           <div className="space-y-4">
-            {failure ? (
-              <AlerteAuth>
-                {detail ?? AUTH_ERROR_MESSAGES[failure]}
-              </AlerteAuth>
-            ) : null}
-
             <ChampAuth
               label="Adresse e-mail"
               name="email"
