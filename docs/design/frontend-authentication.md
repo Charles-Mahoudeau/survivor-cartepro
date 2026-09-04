@@ -175,13 +175,14 @@ apps/frontend/
 │   ├── session.ts                    getCurrentUser()
 │   ├── guard.ts                      roleHome(), safeRedirect()
 │   ├── errors.ts                     code → message
+│   ├── validation.ts                 règles de saisie, messages, focus
 │   └── role-gate.tsx                 <RoleGate>
 ├── components/composites/
 │   ├── brand-block.tsx               bloc-marque, extrait du prototype
 │   ├── simulation-banner.tsx         mention de simulation, extraite
 │   ├── card.tsx                      carte, extraite
 │   ├── auth-shell.tsx                en-tête + bandeau + colonne centrée
-│   ├── auth-field.tsx                champ (avec révélateur) et bouton
+│   ├── auth-field.tsx                champ (aide, erreur, révélateur) et bouton
 │   ├── sign-out.client.tsx           bouton de déconnexion
 │   └── espace-placeholder.tsx        écran d'attente d'un espace
 └── app/
@@ -949,10 +950,30 @@ export const AUTH_ERROR_MESSAGES: Record<AuthErrorCode, string> = {
 };
 ```
 
-Un refus s'annonce par un **toast** (`sonner`, monté une fois dans le layout racine),
-pas par un encart dans le formulaire : c'est le motif déjà en place sur DiscorAds, et
-sonner pose l'`aria-live` qui fait annoncer le message. Le toast est explicitement retiré
-avant une navigation réussie, sinon un refus précédent survit à l'écran d'arrivée.
+**Deux registres, deux surfaces.** Ce que l'utilisateur a mal saisi se dit **dans le
+champ** ; ce que le service refuse se dit **en toast**. Confondre les deux met « mot de
+passe incorrect » sous un champ correctement rempli.
+
+Le refus du service passe par `sonner`, monté une fois dans le layout racine, à sa
+position par défaut — en bas à droite, comme sur DiscorAds. Il pose l'`aria-live` qui
+fait annoncer le message, et il est explicitement retiré avant une navigation réussie,
+sinon un refus précédent survit à l'écran d'arrivée.
+
+L'erreur de saisie suit le motif GOV.UK que `frontend.md` §4.4 nomme déjà :
+
+| Règle                                                           | Mise en œuvre                                            |
+| --------------------------------------------------------------- | -------------------------------------------------------- |
+| Message rouge **au-dessus** du champ, sous le libellé et l'aide | `ChampAuth`, ordre libellé → aide → erreur → champ       |
+| Préfixe « Erreur » lu mais non vu                               | `<span className="sr-only">Erreur : </span>`             |
+| Bordure rouge sur le champ fautif                               | `border-2 border-[color:var(--destructive)]`             |
+| `aria-describedby` vers l'aide **et** l'erreur                  | `password-aide password-erreur`, dans cet ordre          |
+| `aria-invalid` sur le champ                                     | posé seulement quand il y a une erreur                   |
+| Focus sur le premier champ fautif                               | `focusFirstError`, dans l'ordre d'affichage              |
+| Le message dit quoi corriger, pas quelle règle a été violée     | « par exemple vous@exemple.fr », pas « format invalide » |
+
+La validation native du navigateur est **désactivée** (`noValidate`) : sa bulle ne se
+style pas, s'affiche dans la langue du navigateur et non celle du service, disparaît au
+clic suivant, et ne laisse aucune trace pour un lecteur d'écran.
 
 Le champ de mot de passe porte un bouton révélateur (`aria-pressed`, `aria-controls`),
 qui bascule le `type` entre `password` et `text`.

@@ -12,6 +12,8 @@ import { Toaster as Sonner, type ToasterProps } from "sonner";
 /**
  * The application's toaster.
  *
+ * Position is sonner's own default, bottom right, like the sibling project.
+ *
  * The register is the one the rest of the interface uses: square-ish corners
  * from the shared radius, a plain border, no shadow. Colours come from the
  * tokens rather than fixed values, so a theme change carries here too.
@@ -20,7 +22,6 @@ function Toaster({ ...props }: ToasterProps) {
   return (
     <Sonner
       className="toaster group"
-      position="top-center"
       icons={{
         success: <RiCheckboxCircleLine className="size-4" />,
         info: <RiInformationLine className="size-4" />,

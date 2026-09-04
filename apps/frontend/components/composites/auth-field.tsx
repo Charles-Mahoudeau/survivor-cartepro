@@ -14,6 +14,7 @@ export function ChampAuth({
   aide,
   value,
   onChange,
+  error,
 }: {
   label: string;
   name: string;
@@ -24,10 +25,16 @@ export function ChampAuth({
   aide?: string;
   value?: string;
   onChange?: (value: string) => void;
+  error?: string;
 }) {
   const [revealed, setRevealed] = useState(false);
   const aideId = aide ? `${name}-aide` : undefined;
+  const erreurId = error ? `${name}-erreur` : undefined;
   const revealable = type === "password";
+
+  // The hint comes first, then the error: a screen reader reads what to enter
+  // before what went wrong.
+  const describedBy = [aideId, erreurId].filter(Boolean).join(" ") || undefined;
 
   return (
     <div>
@@ -37,6 +44,25 @@ export function ChampAuth({
       >
         {label}
       </label>
+
+      {aide ? (
+        <p
+          id={aideId}
+          className="mb-1.5 font-serif text-xs text-[color:var(--muted-foreground)]"
+        >
+          {aide}
+        </p>
+      ) : null}
+
+      {error ? (
+        <p
+          id={erreurId}
+          className="mb-1.5 font-display text-xs font-medium text-[color:var(--destructive)]"
+        >
+          <span className="sr-only">Erreur : </span>
+          {error}
+        </p>
+      ) : null}
 
       <div className="relative">
         <input
@@ -49,11 +75,13 @@ export function ChampAuth({
           {...(onChange
             ? { value: value ?? "", onChange: (e) => onChange(e.target.value) }
             : {})}
-          aria-describedby={aideId}
-          required
-          className={`w-full rounded border border-[color:var(--border)] bg-transparent px-3 py-2.5 font-serif text-sm transition-colors focus:border-[color:var(--primary)] focus:outline-none ${
-            revealable ? "pr-11" : ""
-          }`}
+          aria-describedby={describedBy}
+          aria-invalid={error ? true : undefined}
+          className={`w-full rounded border bg-transparent px-3 py-2.5 font-serif text-sm transition-colors focus:outline-none ${
+            error
+              ? "border-2 border-[color:var(--destructive)]"
+              : "border-[color:var(--border)] focus:border-[color:var(--primary)]"
+          } ${revealable ? "pr-11" : ""}`}
         />
 
         {revealable ? (
@@ -76,14 +104,6 @@ export function ChampAuth({
         ) : null}
       </div>
 
-      {aide ? (
-        <p
-          id={aideId}
-          className="mt-1.5 font-serif text-xs text-[color:var(--muted-foreground)]"
-        >
-          {aide}
-        </p>
-      ) : null}
     </div>
   );
 }
