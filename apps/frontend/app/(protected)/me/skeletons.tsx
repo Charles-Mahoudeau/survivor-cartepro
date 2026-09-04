@@ -37,16 +37,3 @@ export function MovementsSkeleton({ rows = 4 }: { rows?: number }) {
     </Card>
   );
 }
-
-export function WalletSkeleton() {
-  return (
-    <div>
-      <div className={`mb-2 h-6 w-48 ${pulse}`} />
-      <div className={`mb-8 h-3 w-40 ${pulse}`} />
-      <BalanceSkeleton />
-      <div className={`mb-6 h-14 ${pulse}`} />
-      <div className={`mb-3 h-3 w-36 ${pulse}`} />
-      <MovementsSkeleton />
-    </div>
-  );
-}

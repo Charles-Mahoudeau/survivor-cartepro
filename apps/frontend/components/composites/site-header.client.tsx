@@ -1,12 +1,11 @@
 'use client';
 
-import { Header, HeaderQuickAccessItem } from '@codegouvfr/react-dsfr/Header';
+import { Header } from '@codegouvfr/react-dsfr/Header';
 import type { MainNavigationProps } from '@codegouvfr/react-dsfr/MainNavigation';
-import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { usePathname } from 'next/navigation';
+import type { ReactElement } from 'react';
 
 import { SITE_CONTENT } from '@/content/site';
-import { authClient } from '@/lib/auth/client';
 
 export interface SiteNavItem {
   href: string;
@@ -18,36 +17,15 @@ interface SiteHeaderProps {
   navigation?: SiteNavItem[];
   /** The home of the space, so its entry is active on the exact path only. */
   home?: string;
-  user?: { name: string };
+  /** Session-dependent quick access items, streamed by the caller. */
+  account?: ReactElement;
 }
 
 function isActive(pathname: string, href: string, home?: string) {
   return href === home ? pathname === home : pathname.startsWith(href);
 }
 
-function SignOutItem() {
-  const router = useRouter();
-  const [pending, setPending] = useState(false);
-
-  async function signOut() {
-    setPending(true);
-    await authClient.signOut();
-    router.replace('/login');
-    router.refresh();
-  }
-
-  return (
-    <HeaderQuickAccessItem
-      quickAccessItem={{
-        iconId: 'fr-icon-logout-box-r-line',
-        text: pending ? 'Déconnexion…' : SITE_CONTENT.signOut,
-        buttonProps: { onClick: signOut, disabled: pending },
-      }}
-    />
-  );
-}
-
-export function SiteHeader({ navigation, home, user }: SiteHeaderProps) {
+export function SiteHeader({ navigation, home, account }: SiteHeaderProps) {
   const pathname = usePathname();
 
   const items: MainNavigationProps.Item[] | undefined = navigation?.map(
@@ -66,15 +44,8 @@ export function SiteHeader({ navigation, home, user }: SiteHeaderProps) {
       serviceTagline={SITE_CONTENT.serviceTagline}
       navigation={items}
       quickAccessItems={
-        user
-          ? [
-              {
-                iconId: 'fr-icon-account-circle-line',
-                text: user.name,
-                linkProps: { href: home ?? '/me' },
-              },
-              <SignOutItem key="sign-out" />,
-            ]
+        account
+          ? [account]
           : [
               {
                 iconId: 'fr-icon-account-circle-line',

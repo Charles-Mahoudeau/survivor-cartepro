@@ -13,9 +13,21 @@ const nextConfig: NextConfig = {
    */
   cacheComponents: true,
 
-  /** `forbidden()` and `forbidden.tsx`, for a session whose role is refused. */
   experimental: {
+    /** `forbidden()` and `forbidden.tsx`, for a session whose role is refused. */
     authInterrupts: true,
+
+    /**
+     * Automatic instant-navigation validation fails on every route, including
+     * an empty page, with Next's own `InvariantError: Cannot access
+     * "moduleLoading" without a work store` (E952, surfaced as E1286). The
+     * validation render has no work store when the DSFR provider, mounted in
+     * the root layout, resolves its `import('./dsfr/dsfr.module')`. Validation
+     * stays available per segment through `export const instant`.
+     */
+    instantInsights: {
+      validationLevel: 'manual-warning',
+    },
   },
 
   /**
