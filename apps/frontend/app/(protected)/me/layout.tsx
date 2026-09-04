@@ -1,33 +1,31 @@
 import { Suspense } from 'react';
 
+import { BandeauSimulation } from '@/components/composites/simulation-banner';
 import { ROLES } from '@/lib/auth/constants';
 import { RoleGate } from '@/lib/auth/role-gate';
 
 /**
- * The employee shell. `sidebar` is a parallel route (`@sidebar`) that reads
- * the session on its own and streams independently of the page. Both sit
- * behind a boundary: a session read outside one is a build error.
+ * The employee shell. Header, notice and grid are static and paint at once.
+ * The role gate reads the session behind its own boundary, beside the page
+ * rather than around it: the page streams its own skeletons meanwhile, and
+ * the gate redirects a wrong role as soon as the session resolves. The API
+ * enforces the role on every read regardless.
  */
-export default function Layout({ children, sidebar }: LayoutProps<'/me'>) {
+export default function Layout({ children, header }: LayoutProps<'/me'>) {
   return (
-    <div className="min-h-screen bg-[color:var(--background)]">
-      <Suspense fallback={null}>{sidebar}</Suspense>
-      <main
-        id="contenu"
-        className="min-h-screen pb-[72px] pt-[56px] md:pb-0 md:pl-[240px] md:pt-0"
-      >
-        <div className="mx-auto max-w-3xl px-4 py-6 md:px-8 md:py-8">
-          <Suspense
-            fallback={
-              <p className="font-serif text-sm text-[color:var(--muted-foreground)]">
-                Chargement de la session…
-              </p>
-            }
-          >
-            <RoleGate role={ROLES.EMPLOYEE}>{children}</RoleGate>
-          </Suspense>
+    <>
+      {header}
+      <BandeauSimulation />
+      <main id="contenu" className="fr-container fr-py-4w flex-1 md:fr-py-6w">
+        <div className="fr-grid-row fr-grid-row--center">
+          <div className="fr-col-12 fr-col-md-10 fr-col-lg-8">
+            <Suspense fallback={null}>
+              <RoleGate role={ROLES.EMPLOYEE} />
+            </Suspense>
+            {children}
+          </div>
         </div>
       </main>
-    </div>
+    </>
   );
 }

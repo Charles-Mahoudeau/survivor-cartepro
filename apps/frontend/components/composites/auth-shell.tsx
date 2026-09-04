@@ -1,7 +1,7 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
-import { BlocMarque } from "./brand-block";
-import { BandeauSimulation } from "./simulation-banner";
+import { BandeauSimulation } from './simulation-banner';
+import { SiteHeader } from './site-header.client';
 
 export function AuthShell({
   titre,
@@ -14,22 +14,18 @@ export function AuthShell({
 }) {
   return (
     <>
-      <header className="border-b border-[color:var(--border)] bg-[color:var(--card)] px-6 py-5">
-        <BlocMarque />
-      </header>
+      <SiteHeader />
       <BandeauSimulation />
 
-      <main className="flex flex-1 items-center justify-center px-4 py-12">
-        <div className="w-full max-w-[400px]">
-          <div className="mb-8">
-            <h1 className="mb-2 font-display text-2xl font-semibold text-[color:var(--foreground)]">
-              {titre}
-            </h1>
-            <p className="font-serif text-sm text-[color:var(--muted-foreground)]">
+      <main id="contenu" className="fr-container fr-py-6w flex flex-1">
+        <div className="fr-grid-row fr-grid-row--center w-full">
+          <div className="fr-col-12 fr-col-sm-8 fr-col-md-6 fr-col-lg-5">
+            <h1 className="fr-h3 fr-mb-1w">{titre}</h1>
+            <p className="fr-text--sm fr-mb-4w text-[color:var(--muted-foreground)]">
               {sousTitre}
             </p>
+            {children}
           </div>
-          {children}
         </div>
       </main>
     </>

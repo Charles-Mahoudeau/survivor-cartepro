@@ -2,7 +2,8 @@
 
 import { useEffect } from 'react';
 
-import { Card } from '@/components/composites/card';
+import { Alert } from '@codegouvfr/react-dsfr/Alert';
+import { Button } from '@codegouvfr/react-dsfr/Button';
 import { ME_CONTENT } from '@/content/me';
 
 interface RouteErrorProps {
@@ -17,21 +18,15 @@ export function RouteError({ error, reset }: RouteErrorProps) {
 
   return (
     <div role="alert">
-      <Card className="p-6">
-        <h2 className="mb-2 font-display text-base font-semibold text-[color:var(--foreground)]">
-          {ME_CONTENT.error.title}
-        </h2>
-        <p className="mb-4 font-serif text-sm text-[color:var(--muted-foreground)]">
-          {ME_CONTENT.error.body}
-        </p>
-        <button
-          type="button"
-          onClick={reset}
-          className="rounded border-2 border-[color:var(--primary)] px-4 py-2 font-display text-sm font-semibold text-[color:var(--primary)] transition-colors hover:bg-[color:var(--secondary)]"
-        >
-          {ME_CONTENT.error.retry}
-        </button>
-      </Card>
+      <Alert
+        severity="error"
+        title={ME_CONTENT.error.title}
+        description={ME_CONTENT.error.body}
+        className="fr-mb-3w"
+      />
+      <Button type="button" priority="secondary" onClick={reset}>
+        {ME_CONTENT.error.retry}
+      </Button>
     </div>
   );
 }

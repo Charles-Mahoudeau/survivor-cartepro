@@ -1,6 +1,5 @@
 import { DateTexte } from '@/components/composites/date-texte';
 import { Montant } from '@/components/composites/montant';
-import { IconArrowDown, IconArrowUp } from '@/components/icons';
 import { ME_CONTENT } from '@/content/me';
 import type { WalletEntry } from '@/lib/api/schemas/backend/wallet-entry';
 
@@ -53,7 +52,12 @@ export function MouvementLigne({ entry, last, variant }: MouvementLigneProps) {
             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${bubble}`}
             aria-hidden="true"
           >
-            {credit ? <IconArrowDown /> : <IconArrowUp />}
+            <span
+              className={
+                credit ? 'fr-icon-arrow-down-line' : 'fr-icon-arrow-up-line'
+              }
+              aria-hidden="true"
+            />
           </div>
         )}
         <div>

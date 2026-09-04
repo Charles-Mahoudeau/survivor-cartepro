@@ -15,6 +15,7 @@ import type {
 import { BlocMarque } from "@/components/composites/brand-block";
 import { Card } from "@/components/composites/card";
 import { BandeauSimulation } from "@/components/composites/simulation-banner";
+import { StartDsfrOnHydration } from "@/lib/dsfr";
 
 /** Le partenaire connecté sur le compte de démonstration. */
 const DEMO_PARTNER = MOCK_PARTNERS[1];
@@ -1262,9 +1263,12 @@ export default function App() {
   };
 
   return (
+    <>
+      <StartDsfrOnHydration />
     <AppShell role={role} currentView={view} onNavigate={setView} onLogout={handleLogout}>
       {renderView()}
     </AppShell>
+    </>
   );
 }
 

@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import { PageHeader } from '@/components/composites/page-header';
 import { ME_CONTENT } from '@/content/me';
 import { listPartnerCategoriesHook, listPartnersHook } from '@/hooks/api';
+import { StartDsfrOnHydration } from '@/lib/dsfr';
 
 import PartnersPageClient from './page.client';
 import {
@@ -23,6 +24,7 @@ function first(value: string | string[] | undefined): string {
 export default function Page({ searchParams }: PageProps<'/me/partners'>) {
   return (
     <div className="page-enter">
+      <StartDsfrOnHydration />
       <PageHeader
         title={ME_CONTENT.partners.title}
         subtitle={ME_CONTENT.partners.subtitle}

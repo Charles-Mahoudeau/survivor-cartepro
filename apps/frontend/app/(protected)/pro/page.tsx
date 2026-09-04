@@ -1,15 +1,11 @@
-import { redirect } from "next/navigation";
+import { EspacePlaceholder } from '@/components/composites/espace-placeholder';
+import { StartDsfrOnHydration } from '@/lib/dsfr';
 
-import { EspacePlaceholder } from "@/components/composites/espace-placeholder";
-import { getCurrentUser } from "@/lib/auth/session";
-
-export default async function Page() {
-
-  const user = await getCurrentUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  return <EspacePlaceholder titre="Espace partenaire" user={user} />;
+export default function Page() {
+  return (
+    <>
+      <StartDsfrOnHydration />
+      <EspacePlaceholder titre="Espace partenaire" home="/pro" />
+    </>
+  );
 }

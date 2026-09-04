@@ -1,37 +1,53 @@
-import type { Metadata } from "next";
-import { Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { cn } from "@/lib/utils";
-import { marianne, spectral } from "@/lib/fonts";
-import { Toaster } from "@/components/ui/sonner";
+import { Footer } from '@codegouvfr/react-dsfr/Footer';
+import { SkipLinks } from '@codegouvfr/react-dsfr/SkipLinks';
+import type { Metadata } from 'next';
+import { Geist_Mono } from 'next/font/google';
+
+import './globals.css';
+import { Toaster } from '@/components/ui/sonner';
+import { SITE_CONTENT } from '@/content/site';
+import { DsfrProvider } from '@/lib/dsfr';
+import { DsfrHead, getHtmlAttributes } from '@/lib/dsfr/server-only-index';
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
-  title: "Ticket Tout (simulation)",
-  description:
-    "Vos avantages salariés, à dépenser partout chez les partenaires du Ministère du Job et Bonheur. Dispositif de simulation, sans valeur monétaire réelle.",
+  title: SITE_CONTENT.title,
+  description: SITE_CONTENT.description,
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html
-      lang="fr"
-      suppressHydrationWarning
-      className={cn(
-        "h-full",
-        "antialiased",
-        spectral.variable,
-        marianne.variable,
-        geistMono.variable
-      )}
-    >
-      <body className="min-h-full flex flex-col font-sans">
-        {children}
-        <Toaster />
+    <html {...getHtmlAttributes({ lang: 'fr' })} className={geistMono.variable}>
+      <head>
+        <DsfrHead
+          preloadFonts={[
+            'Marianne-Regular',
+            'Marianne-Medium',
+            'Marianne-Bold',
+          ]}
+        />
+      </head>
+      <body className="flex min-h-screen flex-col">
+        <DsfrProvider lang="fr">
+          <SkipLinks
+            links={[{ label: SITE_CONTENT.skipToContent, anchor: '#contenu' }]}
+          />
+          <div className="flex flex-1 flex-col">{children}</div>
+          <Footer
+            brandTop={SITE_CONTENT.brandTop}
+            homeLinkProps={{ href: '/', title: SITE_CONTENT.homeTitle }}
+            accessibility="non compliant"
+            contentDescription={SITE_CONTENT.footerDescription}
+            bottomItems={[
+              { text: SITE_CONTENT.footerSimulation, linkProps: { href: '/' } },
+            ]}
+          />
+          <Toaster />
+        </DsfrProvider>
       </body>
     </html>
   );
