@@ -312,44 +312,62 @@ son action appelant la **même** fonction cachée `loadPartners` que la page.
 
 ---
 
-## 5. Le shell et les routes parallèles
+## 5. Le shell, les routes parallèles et le chargement
 
 ```tsx
 // app/(protected)/me/layout.tsx
-export default function Layout({ children, sidebar }: LayoutProps<'/me'>) {
+export default function Layout({ children, header }: LayoutProps<'/me'>) {
   return (
-    <div className="min-h-screen bg-[color:var(--background)]">
-      <Suspense fallback={null}>{sidebar}</Suspense>
-      <main id="contenu" className="min-h-screen pb-[72px] pt-[56px] md:pb-0 md:pl-[240px] md:pt-0">
-        <div className="mx-auto max-w-3xl px-4 py-6 md:px-8 md:py-8">
-          <Suspense fallback={…}>
-            <RoleGate role={ROLES.EMPLOYEE}>{children}</RoleGate>
-          </Suspense>
+    <>
+      {header}
+      <BandeauSimulation />
+      <main id="contenu" className="fr-container fr-py-4w flex-1 md:fr-py-6w">
+        <div className="fr-grid-row fr-grid-row--center">
+          <div className="fr-col-12 fr-col-md-10 fr-col-lg-8">
+            <Suspense fallback={null}>
+              <RoleGate role={ROLES.EMPLOYEE} />
+            </Suspense>
+            {children}
+          </div>
         </div>
       </main>
-    </div>
+    </>
   );
 }
 ```
 
-- `@sidebar/page.tsx` lit `getCurrentUser()` et rend `<DashboardChrome>` : barre
-  latérale de 240 px sur `md:`, barre supérieure et barre d'onglets basse en dessous —
-  positions de l'`AppShell` de la maquette.
-- `@sidebar/default.ts` ré-exporte `page.tsx`, comme DiscorAds : après un
-  rechargement sur `/me/history`, le slot n'a pas de sous-page `history` et rend le
-  `default`, qui est la même barre.
-- La session est lue **deux fois** par requête (slot et `RoleGate`) mais une seule
-  fois sur le fil : `getCurrentUser` est dans `cache()` de React.
-- `LayoutProps<'/me'>` porte le slot typé : `next typegen` régénère
-  `.next/types/routes.d.ts` (`"/me": "sidebar"`).
-- `/pro` et `/admin` ajouteront `@breadcrumb`, avec une sous-page par route pour
-  porter `generateMetadata` et le fil d'Ariane sans remonter le layout — le motif
-  DiscorAds `@breadcrumb/<route>/page.tsx`. `/me` n'en a pas (D10 de `frontend.md`).
+Le flux de chargement suit le guide « Streaming » de Next 16 (_push dynamic access down_) :
 
-Fichiers système : `loading.tsx` (squelette qui reprend la grille de l'écran),
-`error.tsx` (délègue à `components/views/route-error.tsx`), `app/forbidden.tsx`.
+- **Le shell est statique et peint tout de suite** : en-tête DSFR avec sa navigation, bandeau
+  de simulation, grille. Rien dans le layout n'attend la requête.
+- **Le slot `@header` ne lit pas la session au premier niveau.** `@header/page.tsx` rend le
+  `<Header>` synchrone et lui passe, en `account`, un `<UserQuickAccess>` derrière son propre
+  `<Suspense fallback={null}>` : le nom du compte et la déconnexion streament dans l'en-tête,
+  l'en-tête lui-même ne disparaît jamais. `@header/default.ts` ré-exporte la page pour les
+  navigations dures vers `/me/history` et `/me/partners`.
+- **La garde de rôle est à côté de la page, pas autour.** `<RoleGate>` ne rend rien ; elle lit
+  la session dans sa frontière et redirige (`/login`, ou l'espace du rôle) dès qu'elle résout.
+  La page streame ses propres squelettes pendant ce temps. Ce n'est pas une garde de sécurité —
+  l'API applique le rôle sur chaque lecture, et les hooks traduisent `UNAUTHENTICATED` et
+  `FORBIDDEN_ROLE` en navigation — c'est de la navigation. Écart assumé avec `D6` de
+  `frontend-authentication.md`, qui enveloppait `{children}` : envelopper bloquait la page
+  entière derrière la lecture de session et affichait un texte d'attente à la place du squelette.
+- **Aucun `loading.tsx` de segment.** Un `loading.tsx` dans `me/` enveloppe la page **et** les
+  segments enfants : sur le premier affichage de `/me/history`, c'était le squelette du
+  portefeuille qui couvrait l'écran (`loading.md`, « Behavior »). Chaque page pose ses propres
+  `<Suspense>` autour de ce qui lit des données — en-tête de page statique, squelette par bloc.
+- **La validation automatique de la navigation instantanée est désactivée**
+  (`experimental.instantInsights.validationLevel: 'manual-warning'`) : elle échoue sur toute
+  route, page vide comprise, avec un `InvariantError` interne à Next (« Cannot access
+  moduleLoading without a work store », `E952` remonté en `E1286`) dès que le `DsfrProvider`
+  est monté dans le layout racine. La validation reste possible segment par segment avec
+  `export const instant`.
 
----
+`/pro` et `/admin` suivent le même motif (garde à côté des enfants) et ajouteront `@header` et
+`@breadcrumb`, avec une sous-page par route pour `generateMetadata` et le fil d'Ariane — le
+motif DiscorAds `@breadcrumb/<route>/page.tsx`. `/me` n'a pas de fil d'Ariane (D10 de `frontend.md`).
+
+Fichiers système : `error.tsx` (délègue à `components/views/route-error.tsx`), `app/forbidden.tsx`.
 
 ## 6. Ce qui est caché, streamé ou privé
 
