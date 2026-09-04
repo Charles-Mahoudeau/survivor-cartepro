@@ -1,8 +1,8 @@
 import type { DataSource } from 'typeorm';
-import { Payment } from '@/modules/payments/entities/payment.entity';
-import { PaymentToken } from '@/modules/payments/entities/payment-token.entity';
-import { CaptureMode } from '@/modules/payments/enums/capture-mode.enum';
-import { PaymentTokenStatus } from '@/modules/payments/enums/payment-token-status.enum';
+import { Payment } from '@/modules/payments/core/entities/payment.entity';
+import { PaymentToken } from '@/modules/payments/core/entities/payment-token.entity';
+import { CaptureMode } from '@/modules/payments/core/enums/capture-mode.enum';
+import { PaymentTokenStatus } from '@/modules/payments/core/enums/payment-token-status.enum';
 
 let fixtureSequence = 0;
 
