@@ -1,47 +1,44 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { authClient } from "@/lib/auth/client";
+import { MIN_PASSWORD_LENGTH } from "@/lib/auth/constants";
 import {
   AUTH_ERROR_MESSAGES,
   toAuthError,
   type AuthErrorCode,
 } from "@/lib/auth/errors";
-import { safeRedirect } from "@/lib/auth/guard";
+import { roleHome } from "@/lib/auth/guard";
 
-export function LoginForm() {
+export function SignUpForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [pending, startTransition] = useTransition();
   const [failure, setFailure] = useState<AuthErrorCode | null>(null);
-  const [detail, setDetail] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   async function submit(formData: FormData) {
     setFailure(null);
-    setDetail(null);
     setSubmitting(true);
 
-    const { data, error } = await authClient.signIn.email({
+    // The role is never sent: the API assigns it from its own default, so a
+    // crafted request cannot ask for the administration space.
+    const { data, error } = await authClient.signUp.email({
+      name: String(formData.get("name") ?? "").trim(),
       email: String(formData.get("email") ?? ""),
       password: String(formData.get("password") ?? ""),
     });
 
     if (error || !data) {
-      const code = toAuthError(error);
-      setFailure(code);
-      // The suspension sentence is written by the API, which alone knows why.
-      setDetail(code === "BANNED_USER" ? (error?.message ?? null) : null);
+      setFailure(toAuthError(error));
       setSubmitting(false);
       return;
     }
 
-    // refresh() drops the router cache, so the previous visitor's pages are not
-    // repainted for the account that just signed in.
+    // Sign-up opens the session itself, so there is nothing to sign in to.
     startTransition(() => {
-      router.replace(safeRedirect(searchParams.get("next"), data.user.role));
+      router.replace(roleHome(data.user.role));
       router.refresh();
     });
   }
@@ -55,9 +52,20 @@ export function LoginForm() {
           role="alert"
           className="border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive"
         >
-          {detail ?? AUTH_ERROR_MESSAGES[failure]}
+          {AUTH_ERROR_MESSAGES[failure]}
         </p>
       ) : null}
+
+      <label className="flex flex-col gap-1.5 text-sm">
+        <span className="font-medium">Nom et prénom</span>
+        <input
+          name="name"
+          type="text"
+          autoComplete="name"
+          required
+          className="border border-input bg-background px-3 py-2 text-base"
+        />
+      </label>
 
       <label className="flex flex-col gap-1.5 text-sm">
         <span className="font-medium">Adresse électronique</span>
@@ -75,10 +83,15 @@ export function LoginForm() {
         <input
           name="password"
           type="password"
-          autoComplete="current-password"
+          autoComplete="new-password"
           required
+          minLength={MIN_PASSWORD_LENGTH}
+          aria-describedby="password-rule"
           className="border border-input bg-background px-3 py-2 text-base"
         />
+        <span id="password-rule" className="text-muted-foreground">
+          {MIN_PASSWORD_LENGTH} caractères minimum.
+        </span>
       </label>
 
       <button
@@ -86,7 +99,7 @@ export function LoginForm() {
         disabled={busy}
         className="border border-primary px-4 py-2 text-sm font-medium text-primary disabled:opacity-60"
       >
-        {busy ? "Connexion…" : "Se connecter"}
+        {busy ? "Création…" : "Créer mon compte"}
       </button>
     </form>
   );

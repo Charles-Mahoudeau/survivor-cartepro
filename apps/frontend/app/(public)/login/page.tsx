@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 
 import { LoginForm } from "./login-form.client";
@@ -18,6 +19,12 @@ export default function LoginPage() {
       <Suspense fallback={null}>
         <LoginForm />
       </Suspense>
+      <p className="text-sm text-muted-foreground">
+        Pas encore de compte ?{" "}
+        <Link href="/signup" className="underline">
+          Créer un compte
+        </Link>
+      </p>
     </main>
   );
 }

@@ -11,7 +11,7 @@
 > espaces, la traduction des erreurs, les tests.
 >
 > **Hors portée** — le dessin des écrans (`frontend.md` §6), le client de l'API métier
-> (`lib/api/*`, lot `F-A`), l'inscription salarié, la vérification d'e-mail et la
+> (`lib/api/*`, lot `F-A`), la vérification d'e-mail et la
 > réinitialisation de mot de passe (`O1` de `authentication.md`), les clés d'API.
 >
 > **Vérifié contre** — `better-auth@1.7.2` et `better-call@1.4.0` lus dans
@@ -24,6 +24,7 @@
 
 | Capacité                              | Servi par                                                 |
 | ------------------------------------- | --------------------------------------------------------- |
+| Créer un compte salarié               | `authClient.signUp.email()` depuis `/signup`              |
 | Se connecter                          | `authClient.signIn.email()` depuis `/login`               |
 | Se déconnecter                        | `authClient.signOut()` depuis le shell                    |
 | Connaître l'utilisateur courant       | `getCurrentUser()`, côté serveur                          |
@@ -179,9 +180,9 @@ apps/frontend/
 │   ├── sign-out.client.tsx           bouton de déconnexion
 │   └── espace-placeholder.tsx        écran d'attente d'un espace
 └── app/
-    ├── (public)/login/
-    │   ├── page.tsx                  écran, statique
-    │   └── login-form.client.tsx     formulaire, client
+    ├── (public)/
+    │   ├── login/                    page.tsx + login-form.client.tsx
+    │   └── signup/                   page.tsx + signup-form.client.tsx
     └── (protected)/
         ├── me/     layout.tsx <RoleGate role="employee"> + page.tsx
         ├── pro/    layout.tsx <RoleGate role="partner">  + page.tsx
@@ -422,6 +423,39 @@ Ce que ça coûte, dit franchement : la coquille statique s'arrête au layout
 ---
 
 ## 5. Fonctionnalités
+
+### F0 — Inscription
+
+Aucun compte n'existe dans une base fraîche, et `auth:promote` ne fait que changer le
+rôle d'un compte déjà là : sans cet écran, le dispositif livré n'a aucun moyen d'obtenir
+son premier compte.
+
+```mermaid
+sequenceDiagram
+    participant U as Navigateur (/signup)
+    participant B as Better Auth
+    participant D as PostgreSQL
+
+    U->>B: POST /auth/sign-up/email {name, email, password}
+    alt adresse invalide, ou mot de passe hors bornes
+        B-->>U: 400 {code: INVALID_EMAIL | PASSWORD_TOO_SHORT | PASSWORD_TOO_LONG}
+    else adresse déjà prise
+        B-->>U: 422 {code: USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL}
+    else
+        B->>D: insert user (rôle = defaultRole), account, session
+        B-->>U: 200 {user} + Set-Cookie
+    end
+    U->>U: router.replace(roleHome(user.role))
+```
+
+Le rôle n'est **jamais** envoyé par le formulaire : l'API l'attribue depuis son
+`defaultRole`, donc une requête forgée ne peut pas réclamer l'espace d'administration.
+`autoSignIn` étant actif côté API, l'inscription ouvre la session — il n'y a pas de
+connexion à enchaîner.
+
+Conséquence assumée du même réglage : l'inscription **dit** qu'une adresse est déjà
+prise, là où la connexion refuse de distinguer une adresse inconnue d'un mot de passe
+faux. C'est une décision de l'API, pas de cet écran.
 
 ### F1 — Connexion
 
@@ -833,38 +867,52 @@ Le client renvoie `{ data, error }`, l'erreur portant `code`, `message`, `status
 Mesuré : `defineErrorCodes` construit `{ code: CLÉ, message: TEXTE }` et
 `APIError.from(status, error)` met les deux sur le fil.
 
-| Code                                       | Statut | Origine                                 | Écran                                                                                                                                   |
-| ------------------------------------------ | ------ | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `INVALID_EMAIL_OR_PASSWORD`                | 401    | e-mail inconnu **ou** mot de passe faux | Un seul message. Les distinguer permettrait d'énumérer les comptes                                                                      |
-| `BANNED_USER`                              | 403    | plugin `admin`                          | `error.message` tel quel : c'est `BANNED_USER_MESSAGE`, déjà en français                                                                |
-| _aucun code_                               | 429    | limiteur de débit                       | Brancher sur `status`, pas sur un code — le corps ne porte que `message`                                                                |
-| `INVALID_ORIGIN`, `MISSING_OR_NULL_ORIGIN` | 403    | contrôle CSRF                           | Défaut de déploiement, pas d'utilisateur. Message distinct, sinon un `AUTH_TRUSTED_ORIGINS` mal réglé se lit « identifiants invalides » |
-| `PASSWORD_TOO_SHORT`                       | 400    | inscription                             | Hors portée de ce lot                                                                                                                   |
+| Code                                                       | Statut | Origine                                 | Écran                                                                                                                                   |
+| ---------------------------------------------------------- | ------ | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `INVALID_EMAIL_OR_PASSWORD`                                | 401    | e-mail inconnu **ou** mot de passe faux | Un seul message. Les distinguer permettrait d'énumérer les comptes                                                                      |
+| `BANNED_USER`                                              | 403    | plugin `admin`                          | `error.message` tel quel : c'est `BANNED_USER_MESSAGE`, déjà en français                                                                |
+| `INVALID_EMAIL`, `PASSWORD_TOO_SHORT`, `PASSWORD_TOO_LONG` | 400    | inscription                             | Le minimum de 12 caractères est annoncé avant la saisie, pas seulement après le refus                                                   |
+| `USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL`                    | 422    | inscription                             | L'inscription dit qu'une adresse est prise, là où la connexion refuse de le dire — conséquence d'`autoSignIn`, décidée côté API         |
+| _aucun code_                                               | 429    | limiteur de débit                       | Brancher sur `status`, pas sur un code — le corps ne porte que `message`                                                                |
+| `INVALID_ORIGIN`, `MISSING_OR_NULL_ORIGIN`                 | 403    | contrôle CSRF                           | Défaut de déploiement, pas d'utilisateur. Message distinct, sinon un `AUTH_TRUSTED_ORIGINS` mal réglé se lit « identifiants invalides » |
 
 ```ts
 // apps/frontend/lib/auth/errors.ts
 import { TOO_MANY_REQUESTS_STATUS } from './constants';
 
-export type SignInErrorCode =
+export type AuthErrorCode =
   | 'INVALID_EMAIL_OR_PASSWORD'
   | 'BANNED_USER'
+  | 'INVALID_EMAIL'
+  | 'PASSWORD_TOO_SHORT'
+  | 'PASSWORD_TOO_LONG'
+  | 'USER_ALREADY_EXISTS'
   | 'TOO_MANY_REQUESTS'
   | 'MISCONFIGURED_ORIGIN'
   | 'UNKNOWN_ERROR';
 
-/** The rate limiter answers 429 with a message and no code, so status first. */
-export function toSignInError(
-  error: {
-    code?: string;
-    status?: number;
-  } | null,
-): SignInErrorCode {
-  if (error?.status === TOO_MANY_REQUESTS_STATUS) return 'TOO_MANY_REQUESTS';
+/**
+ * Branches on the code, never on the message: the API puts a machine-readable
+ * code on the wire, and a message is free to change. The rate limiter is the
+ * exception — it answers 429 with a message and no code at all.
+ */
+export function toAuthError(
+  error: { code?: string; status?: number } | null | undefined,
+): AuthErrorCode {
+  if (error?.status === TOO_MANY_REQUESTS_STATUS) {
+    return 'TOO_MANY_REQUESTS';
+  }
 
   switch (error?.code) {
     case 'INVALID_EMAIL_OR_PASSWORD':
     case 'BANNED_USER':
+    case 'INVALID_EMAIL':
+    case 'PASSWORD_TOO_SHORT':
+    case 'PASSWORD_TOO_LONG':
       return error.code;
+    case 'USER_ALREADY_EXISTS':
+    case 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL':
+      return 'USER_ALREADY_EXISTS';
     case 'INVALID_ORIGIN':
     case 'MISSING_OR_NULL_ORIGIN':
       return 'MISCONFIGURED_ORIGIN';
@@ -872,6 +920,23 @@ export function toSignInError(
       return 'UNKNOWN_ERROR';
   }
 }
+
+/**
+ * A banned account is refused with a sentence written by the API, which is the
+ * only side that knows what it refuses. Everything else is worded here.
+ */
+export const AUTH_ERROR_MESSAGES: Record<AuthErrorCode, string> = {
+  INVALID_EMAIL_OR_PASSWORD: 'Adresse électronique ou mot de passe incorrect.',
+  BANNED_USER: 'Ce compte est suspendu.',
+  INVALID_EMAIL: 'Cette adresse électronique n’est pas valide.',
+  PASSWORD_TOO_SHORT: 'Le mot de passe est trop court.',
+  PASSWORD_TOO_LONG: 'Le mot de passe est trop long.',
+  USER_ALREADY_EXISTS: 'Un compte existe déjà avec cette adresse électronique.',
+  TOO_MANY_REQUESTS: 'Trop de tentatives. Réessayez dans une minute.',
+  MISCONFIGURED_ORIGIN:
+    'La configuration du service d’authentification est incorrecte. Contactez l’administration du dispositif.',
+  UNKNOWN_ERROR: 'L’opération a échoué. Réessayez.',
+};
 ```
 
 Les libellés vivent dans `content/auth.ts`, comme le veut `D7` de `frontend.md` — une

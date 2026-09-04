@@ -20,3 +20,10 @@ export type Role = (typeof ROLES)[keyof typeof ROLES];
 
 /** The rate limiter answers with a message and no code, so status is the signal. */
 export const TOO_MANY_REQUESTS_STATUS = 429;
+
+/**
+ * Mirrors MIN_PASSWORD_LENGTH in the backend, which refuses anything shorter.
+ * Stated on the form so the rule is read before it is broken, and enforced by
+ * the API either way.
+ */
+export const MIN_PASSWORD_LENGTH = 12;
