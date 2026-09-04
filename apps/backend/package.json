@@ -25,6 +25,7 @@
     "db:show": "bun scripts/db-show.ts",
     "db:drop": "bun scripts/db-drop.ts",
     "db:reset": "bun scripts/db-reset.ts",
+    "db:seed": "bun scripts/db-seed.ts",
     "auth:promote": "bun scripts/auth-promote.ts"
   },
   "dependencies": {

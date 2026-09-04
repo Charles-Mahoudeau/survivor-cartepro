@@ -156,14 +156,15 @@ Les choix et leurs raisons sont dans
 
 ## Scripts base de données
 
-| Commande                    | Effet                                                         |
-| --------------------------- | ------------------------------------------------------------- |
-| `bun run db:generate <Nom>` | Génère une migration depuis le diff des entities.             |
-| `bun run db:migrate`        | Applique les migrations en attente.                           |
-| `bun run db:show`           | Liste les migrations et leur état.                            |
-| `bun run db:revert`         | Annule la dernière migration appliquée.                       |
-| `bun run db:drop`           | Supprime tout le schéma. Refuse de tourner en production.     |
-| `bun run db:reset`          | `db:drop` puis `db:migrate`. Refuse de tourner en production. |
+| Commande                    | Effet                                                          |
+| --------------------------- | -------------------------------------------------------------- |
+| `bun run db:generate <Nom>` | Génère une migration depuis le diff des entities.              |
+| `bun run db:migrate`        | Applique les migrations en attente.                            |
+| `bun run db:show`           | Liste les migrations et leur état.                             |
+| `bun run db:revert`         | Annule la dernière migration appliquée.                        |
+| `bun run db:drop`           | Supprime tout le schéma. Refuse de tourner en production.      |
+| `bun run db:reset`          | `db:drop` puis `db:migrate`. Refuse de tourner en production.  |
+| `bun run db:seed [--reset]` | Charge le jeu de données de recette. Refuse une base non vide. |
 
 Les cinq tables d'authentification passent par ce même chemin : ce sont des
 entities comme les autres.
@@ -171,6 +172,22 @@ entities comme les autres.
 | Commande                              | Effet                                                   |
 | ------------------------------------- | ------------------------------------------------------- |
 | `bun run auth:promote <email> [rôle]` | Donne un rôle à un compte existant. Par défaut `admin`. |
+
+### Jeu de données de recette
+
+`bun run db:seed` remplit une base vide avec cinquante salariés répartis sur
+trois employeurs, douze partenaires sur six catégories et neuf régions, et deux
+cents transactions. Les dossiers partenaires sont ceux du cahier des charges.
+
+Le jeu est **déterministe** : la graine du générateur et la date de référence sont des constantes de `scripts/seed/dataset.ts`.
+
+Il rejoue le dispositif plutôt que de tirer des lignes au sort et un paiement est refusé quand `isDebitAllowed` le dit.
+Le solde de chaque portefeuille est donc celui que ses écritures recalculent, au centime.
+
+Le script écrit aussi `exports/transactions.csv`, par la même classe que sert `GET /api/v1/admin/transactions.csv` (rôle `admin`).
+Colonnes, dans cet ordre : `id;date_iso8601;employee_id;partner_id;amount_cents;status`.
+
+Le mot de passe commun et les comptes de démonstration sont affichés en fin d'exécution. Sur une base déjà remplie, `--reset` la vide d'abord.
 
 `synchronize` n'existe pas, et il n'y a pas de variable d'environnement pour le
 réactiver. Le cahier des charges impose que les transactions validées soient
