@@ -3,4 +3,5 @@ export enum WalletEntryKind {
   PAYMENT_RECEIVED = 'payment_received',
   REFUND_SENT = 'refund_sent',
   REFUND_RECEIVED = 'refund_received',
+  ALLOCATION_RECEIVED = 'allocation_received',
 }
