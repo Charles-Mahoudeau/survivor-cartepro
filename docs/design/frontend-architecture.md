@@ -426,100 +426,79 @@ Mono — l'écart est assumé, pas rouvert ici.
 
 ### 8.2 Implémentation des composants du DSFR
 
-Demande du 2026-09-04 : la spécification décrit l'implémentation des composants du
-Système de Design de l'État tels que la page « Prise en main » du site les présente.
-Le site (`systeme-de-design.gouv.fr`) refuse les requêtes automatisées (Cloudflare) ;
-les faits ci-dessous viennent du `README.md` du dépôt `GouvernementFR/dsfr` et de
-`@codegouvfr/react-dsfr`, qui en sont la source. À vérifier sur la page au moment
-d'ouvrir le lot.
+**Décision du 2026-09-04 (Nolan)** : le DSFR est adopté via `@codegouvfr/react-dsfr` 1.34.0.
+La clause d'usage du DSFR (réservé à l'administration, réplicabilité limitée hors `.gouv.fr`,
+agrément requis) est connue et **assumée** : le site ne sera jamais publié. La palette suit
+la direction artistique de `globals.css` ; tout ce qui n'y a pas de jeton suit la bibliothèque.
 
-**Ce que le DSFR impose (vanilla, `@gouvfr/dsfr` 1.15.2)**
+**Pourquoi react-dsfr plutôt que le DSFR vanilla.** Même CSS, mêmes scripts, même rendu :
+react-dsfr embarque `@gouvfr/dsfr` et génère ses composants et ses types depuis les sources.
+Il ajoute ce que le vanilla laisse à faire dans l'App Router : le montage (`DsfrHead`,
+`DsfrProvider`, `StartDsfrOnHydration`), des composants React typés et tree-shakables, le
+branchement sur `next/link`, le thème forcé (`defaultColorScheme: 'light'`). Le responsive est
+celui du DSFR — grille `fr-grid-row` / `fr-col-*`, points de rupture `sm`/`md`/`lg`/`xl`, en-tête
+qui se replie en menu mobile — react-dsfr n'y ajoute que des helpers typés (`fr.breakpoints`).
 
-- Installation : `npm install @gouvfr/dsfr` (variable `DSFR_ACCEPT_LICENSE=1` en CI —
-  la licence n'autorise l'usage qu'aux sites de l'État ; voir O2).
-- Fichiers à servir : `dsfr.min.css`, `utility/utility.min.css`, `dsfr.module.min.js`
-  (`type="module"`) **et** `dsfr.nomodule.min.js` (`nomodule`), les dossiers `fonts/`,
-  `icons/`, `favicon/`. `utility.min.css` doit être un niveau sous `icons/`.
-- `<html lang="fr" data-fr-scheme="system">` pour les thèmes clair / sombre, un script
-  anti-flash dans `<head>`, les deux scripts JS en fin de `<body>`.
-- Nomenclature BEM : classes `fr-*` (`fr-btn`, `fr-card`, `fr-badge`, `fr-tag`,
-  `fr-sidemenu`, `fr-tabs`, `fr-alert`, `fr-breadcrumb`, `fr-header`, `fr-footer`,
-  `fr-search-bar`, `fr-skiplinks`). Chaque composant liste ses dépendances CSS/JS dans
-  son `README.md` ; on peut n'importer que `core` + `scheme` + les composants utilisés.
-- Les composants s'instancient seuls depuis le HTML ; `window.dsfr(element)` expose
-  l'API JavaScript (ouvrir une modale, changer d'onglet).
+**Montage** (`lib/dsfr/`) :
 
-**Ce que Next impose**
-
-Les scripts DSFR manipulent le DOM après hydratation et gèrent eux-mêmes le mode
-sombre ; la voie sans surprise dans l'App Router est `@codegouvfr/react-dsfr` 1.34.0,
-qui embarque le DSFR, expose chaque composant en React et sait se brancher sur
-`next/link`. Ce que la démo officielle Next 16 App Router met en place :
-
-```jsonc
-// package.json
-"predev":   "react-dsfr optimize-css",
-"prebuild": "react-dsfr optimize-css"
+```
+lib/dsfr/color-scheme.ts          DEFAULT_COLOR_SCHEME = 'light'
+lib/dsfr/server-only-index.tsx    getHtmlAttributes (createGetHtmlAttributes), DsfrHead (DsfrHeadBase + next/link)
+lib/dsfr/index.tsx  ('use client') DsfrProvider (DsfrProviderBase + next/link), StartDsfrOnHydration
+app/layout.tsx                    <html {...getHtmlAttributes({ lang: 'fr' })}> · <DsfrHead preloadFonts /> · <DsfrProvider> · SkipLinks · Footer
+chaque page.tsx                   <StartDsfrOnHydration />  — exigé par la bibliothèque sur toutes les pages
 ```
 
-```tsx
-// lib/dsfr/server-only-index.tsx
-import { DsfrHeadBase, createGetHtmlAttributes } from '@codegouvfr/react-dsfr/next-app-router/server-only-index';
-export const { getHtmlAttributes } = createGetHtmlAttributes({ defaultColorScheme: 'light' });
-export function DsfrHead(props) { return <DsfrHeadBase Link={Link} {...props} />; }
+Le CSS du DSFR et ses icônes arrivent par l'import Sass de `DsfrHead`
+(`assets/dsfr_plus_icons.scss`) : `sass` est une dépendance de développement, aucun dossier
+`public/dsfr` à copier, aucun script `optimize-css` requis (il n'est qu'une optimisation de
+poids, à ajouter plus tard si le bundle CSS gêne).
 
-// lib/dsfr/index.tsx  ('use client')
-import { DsfrProviderBase, StartDsfrOnHydration } from '@codegouvfr/react-dsfr/next-app-router';
-export function DsfrProvider(props) { return <DsfrProviderBase defaultColorScheme="light" Link={Link} {...props} />; }
-export { StartDsfrOnHydration };
+**Polices.** Le DSFR charge Marianne et Spectral depuis ses propres fichiers : `lib/fonts.ts` et
+`app/fonts/**` (4,2 Mo de fontes locales) sont retirés, et les jetons `--font-display` /
+`--font-serif` pointent sur `Marianne` / `Spectral`. Geist Mono reste pour `.font-mono-data`.
 
-// app/layout.tsx
-<html {...getHtmlAttributes({ lang: 'fr' })}>
-  <head><DsfrHead preloadFonts={['Marianne-Regular', 'Marianne-Medium', 'Marianne-Bold']} /></head>
-  <body><DsfrProvider lang="fr">{children}</DsfrProvider></body>
-</html>
+**Palette.** Les décisions de couleur du DSFR dérivent de primitives (`--blue-france-sun-113-625`,
+`--grey-1000-50`, `--error-425-625`…) déclarées sur `:root`. `globals.css` les redéfinit dans un
+bloc `:root:not([data-fr-theme='dark'])` (spécificité supérieure, thème clair seulement) à partir
+des jetons de la direction artistique :
 
-// chaque page.tsx
-<StartDsfrOnHydration />
-```
+| Primitive DSFR                                  | Jeton                                            |
+| ----------------------------------------------- | ------------------------------------------------ |
+| `--blue-france-sun-113-625` (+ hover, active)   | `--primary`, `--primary-light`, `--primary-dark` |
+| `--blue-france-975-75`, `--blue-france-950-100` | `--secondary`                                    |
+| `--grey-1000-50`                                | `--card`                                         |
+| `--grey-975-75`                                 | `--background`                                   |
+| `--grey-950-100`                                | `--muted`                                        |
+| `--grey-200-850`                                | `--foreground`                                   |
+| `--grey-425-625`, `--grey-625-425`              | `--muted-foreground`                             |
+| `--grey-900-175`                                | `--border`                                       |
+| `--error-425-625`                               | `--destructive`                                  |
 
-Les composants s'importent un par un — `@codegouvfr/react-dsfr/Button`, `/Badge`,
-`/Card`, `/Tabs`, `/Alert`, `/Breadcrumb`, `/SideMenu`, `/Header`, `/Footer`,
-`/SearchBar`, `/Tag`, `/SkipLinks` — et `fr.cx('fr-mt-7v')` compose les classes
-utilitaires. `defaultColorScheme: 'light'` fige le thème clair : le registre de la
-maquette n'a pas de variante sombre.
+Ce qui n'a pas de jeton — rayons (le DSFR est carré), ombres, boutons pleins pour l'action
+principale, tailles, espacements `fr-*` — suit la bibliothèque. Les classes `.badge-*` et
+`--radius` restent pour le prototype `app/page.tsx` et les conteneurs Tailwind maison.
 
-**Correspondance maquette → DSFR**, à appliquer écran par écran dans le lot design :
+**Correspondance maquette → DSFR**, telle qu'appliquée :
 
-| Élément de la maquette                        | Composant DSFR                                                | Ce qui change                                                                      |
-| --------------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Bloc-marque (bande tricolore + intitulé)      | `Header` — `brandTop`, `serviceTitle`                         | La bande tricolore devient celle du DSFR ; le nom du service reste « Ticket Tout » |
-| Barre latérale `/me`                          | `SideMenu`                                                    | `aria-current`, repli mobile gérés par le composant                                |
-| Barre d'onglets basse (mobile)                | aucun équivalent                                              | conservée telle quelle, sous `md:`                                                 |
-| Bouton contour                                | `Button` `priority="secondary"`                               | même sémantique (contour), taille et focus du DSFR                                 |
-| Carte de solde, carte de partenaire           | `Card`                                                        | `border`, `size`, `enlargeLink` pour la carte cliquable                            |
-| Pastille de statut, puce de catégorie         | `Badge` (statut), `Tag` (catégorie, `pressed` pour le filtre) | la couleur seule ne porte jamais l'information                                     |
-| Recherche du catalogue                        | `SearchBar`                                                   | libellé, bouton, `role="search"`                                                   |
-| Onglets de statut (`/admin/partners`)         | `Tabs`                                                        | —                                                                                  |
-| Bandeaux (simulation, portefeuille désactivé) | `Alert` `severity="info" / "warning"`                         | fermeture facultative                                                              |
-| Fil d'Ariane (`/pro`, `/admin`)               | `Breadcrumb`                                                  | alimenté par le slot `@breadcrumb`                                                 |
-| Lien d'évitement                              | `SkipLinks`                                                   | cible `#contenu`, déjà posé sur `<main>`                                           |
-| Chargement                                    | squelettes maison                                             | le DSFR n'a pas de squelette                                                       |
+| Élément                                     | Composant DSFR                                                                                                                                   | Où                                                                      |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| Bloc-marque + barre latérale + barre mobile | `Header` (`brandTop`, `serviceTitle`, `navigation`, `quickAccessItems`) — le menu mobile est celui du DSFR                                       | `components/composites/site-header.client.tsx`, slot `@header` de `/me` |
+| Bandeau de simulation                       | `Notice` `severity="info"`                                                                                                                       | `simulation-banner.tsx`                                                 |
+| Champs de connexion / inscription           | `Input` (`state`, `stateRelatedMessage`, `action` pour révéler le mot de passe)                                                                  | `auth-field.tsx`                                                        |
+| Boutons                                     | `Button` — `primary` pour l'action principale, `secondary` pour « Charger plus » et les liens d'action, `tertiary no outline` pour « Tout voir » | partout                                                                 |
+| Carte de solde                              | `CallOut`                                                                                                                                        | `/me`                                                                   |
+| Carte de partenaire                         | `Card` `size="small" border` + `Tag` de catégorie                                                                                                | `carte-partenaire.tsx`                                                  |
+| Recherche du catalogue                      | `SearchBar` (`renderInput` contrôlé, débounce conservé)                                                                                          | `/me/partners`                                                          |
+| Puces de catégorie                          | `Tag as="button" pressed`                                                                                                                        | `/me/partners`                                                          |
+| Icônes maison                               | classes `fr-icon-*` (`arrow-down-line`, `arrow-up-line`, `map-pin-2-line`, `logout-box-r-line`, `account-circle-line`, `eye-line`)               | —                                                                       |
+| Erreur de route, accès refusé               | `Alert severity="error"` + `Button`                                                                                                              | `views/route-error.tsx`, `app/forbidden.tsx`                            |
+| Lien d'évitement, pied de page              | `SkipLinks` (`#contenu`), `Footer` (`accessibility="non compliant"`)                                                                             | `app/layout.tsx`                                                        |
+| Liste des mouvements, squelettes            | conteneur Tailwind maison — le DSFR n'a ni liste de transactions ni squelette                                                                    | inchangés                                                               |
 
-**Coexistence avec Tailwind** : le DSFR pose ses styles sur ses propres classes
-`fr-*` et sur des variables `--*` préfixées ; Tailwind 4 reste pour la mise en page
-(grille, espacements du shell). Règle : un composant est **soit** DSFR, **soit**
-Tailwind — jamais des utilitaires de couleur Tailwind sur un composant `fr-*`. Les
-jetons de la maquette (§8.1) se posent en surcharge des variables DSFR
-(`--background-action-high-blue-france` → `#1B3A6B`, etc.) dans `globals.css`, après
-l'import DSFR.
-
-**Ce que ce lot ne fait pas** : il n'installe ni `@gouvfr/dsfr` ni `react-dsfr`. Les
-écrans livrés reproduisent la maquette avec des primitives maison, comme les écrans
-d'authentification. La bascule vers les composants DSFR est un lot à part (§12),
-parce qu'elle touche `app/layout.tsx`, les polices et les écrans existants d'un coup.
-
----
+**Coexistence avec Tailwind** : un composant est soit DSFR, soit Tailwind — jamais un utilitaire
+de couleur Tailwind sur un `fr-*`. Tailwind garde la mise en page fine et les composants que le
+DSFR n'a pas ; la grille des pages est celle du DSFR (`fr-container`, `fr-grid-row`, `fr-col-*`).
 
 ## 9. Contrat backend consommé
 
