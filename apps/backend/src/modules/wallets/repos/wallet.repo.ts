@@ -16,4 +16,11 @@ export class WalletRepo {
       order: { entries: { createdAt: 'DESC' } },
     });
   }
+
+  findIdByUserId(userId: string): Promise<Pick<Wallet, 'id'> | null> {
+    return this.repo.findOne({
+      where: { user: { id: userId } },
+      select: { id: true },
+    });
+  }
 }
