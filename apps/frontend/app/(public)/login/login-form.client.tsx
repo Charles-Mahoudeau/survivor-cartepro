@@ -1,116 +1,108 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useTransition } from "react";
-import { toast } from "sonner";
+import { Alert } from '@codegouvfr/react-dsfr/Alert';
+import { Button } from '@codegouvfr/react-dsfr/Button';
+import { zodResolver } from '@hookform/resolvers/zod';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useForm } from 'react-hook-form';
 
-import { BoutonAuth, ChampAuth } from "@/components/composites/auth-field";
-import { Card } from "@/components/composites/card";
-import { authClient } from "@/lib/auth/client";
-import { AUTH_ERROR_MESSAGES, toAuthError } from "@/lib/auth/errors";
-import { safeRedirect } from "@/lib/auth/guard";
-import {
-  collectErrors,
-  focusFirstError,
-  validateEmail,
-  validatePassword,
-  type FieldErrors,
-} from "@/lib/auth/validation";
+import { PasswordField } from '@/components/composites/forms/password-field';
+import { TextField } from '@/components/composites/forms/text-field';
+import { AUTH_CONTENT } from '@/content/auth';
+import { authClient } from '@/lib/auth/client';
+import { AUTH_ERROR_MESSAGES, toAuthError } from '@/lib/auth/errors';
+import { safeRedirect } from '@/lib/auth/guard';
 
-const CHAMPS = ["email", "password"];
+import { type SignInInput, signInSchema } from './schemas/sign-in.schema';
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [pending, startTransition] = useTransition();
-  const [submitting, setSubmitting] = useState(false);
-  const [errors, setErrors] = useState<FieldErrors>({});
+  const { fields, signIn } = AUTH_CONTENT;
 
-  const [email, setEmail] = useState("");
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting, isSubmitSuccessful },
+  } = useForm<SignInInput>({
+    resolver: zodResolver(signInSchema),
+    defaultValues: { email: '', password: '' },
+  });
 
-  async function submit(formData: FormData) {
-    const password = String(formData.get("password") ?? "");
-
-    const found = collectErrors({
-      email: validateEmail(email),
-      password: validatePassword(password, { enforceLength: false }),
-    });
-
-    setErrors(found);
-
-    if (Object.keys(found).length > 0) {
-      focusFirstError(CHAMPS, found);
-      return;
-    }
-
-    setSubmitting(true);
-
-    const { data, error } = await authClient.signIn.email({
-      email: email.trim(),
-      password,
-    });
+  async function onSubmit(values: SignInInput) {
+    const { data, error } = await authClient.signIn.email(values);
 
     if (error || !data) {
       const code = toAuthError(error);
-
-      toast.error(
-        code === "BANNED_USER"
-          ? (error?.message ?? AUTH_ERROR_MESSAGES[code])
-          : AUTH_ERROR_MESSAGES[code],
-      );
-      setSubmitting(false);
+      setError('root', {
+        message:
+          code === 'BANNED_USER'
+            ? (error?.message ?? AUTH_ERROR_MESSAGES[code])
+            : AUTH_ERROR_MESSAGES[code],
+      });
       return;
     }
 
-    toast.dismiss();
-
-    startTransition(() => {
-      router.replace(safeRedirect(searchParams.get("next"), data.user.role));
-      router.refresh();
-    });
+    router.replace(safeRedirect(searchParams.get('next'), data.user.role));
+    router.refresh();
   }
 
-  const busy = submitting || pending;
+  const busy = isSubmitting || isSubmitSuccessful;
 
   return (
     <>
-      <form action={submit} noValidate>
-        <Card className="mb-4 p-6">
-          <div className="space-y-4">
-            <ChampAuth
-              label="Adresse e-mail"
-              name="email"
-              type="email"
-              autoComplete="email"
-              placeholder="vous@exemple.fr"
-              value={email}
-              onChange={setEmail}
-              error={errors.email}
-            />
-            <ChampAuth
-              label="Mot de passe"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              placeholder="••••••••••••"
-              error={errors.password}
-            />
+      <form
+        method="post"
+        noValidate
+        onSubmit={handleSubmit(onSubmit)}
+        aria-busy={busy}
+      >
+        {errors.root ? (
+          <Alert
+            small
+            severity="error"
+            description={errors.root.message ?? AUTH_CONTENT.errorSummary}
+            className="fr-mb-3w"
+          />
+        ) : null}
 
-            <BoutonAuth disabled={busy}>
-              {busy ? "Connexion…" : "Se connecter"}
-            </BoutonAuth>
-          </div>
-        </Card>
+        <TextField
+          label={fields.email.label}
+          error={errors.email?.message}
+          registration={register('email')}
+          input={{
+            type: 'email',
+            autoComplete: 'username',
+            inputMode: 'email',
+            autoCapitalize: 'none',
+            spellCheck: false,
+            placeholder: fields.email.placeholder,
+          }}
+        />
+
+        <PasswordField
+          label={fields.password.label}
+          error={errors.password?.message}
+          registration={register('password')}
+          autoComplete="current-password"
+        />
+
+        <Button
+          type="submit"
+          priority="primary"
+          disabled={busy}
+          className="fr-mt-2w"
+        >
+          {busy ? signIn.submitting : signIn.submit}
+        </Button>
       </form>
 
-      <p className="text-center font-serif text-sm text-[color:var(--muted-foreground)]">
-        Pas encore de compte ?{" "}
-        <Link
-          href="/signup"
-          className="text-[color:var(--primary)] hover:underline"
-        >
-          Créer un compte
+      <p className="fr-text--sm fr-mt-4w text-center text-[color:var(--muted-foreground)]">
+        {signIn.noAccount}{' '}
+        <Link href="/signup" className="fr-link">
+          {signIn.createAccount}
         </Link>
       </p>
     </>
