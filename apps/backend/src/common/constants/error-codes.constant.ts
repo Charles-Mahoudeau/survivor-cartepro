@@ -14,6 +14,8 @@ export const ERROR_CODES = {
   FORBIDDEN_ROLE: 'FORBIDDEN_ROLE',
   /** The connected account has no wallet. */
   WALLET_NOT_FOUND: 'WALLET_NOT_FOUND',
+  /** The requested partner does not exist or is not active. */
+  PARTNER_NOT_FOUND: 'PARTNER_NOT_FOUND',
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];
