@@ -5,14 +5,14 @@ conformément à l'article 47 de la loi n° 2005-102 du 11 février 2005.
 
 À cette fin, il met en œuvre la stratégie et les actions suivantes :
 
-- Schéma pluriannuel de mise en accessibilité : **non encore établi** — voir §
+- Schéma pluriannuel de mise en accessibilité : **non encore établi**, voir §
   « Contenus non accessibles ».
 - Plan d'action de l'année en cours : le plan de correction figure ci-dessous,
   faute de schéma pluriannuel publié à ce jour.
 
 Cette déclaration d'accessibilité s'applique à **Ticket Tout**
-(`https://tickettout.gouv.fr` — dispositif de simulation, sans valeur monétaire
-réelle).
+(`https://tickettout.gouv.fr`), dispositif de simulation sans valeur
+monétaire réelle.
 
 ## État de conformité
 
@@ -34,7 +34,7 @@ donné ci-dessous à titre d'information sur l'état réel du service.
 
 L'évaluation, réalisée en interne le 4 septembre 2026, révèle que :
 
-- **63,6 % des critères applicables du RGAA 4.1 sont respectés** — 35 critères
+- **63,6 % des critères applicables du RGAA 4.1 sont respectés** : 35 critères
   conformes sur 55 applicables, les 7 critères non évalués étant décomptés comme
   non respectés ;
 - sur le seul périmètre effectivement évalué, 35 critères sont conformes et 13
@@ -143,16 +143,16 @@ Safari et VoiceOver), qui n'ont pas été réalisées.
 
 ### Pages du service ayant fait l'objet de la vérification de conformité
 
-1. Accueil et démonstrateur — `/`
-2. Connexion — `/login`
-3. Création de compte — `/signup`
-4. Solde salarié — `/me`
-5. Historique des mouvements — `/me/history`
-6. Catalogue des partenaires — `/me/partners`
-7. Écran « Accès refusé » — rendu par `forbidden()`, sans URL propre
-8. Espace partenaire — `/pro`
-9. Espace administration — `/admin`
-10. Déclaration d'accessibilité — `/accessibilite`
+1. Accueil et démonstrateur : `/`
+2. Connexion : `/login`
+3. Création de compte : `/signup`
+4. Solde salarié : `/me`
+5. Historique des mouvements : `/me/history`
+6. Catalogue des partenaires : `/me/partners`
+7. Écran « Accès refusé » : rendu par `forbidden()`, sans URL propre
+8. Espace partenaire : `/pro`
+9. Espace administration : `/admin`
+10. Déclaration d'accessibilité : `/accessibilite`
 
 Les pages contact, mentions légales, plan du site et aide, obligatoires dans
 l'échantillon, n'existent pas à ce jour et n'ont donc pas pu être auditées.
@@ -166,7 +166,7 @@ accessible ou obtenir le contenu sous une autre forme.
 - Envoyer un message : `accessibilite@tickettout.gouv.fr` **[adresse à confirmer
   avant publication]**
 - Contacter le Ministère du Job et Bonheur, direction du numérique et de
-  l'innovation — référence `JEB/DNI/2026-002`.
+  l'innovation, référence `JEB/DNI/2026-002`.
 
 Nous accusons réception de votre réclamation et vous répondons dans un délai
 d'une semaine à compter de son envoi. Si votre demande soulève des questions
@@ -196,15 +196,15 @@ Plusieurs moyens sont à votre disposition :
 
 ## Sources
 
-- Loi n° 2005-102 du 11 février 2005, article 47 —
+- Loi n° 2005-102 du 11 février 2005, article 47 :
   <https://www.legifrance.gouv.fr/loda/id/JORFTEXT000000809647/>
-- Décret n° 2019-768 du 24 juillet 2019 —
+- Décret n° 2019-768 du 24 juillet 2019 :
   <https://www.legifrance.gouv.fr/loda/id/JORFTEXT000038811937/>
-- RGAA 4.1, obligations et modèle de déclaration —
+- RGAA 4.1, obligations et modèle de déclaration :
   <https://accessibilite.numerique.gouv.fr/obligations/declaration-accessibilite/>
-- RGAA 4.1, mentions et pages obligatoires —
+- RGAA 4.1, mentions et pages obligatoires :
   <https://accessibilite.numerique.gouv.fr/obligations/mentions-et-pages-obligatoires/>
-- RGAA 4.1, évaluation de la conformité —
+- RGAA 4.1, évaluation de la conformité :
   <https://accessibilite.numerique.gouv.fr/obligations/evaluation-conformite/>
-- Exemple de déclaration d'accessibilité, DesignGouv —
+- Exemple de déclaration d'accessibilité, DesignGouv :
   <https://design.numerique.gouv.fr/outils/exemple-declaration-accessibilite/>

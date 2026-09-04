@@ -3,7 +3,7 @@
  * `/accessibilite` page read the same state, so they cannot drift apart.
  *
  * Source: `docs/legal/declaration-accessibilite.md`. Any change here is a
- * change to a legal statement — it follows an audit, never a redesign.
+ * change to a legal statement: it follows an audit, never a redesign.
  */
 
 export const ACCESSIBILITE_PATH = '/accessibilite';

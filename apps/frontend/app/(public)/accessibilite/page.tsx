@@ -40,16 +40,16 @@ const OUTILS = [
 ];
 
 const PAGES = [
-  'Accueil et démonstrateur — /',
-  'Connexion — /login',
-  'Création de compte — /signup',
-  'Solde salarié — /me',
-  'Historique des mouvements — /me/history',
-  'Catalogue des partenaires — /me/partners',
+  'Accueil et démonstrateur : /',
+  'Connexion : /login',
+  'Création de compte : /signup',
+  'Solde salarié : /me',
+  'Historique des mouvements : /me/history',
+  'Catalogue des partenaires : /me/partners',
   'Écran « Accès refusé », rendu sans URL propre',
-  'Espace partenaire — /pro',
-  'Espace administration — /admin',
-  'Déclaration d’accessibilité — /accessibilite',
+  'Espace partenaire : /pro',
+  'Espace administration : /admin',
+  'Déclaration d’accessibilité : /accessibilite',
 ];
 
 function Section({
@@ -206,8 +206,8 @@ export default function AccessibilitePage() {
           </h3>
           <p className="font-serif text-sm text-[color:var(--foreground)]">
             Aucun. Les vérifications de restitution sur la base de référence du
-            RGAA — Firefox avec NVDA, Safari avec VoiceOver — n’ont pas été
-            réalisées. C’est le motif de la non-conformité prononcée ci-dessus.
+            RGAA (Firefox avec NVDA, Safari avec VoiceOver) n’ont pas
+            été réalisées. C’est le motif de la non-conformité prononcée ci-dessus.
           </p>
 
           <h3 className="mb-2 mt-6 font-display text-base font-semibold text-[color:var(--foreground)]">

@@ -1,4 +1,4 @@
-# Audit d'accessibilité RGAA 4.1 — Ticket Tout
+# Audit d'accessibilité RGAA 4.1 de Ticket Tout
 
 > Pièce justificative de la [déclaration d'accessibilité](./declaration-accessibilite.md).
 > Évaluation menée le 04/09/2026 en interne, sur la révision `8320a08`
@@ -23,7 +23,7 @@ lecteur d'écran est classé « non testé ».
 | C       | Conforme, établi sur le code source                             |     35 |
 | NC      | Non conforme, défaut localisé dans le code                      |     13 |
 | NA      | Non applicable en l'état du service                             |     51 |
-| NT      | Non testé — exige un rendu, un validateur ou un lecteur d'écran |      7 |
+| NT      | Non testé : exige un rendu, un validateur ou un lecteur d'écran |      7 |
 
 **Taux de conformité** = critères conformes / critères applicables.
 Applicables = 106 − 51 = **55**.
@@ -44,19 +44,19 @@ d'authentification.
 | #   | Page                        | URL              | Statut                     |
 | --- | --------------------------- | ---------------- | -------------------------- |
 | 1   | Accueil et démonstrateur    | `/`              | Auditée                    |
-| 2   | Connexion                   | `/login`         | Auditée — authentification |
-| 3   | Création de compte          | `/signup`        | Auditée — authentification |
+| 2   | Connexion                   | `/login`         | Auditée (authentification) |
+| 3   | Création de compte          | `/signup`        | Auditée (authentification) |
 | 4   | Solde salarié               | `/me`            | Auditée                    |
 | 5   | Historique des mouvements   | `/me/history`    | Auditée                    |
-| 6   | Catalogue des partenaires   | `/me/partners`   | Auditée — recherche        |
-| 7   | Écran « Accès refusé »      | `forbidden()`    | Auditée — sans URL propre  |
+| 6   | Catalogue des partenaires   | `/me/partners`   | Auditée (recherche)        |
+| 7   | Écran « Accès refusé »      | `forbidden()`    | Auditée (sans URL propre)  |
 | 8   | Espace partenaire           | `/pro`           | Auditée                    |
 | 9   | Espace administration       | `/admin`         | Auditée                    |
 | 10  | Déclaration d'accessibilité | `/accessibilite` | Auditée                    |
-| —   | Contact                     | —                | **N'existe pas**           |
-| —   | Mentions légales            | —                | **N'existe pas**           |
-| —   | Plan du site                | —                | **N'existe pas**           |
-| —   | Aide                        | —                | **N'existe pas**           |
+|     | Contact                     |                  | **N'existe pas**           |
+|     | Mentions légales            |                  | **N'existe pas**           |
+|     | Plan du site                |                  | **N'existe pas**           |
+|     | Aide                        |                  | **N'existe pas**           |
 
 Un critère est déclaré conforme s'il l'est sur **toutes** les pages de
 l'échantillon. C'est pourquoi plusieurs critères respectés dans l'espace salarié
@@ -66,41 +66,41 @@ dans les composants réels.
 
 ## 3. Les treize non-conformités, localisées
 
-| Critère | Défaut                                                                              | Où                                                                       |
-| ------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| 1.1     | `<svg>` du QR code : `aria-label` sans `role="img"`                                 | `app/page.tsx:478`                                                       |
-| 1.2     | 20 `<svg>` décoratifs sur 21 sans `aria-hidden="true"`                              | `app/page.tsx` (14/14), `components/icons/index.tsx` (6/7)               |
-| 3.2     | Texte 4,43:1 et 4,24:1 pour un seuil de 4,5:1                                       | `app/globals.css` — `--muted-foreground` sur `--background` et `--muted` |
-| 3.3     | Bordure de champ 1,31:1 et 1,20:1 pour un seuil de 3:1                              | `app/globals.css` — `--border` sur `--card` et `--background`            |
-| 7.1     | Ligne de partenaire : `onClick` sur un `<div>`, sans rôle                           | `components/composites/card.tsx:5`, appelé `app/page.tsx:972`            |
-| 7.3     | La même ligne ne peut pas recevoir le focus ni être activée                         | idem                                                                     |
-| 10.6    | Lien dans le texte : 2,33:1 vs le texte environnant, souligné au survol seulement   | `app/(public)/login/login-form.client.tsx:118`                           |
-| 10.7    | `focus:outline-none` remplacé par une bordure ; bouton œil : couleur de texte seule | `components/composites/auth-field.tsx:81,101`                            |
-| 11.1    | `<label>` sans `for`, champs sans `id` ; recherche sans étiquette                   | `app/page.tsx:280,283,291,294,682,1090,1094`                             |
-| 11.10   | Formulaire de connexion du démonstrateur sans contrôle de saisie                    | `app/page.tsx:276`                                                       |
-| 11.13   | Champs du démonstrateur sans `autocomplete`                                         | `app/page.tsx:283,294`                                                   |
-| 12.1    | Un seul système de navigation : ni plan du site, ni recherche globale               | ensemble du service                                                      |
-| 12.7    | Aucun lien d'évitement ; la cible `#contenu` existe pourtant                        | `app/(protected)/me/layout.tsx:18`                                       |
+| Critère | Défaut                                                                              | Où                                                                      |
+| ------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| 1.1     | `<svg>` du QR code : `aria-label` sans `role="img"`                                 | `app/page.tsx:478`                                                      |
+| 1.2     | 20 `<svg>` décoratifs sur 21 sans `aria-hidden="true"`                              | `app/page.tsx` (14/14), `components/icons/index.tsx` (6/7)              |
+| 3.2     | Texte 4,43:1 et 4,24:1 pour un seuil de 4,5:1                                       | `app/globals.css`, `--muted-foreground` sur `--background` et `--muted` |
+| 3.3     | Bordure de champ 1,31:1 et 1,20:1 pour un seuil de 3:1                              | `app/globals.css`, `--border` sur `--card` et `--background`            |
+| 7.1     | Ligne de partenaire : `onClick` sur un `<div>`, sans rôle                           | `components/composites/card.tsx:5`, appelé `app/page.tsx:972`           |
+| 7.3     | La même ligne ne peut pas recevoir le focus ni être activée                         | idem                                                                    |
+| 10.6    | Lien dans le texte : 2,33:1 vs le texte environnant, souligné au survol seulement   | `app/(public)/login/login-form.client.tsx:118`                          |
+| 10.7    | `focus:outline-none` remplacé par une bordure ; bouton œil : couleur de texte seule | `components/composites/auth-field.tsx:81,101`                           |
+| 11.1    | `<label>` sans `for`, champs sans `id` ; recherche sans étiquette                   | `app/page.tsx:280,283,291,294,682,1090,1094`                            |
+| 11.10   | Formulaire de connexion du démonstrateur sans contrôle de saisie                    | `app/page.tsx:276`                                                      |
+| 11.13   | Champs du démonstrateur sans `autocomplete`                                         | `app/page.tsx:283,294`                                                  |
+| 12.1    | Un seul système de navigation : ni plan du site, ni recherche globale               | ensemble du service                                                     |
+| 12.7    | Aucun lien d'évitement ; la cible `#contenu` existe pourtant                        | `app/(protected)/me/layout.tsx:18`                                      |
 
 ### Contrastes mesurés
 
 Calcul par la formule de luminance relative WCAG 2.1, sur les jetons déclarés
 dans `app/globals.css`.
 
-| Paire                                              | Rapport | Seuil | Verdict |
-| -------------------------------------------------- | ------: | ----: | ------- |
-| `#6b7280` sur `#f5f5f3` — texte secondaire         |  4,43:1 | 4,5:1 | Échec   |
-| `#6b7280` sur `#f0f0ee` — statut « suspendu »      |  4,24:1 | 4,5:1 | Échec   |
-| `#dde1ea` sur `#ffffff` — bordure de champ         |  1,31:1 |   3:1 | Échec   |
-| `#dde1ea` sur `#f5f5f3` — bordure de champ         |  1,20:1 |   3:1 | Échec   |
-| `#1b3a6b` vs `#6b7280` — lien vs texte environnant |  2,33:1 |   3:1 | Échec   |
-| `#6b7280` sur `#ffffff` — texte sur carte          |  4,83:1 | 4,5:1 | OK      |
-| `#1a1a2e` sur `#ffffff` — texte principal          | 17,06:1 | 4,5:1 | OK      |
-| `#1b3a6b` sur `#ffffff` — primary sur blanc        | 11,27:1 | 4,5:1 | OK      |
-| `#d93b3b` sur `#ffffff` — message d'erreur         |  4,53:1 | 4,5:1 | OK      |
-| `#b45309` sur `#fef3c7` — bandeau de simulation    |  4,51:1 | 4,5:1 | OK      |
-| `#065f46` sur `#d1fae5` — pastille de crédit       |  6,78:1 | 4,5:1 | OK      |
-| `#991b1b` sur `#fee2e2` — badge « refusé »         |  6,80:1 | 4,5:1 | OK      |
+| Paire                                             | Rapport | Seuil | Verdict |
+| ------------------------------------------------- | ------: | ----: | ------- |
+| `#6b7280` sur `#f5f5f3`, texte secondaire         |  4,43:1 | 4,5:1 | Échec   |
+| `#6b7280` sur `#f0f0ee`, statut « suspendu »      |  4,24:1 | 4,5:1 | Échec   |
+| `#dde1ea` sur `#ffffff`, bordure de champ         |  1,31:1 |   3:1 | Échec   |
+| `#dde1ea` sur `#f5f5f3`, bordure de champ         |  1,20:1 |   3:1 | Échec   |
+| `#1b3a6b` vs `#6b7280`, lien vs texte environnant |  2,33:1 |   3:1 | Échec   |
+| `#6b7280` sur `#ffffff`, texte sur carte          |  4,83:1 | 4,5:1 | OK      |
+| `#1a1a2e` sur `#ffffff`, texte principal          | 17,06:1 | 4,5:1 | OK      |
+| `#1b3a6b` sur `#ffffff`, primary sur blanc        | 11,27:1 | 4,5:1 | OK      |
+| `#d93b3b` sur `#ffffff`, message d'erreur         |  4,53:1 | 4,5:1 | OK      |
+| `#b45309` sur `#fef3c7`, bandeau de simulation    |  4,51:1 | 4,5:1 | OK      |
+| `#065f46` sur `#d1fae5`, pastille de crédit       |  6,78:1 | 4,5:1 | OK      |
+| `#991b1b` sur `#fee2e2`, badge « refusé »         |  6,80:1 | 4,5:1 | OK      |
 
 Les deux échecs de texte se jouent à 0,07 et 0,26 point : assombrir
 `--muted-foreground` de `#6b7280` à `#616a77` porte les deux paires au-dessus du
@@ -127,16 +127,16 @@ pour disposer d'un audit valide au sens du RGAA.
 Relevées pendant la lecture, elles ne font échouer aucun critère mais méritent
 d'être corrigées quand le code sera touché.
 
-- `components/composites/brand-block.tsx:3` — `aria-label="République Française"`
+- `components/composites/brand-block.tsx:3` : `aria-label="République Française"`
   posé sur un `<div>` sans rôle : ignoré par les technologies d'assistance, et
   redondant avec le texte visible.
-- `components/composites/simulation-banner.tsx:5` — `role="status"` sur un
+- `components/composites/simulation-banner.tsx:5` : `role="status"` sur un
   contenu statique. Le rôle est fait pour annoncer un changement ; ici il n'y en
   a pas.
-- `app/(protected)/me/history/page.client.tsx` — « Charger plus » ajoute des
+- `app/(protected)/me/history/page.client.tsx` : « Charger plus » ajoute des
   lignes sans message de statut, alors que `me/partners/page.client.tsx` montre
   le motif attendu avec son compteur en `aria-live="polite"`.
-- `app/page.tsx:104,177` — deux `<nav>` sans nom accessible distinct.
+- `app/page.tsx:104,177` : deux `<nav>` sans nom accessible distinct.
 
 ## 6. Ce que le DSFR change, et ce qu'il ne change pas
 
@@ -145,7 +145,7 @@ branche `feat/frontend/dsfr`, mais aucun composant DSFR n'était utilisé dans u
 page au moment de cet audit : les écrans reposent sur shadcn/Radix et Tailwind.
 
 Le passage au DSFR traitera par construction plusieurs des non-conformités
-ci-dessus — les composants du système livrent leurs propres étiquettes, un
+ci-dessus : les composants du système livrent leurs propres étiquettes, un
 indicateur de focus conforme, une palette contrastée et un lien d'évitement
 (`SkipLinks`). Il n'en traitera **aucune** de celles qui tiennent à la façon
 dont l'application assemble ces composants : le `<div>` cliquable de la liste
@@ -161,7 +161,7 @@ détermine pas.
 Verdicts : **C** conforme · **NC** non conforme · **NA** non applicable ·
 **NT** non testé.
 
-### 1. Images — 1 C · 2 NC · 6 NA · 0 NT
+### 1. Images : 1 C · 2 NC · 6 NA · 0 NT
 
 | Critère | Intitulé                                                                                                                                                                                             | Verdict |
 | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
@@ -175,14 +175,14 @@ Verdicts : **C** conforme · **NC** non conforme · **NA** non applicable ·
 | 1.8     | Chaque image texte porteuse d’information, en l’absence d’un mécanisme de remplacement, doit si possible être remplacée par du texte stylé. Cette règle est-elle respectée (hors cas particuliers) ? | **NA**  |
 | 1.9     | Chaque légende d’image est-elle, si nécessaire, correctement reliée à l’image correspondante ?                                                                                                       | **NA**  |
 
-### 2. Cadres — 0 C · 0 NC · 2 NA · 0 NT
+### 2. Cadres : 0 C · 0 NC · 2 NA · 0 NT
 
 | Critère | Intitulé                                                                        | Verdict |
 | ------- | ------------------------------------------------------------------------------- | ------- |
 | 2.1     | Chaque cadre a-t-il un titre de cadre ?                                         | **NA**  |
 | 2.2     | Pour chaque cadre ayant un titre de cadre, ce titre de cadre est-il pertinent ? | **NA**  |
 
-### 3. Couleurs — 1 C · 2 NC · 0 NA · 0 NT
+### 3. Couleurs : 1 C · 2 NC · 0 NA · 0 NT
 
 | Critère | Intitulé                                                                                                                                                                                      | Verdict |
 | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
@@ -190,7 +190,7 @@ Verdicts : **C** conforme · **NC** non conforme · **NA** non applicable ·
 | 3.2     | Dans chaque page web, le contraste entre la couleur du texte et la couleur de son arrière-plan est-il suffisamment élevé (hors cas particuliers) ?                                            | **NC**  |
 | 3.3     | Dans chaque page web, les couleurs utilisées dans les composants d’interface ou les éléments graphiques porteurs d’informations sont-elles suffisamment contrastées (hors cas particuliers) ? | **NC**  |
 
-### 4. Multimédia — 0 C · 0 NC · 13 NA · 0 NT
+### 4. Multimédia : 0 C · 0 NC · 13 NA · 0 NT
 
 | Critère | Intitulé                                                                                                                                                                     | Verdict |
 | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
@@ -208,7 +208,7 @@ Verdicts : **C** conforme · **NC** non conforme · **NA** non applicable ·
 | 4.12    | La consultation de chaque média non temporel est-elle contrôlable par le clavier et tout dispositif de pointage ?                                                            | **NA**  |
 | 4.13    | Chaque média temporel et non temporel est-il compatible avec les technologies d’assistance (hors cas particuliers) ?                                                         | **NA**  |
 
-### 5. Tableaux — 0 C · 0 NC · 8 NA · 0 NT
+### 5. Tableaux : 0 C · 0 NC · 8 NA · 0 NT
 
 | Critère | Intitulé                                                                                                                                                   | Verdict |
 | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
@@ -221,14 +221,14 @@ Verdicts : **C** conforme · **NC** non conforme · **NA** non applicable ·
 | 5.7     | Pour chaque tableau de données, la technique appropriée permettant d’associer chaque cellule avec ses en-têtes est-elle utilisée (hors cas particuliers) ? | **NA**  |
 | 5.8     | Chaque tableau de mise en forme ne doit pas utiliser d’éléments propres aux tableaux de données. Cette règle est-elle respectée ?                          | **NA**  |
 
-### 6. Liens — 2 C · 0 NC · 0 NA · 0 NT
+### 6. Liens : 2 C · 0 NC · 0 NA · 0 NT
 
 | Critère | Intitulé                                               | Verdict |
 | ------- | ------------------------------------------------------ | ------- |
 | 6.1     | Chaque lien est-il explicite (hors cas particuliers) ? | **C**   |
 | 6.2     | Dans chaque page web, chaque lien a-t-il un intitulé ? | **C**   |
 
-### 7. Scripts — 2 C · 2 NC · 1 NA · 0 NT
+### 7. Scripts : 2 C · 2 NC · 1 NA · 0 NT
 
 | Critère | Intitulé                                                                                                         | Verdict |
 | ------- | ---------------------------------------------------------------------------------------------------------------- | ------- |
@@ -238,7 +238,7 @@ Verdicts : **C** conforme · **NC** non conforme · **NA** non applicable ·
 | 7.4     | Pour chaque script qui initie un changement de contexte, l’utilisateur est-il averti ou en a-t-il le contrôle ?  | **C**   |
 | 7.5     | Dans chaque page web, les messages de statut sont-ils correctement restitués par les technologies d’assistance ? | **C**   |
 
-### 8. Éléments obligatoires — 6 C · 0 NC · 3 NA · 1 NT
+### 8. Éléments obligatoires : 6 C · 0 NC · 3 NA · 1 NT
 
 | Critère | Intitulé                                                                                                                                | Verdict |
 | ------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------- |
@@ -253,7 +253,7 @@ Verdicts : **C** conforme · **NC** non conforme · **NA** non applicable ·
 | 8.9     | Dans chaque page web, les balises ne doivent pas être utilisées uniquement à des fins de présentation. Cette règle est-elle respectée ? | **C**   |
 | 8.10    | Dans chaque page web, les changements du sens de lecture sont-ils signalés ?                                                            | **NA**  |
 
-### 9. Structuration de l’information — 3 C · 0 NC · 1 NA · 0 NT
+### 9. Structuration de l’information : 3 C · 0 NC · 1 NA · 0 NT
 
 | Critère | Intitulé                                                                                         | Verdict |
 | ------- | ------------------------------------------------------------------------------------------------ | ------- |
@@ -262,7 +262,7 @@ Verdicts : **C** conforme · **NC** non conforme · **NA** non applicable ·
 | 9.3     | Dans chaque page web, chaque liste est-elle correctement structurée ?                            | **C**   |
 | 9.4     | Dans chaque page web, chaque citation est-elle correctement indiquée ?                           | **NA**  |
 
-### 10. Présentation de l’information — 4 C · 2 NC · 3 NA · 5 NT
+### 10. Présentation de l’information : 4 C · 2 NC · 3 NA · 5 NT
 
 | Critère | Intitulé                                                                                                                                                                                                                                                  | Verdict |
 | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
@@ -281,7 +281,7 @@ Verdicts : **C** conforme · **NC** non conforme · **NA** non applicable ·
 | 10.13   | Dans chaque page web, les contenus additionnels apparaissant à la prise de focus ou au survol d’un composant d’interface sont-ils contrôlables par l’utilisateur (hors cas particuliers) ?                                                                | **NA**  |
 | 10.14   | Dans chaque page web, les contenus additionnels apparaissant via les styles CSS uniquement peuvent-ils être rendus visibles au clavier et par tout dispositif de pointage ?                                                                               | **NA**  |
 
-### 11. Formulaires — 5 C · 3 NC · 5 NA · 0 NT
+### 11. Formulaires : 5 C · 3 NC · 5 NA · 0 NT
 
 | Critère | Intitulé                                                                                                                                                                                                                                                                                | Verdict |
 | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
@@ -299,7 +299,7 @@ Verdicts : **C** conforme · **NC** non conforme · **NA** non applicable ·
 | 11.12   | Pour chaque formulaire qui modifie ou supprime des données, ou qui transmet des réponses à un test ou à un examen, ou dont la validation a des conséquences financières ou juridiques, les données saisies peuvent-elles être modifiées, mises à jour ou récupérées par l’utilisateur ? | **NA**  |
 | 11.13   | La finalité d’un champ de saisie peut-elle être déduite pour faciliter le remplissage automatique des champs avec les données de l’utilisateur ?                                                                                                                                        | **NC**  |
 
-### 12. Navigation — 3 C · 2 NC · 5 NA · 1 NT
+### 12. Navigation : 3 C · 2 NC · 5 NA · 1 NT
 
 | Critère | Intitulé                                                                                                                                                                                                                        | Verdict |
 | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
@@ -315,7 +315,7 @@ Verdicts : **C** conforme · **NC** non conforme · **NA** non applicable ·
 | 12.10   | Dans chaque page web, les raccourcis clavier n’utilisant qu’une seule touche (lettre minuscule ou majuscule, ponctuation, chiffre ou symbole) sont-ils contrôlables par l’utilisateur ?                                         | **NA**  |
 | 12.11   | Dans chaque page web, les contenus additionnels apparaissant au survol, à la prise de focus ou à l’activation d’un composant d’interface sont-ils si nécessaire atteignables au clavier ?                                       | **NA**  |
 
-### 13. Consultation — 8 C · 0 NC · 4 NA · 0 NT
+### 13. Consultation : 8 C · 0 NC · 4 NA · 0 NT
 
 | Critère | Intitulé                                                                                                                                                                                        | Verdict |
 | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
@@ -336,8 +336,8 @@ Verdicts : **C** conforme · **NC** non conforme · **NA** non applicable ·
 
 ## Sources
 
-- RGAA 4.1, critères et tests — <https://accessibilite.numerique.gouv.fr/methode/criteres-et-tests/>
-- RGAA 4.1, grille des 106 critères (`RGAA/4.1/criteres.json`) — <https://github.com/DISIC/accessibilite.numerique.gouv.fr>
-- RGAA 4.1, évaluation de la conformité — <https://accessibilite.numerique.gouv.fr/obligations/evaluation-conformite/>
-- WCAG 2.1, rapport de contraste — <https://www.w3.org/TR/WCAG21/#dfn-contrast-ratio>
-- `@codegouvfr/react-dsfr` — <https://github.com/codegouvfr/react-dsfr>
+- RGAA 4.1, critères et tests : <https://accessibilite.numerique.gouv.fr/methode/criteres-et-tests/>
+- RGAA 4.1, grille des 106 critères (`RGAA/4.1/criteres.json`) : <https://github.com/DISIC/accessibilite.numerique.gouv.fr>
+- RGAA 4.1, évaluation de la conformité : <https://accessibilite.numerique.gouv.fr/obligations/evaluation-conformite/>
+- WCAG 2.1, rapport de contraste : <https://www.w3.org/TR/WCAG21/#dfn-contrast-ratio>
+- `@codegouvfr/react-dsfr` : <https://github.com/codegouvfr/react-dsfr>
