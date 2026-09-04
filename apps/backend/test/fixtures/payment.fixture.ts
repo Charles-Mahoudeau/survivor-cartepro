@@ -1,6 +1,6 @@
 import type { DataSource } from 'typeorm';
-import { Payment } from '@/modules/payments/core/entities/payment.entity';
 import { PaymentToken } from '@/modules/payments/core/entities/payment-token.entity';
+import { Payment } from '@/modules/payments/core/entities/payment.entity';
 import { CaptureMode } from '@/modules/payments/core/enums/capture-mode.enum';
 import { PaymentTokenStatus } from '@/modules/payments/core/enums/payment-token-status.enum';
 
