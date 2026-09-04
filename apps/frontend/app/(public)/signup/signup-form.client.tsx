@@ -20,7 +20,6 @@ import {
   type FieldErrors,
 } from "@/lib/auth/validation";
 
-/** The order the form shows them, which is the order to correct them in. */
 const CHAMPS = ["name", "email", "password"];
 
 export function SignUpForm() {
@@ -28,15 +27,13 @@ export function SignUpForm() {
   const [pending, startTransition] = useTransition();
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
-  // React resets the form once the action settles; only the password should go.
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
   async function submit(formData: FormData) {
     const password = String(formData.get("password") ?? "");
 
-    // Native validation is switched off on the form: its bubble cannot be
-    // styled, reads in the browser's language, and vanishes on the next click.
     const found = collectErrors({
       name: validateName(name),
       email: validateEmail(email),
@@ -52,8 +49,6 @@ export function SignUpForm() {
 
     setSubmitting(true);
 
-    // The role is never sent: the API assigns it from its own default, so a
-    // crafted request cannot ask for the administration space.
     const { data, error } = await authClient.signUp.email({
       name: name.trim(),
       email: email.trim(),
@@ -66,11 +61,8 @@ export function SignUpForm() {
       return;
     }
 
-    // A refusal from a previous attempt must not survive onto the space the
-    // account just reached.
     toast.dismiss();
 
-    // Sign-up opens the session itself, so there is nothing to sign in to.
     startTransition(() => {
       router.replace(roleHome(data.user.role));
       router.refresh();

@@ -11,11 +11,6 @@ export type AuthErrorCode =
   | 'MISCONFIGURED_ORIGIN'
   | 'UNKNOWN_ERROR';
 
-/**
- * Branches on the code, never on the message: the API puts a machine-readable
- * code on the wire, and a message is free to change. The rate limiter is the
- * exception — it answers 429 with a message and no code at all.
- */
 export function toAuthError(
   error: { code?: string; status?: number } | null | undefined,
 ): AuthErrorCode {
@@ -41,10 +36,6 @@ export function toAuthError(
   }
 }
 
-/**
- * A banned account is refused with a sentence written by the API, which is the
- * only side that knows what it refuses. Everything else is worded here.
- */
 export const AUTH_ERROR_MESSAGES: Record<AuthErrorCode, string> = {
   INVALID_EMAIL_OR_PASSWORD: 'Adresse électronique ou mot de passe incorrect.',
   BANNED_USER: 'Ce compte est suspendu.',

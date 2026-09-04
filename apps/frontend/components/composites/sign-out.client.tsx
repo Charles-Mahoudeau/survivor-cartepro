@@ -12,8 +12,7 @@ export function SignOutButton() {
   async function signOut() {
     setPending(true);
     await authClient.signOut();
-    // The session row is deleted server-side, but the router cache still holds
-    // the authenticated pages: without refresh() the back button repaints them.
+
     router.replace("/login");
     router.refresh();
   }

@@ -4,10 +4,6 @@ import { SignOutButton } from "@/components/composites/sign-out.client";
 import { BandeauSimulation } from "@/components/composites/simulation-banner";
 import type { CurrentUser } from "@/lib/auth/session";
 
-/**
- * Placeholder for the screens of the frontend specification. It exists so the
- * session guard has something to guard, and so a sign-in can be seen to work.
- */
 export function EspacePlaceholder({
   titre,
   user,

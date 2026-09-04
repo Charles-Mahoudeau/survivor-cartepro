@@ -7,10 +7,6 @@ export const metadata: Metadata = {
   title: "Créer un compte — Ticket Tout (simulation)",
 };
 
-/**
- * Employee sign-up. The account is created with the role the API assigns by
- * default; the partner and administration roles are granted out of band.
- */
 export default function SignUpPage() {
   return (
     <AuthShell

@@ -3,7 +3,6 @@
 import { RiEyeLine, RiEyeOffLine } from "@remixicon/react";
 import { useState, type ReactNode } from "react";
 
-/** One labelled field of the authentication forms, styled like the prototype. */
 export function ChampAuth({
   label,
   name,
@@ -32,8 +31,6 @@ export function ChampAuth({
   const erreurId = error ? `${name}-erreur` : undefined;
   const revealable = type === "password";
 
-  // The hint comes first, then the error: a screen reader reads what to enter
-  // before what went wrong.
   const describedBy = [aideId, erreurId].filter(Boolean).join(" ") || undefined;
 
   return (
@@ -108,7 +105,6 @@ export function ChampAuth({
   );
 }
 
-/** The single action of an authentication form. */
 export function BoutonAuth({
   children,
   disabled,

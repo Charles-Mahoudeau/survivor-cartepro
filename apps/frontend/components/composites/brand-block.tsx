@@ -1,8 +1,7 @@
-/** The République Française brand block, tricolour stripe included. */
 export function BlocMarque({ compact = false }: { compact?: boolean }) {
   return (
     <div className="flex items-start gap-2.5 select-none" aria-label="République Française">
-      {/* Tricolore stripe */}
+      {}
       <div className="flex flex-col shrink-0">
         <div className="flex h-full">
           <div className={`${compact ? "w-1" : "w-1.5"} ${compact ? "h-7" : "h-9"} bg-[#002395]`} />

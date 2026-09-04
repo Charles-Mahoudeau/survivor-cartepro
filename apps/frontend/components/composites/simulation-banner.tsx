@@ -1,7 +1,3 @@
-/**
- * Legally required mention, worded by counsel: every amount in this
- * application is fictional. Shared so the sentence exists once.
- */
 export function BandeauSimulation() {
   return (
     <div

@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { BlocMarque } from "./brand-block";
 import { BandeauSimulation } from "./simulation-banner";
 
-/** The frame the sign-in and sign-up screens share with the rest of the app. */
 export function AuthShell({
   titre,
   sousTitre,

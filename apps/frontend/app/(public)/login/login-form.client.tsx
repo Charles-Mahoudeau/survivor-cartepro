@@ -18,7 +18,6 @@ import {
   type FieldErrors,
 } from "@/lib/auth/validation";
 
-/** The order the form shows them, which is the order to correct them in. */
 const CHAMPS = ["email", "password"];
 
 export function LoginForm() {
@@ -27,15 +26,12 @@ export function LoginForm() {
   const [pending, startTransition] = useTransition();
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
-  // React resets the form once the action settles: without this the address has
-  // to be typed again after every refusal.
+
   const [email, setEmail] = useState("");
 
   async function submit(formData: FormData) {
     const password = String(formData.get("password") ?? "");
 
-    // Native validation is switched off on the form: its bubble cannot be
-    // styled, reads in the browser's language, and vanishes on the next click.
     const found = collectErrors({
       email: validateEmail(email),
       password: validatePassword(password, { enforceLength: false }),
@@ -57,8 +53,7 @@ export function LoginForm() {
 
     if (error || !data) {
       const code = toAuthError(error);
-      // A suspension is announced with the sentence the API wrote: it alone
-      // knows what it refuses.
+
       toast.error(
         code === "BANNED_USER"
           ? (error?.message ?? AUTH_ERROR_MESSAGES[code])
@@ -68,12 +63,8 @@ export function LoginForm() {
       return;
     }
 
-    // A refusal from a previous attempt must not survive onto the space the
-    // account just reached.
     toast.dismiss();
 
-    // refresh() drops the router cache, so the previous visitor's pages are not
-    // repainted for the account that just signed in.
     startTransition(() => {
       router.replace(safeRedirect(searchParams.get("next"), data.user.role));
       router.refresh();

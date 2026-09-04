@@ -12,15 +12,6 @@ export interface CurrentUser {
   role: string;
 }
 
-/**
- * One read per request, deduplicated inside a render by React's cache.
- *
- * Never render-cached, in any form. A private cache defaults to a five-minute
- * stale window and drops out of prefetching below thirty seconds, so there is
- * no short value without a side effect — and five minutes of cached session is
- * exactly what the API gives up a session cache to avoid: a banned account and
- * a stale role staying alive until it expires.
- */
 export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   const auth = await getAuth();
 

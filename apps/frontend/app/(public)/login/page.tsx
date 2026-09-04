@@ -8,10 +8,6 @@ export const metadata: Metadata = {
   title: "Connexion — Ticket Tout (simulation)",
 };
 
-/**
- * No role selector: the space comes from the session, never from a field. A
- * selector would suggest one can choose where to land.
- */
 export default function LoginPage() {
   return (
     <AuthShell

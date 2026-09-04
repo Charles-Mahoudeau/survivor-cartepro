@@ -10,19 +10,6 @@ export interface ForwardedAuth {
   headers: Headers;
 }
 
-/**
- * Rebuilds the three headers the auth handler reads off a browser request: the
- * session cookie, the origin its CSRF check compares against, and the address
- * its rate limiter keys on. A server-side call carries none of them by itself.
- *
- * The origin is set even on reads, where it is ignored: the handler skips the
- * check on GET, but any write that carries a cookie is refused without it, and
- * a helper that branches is a helper whose missing branch is found in production.
- *
- * Forwarding the client address matters because the limiter falls back to a
- * single shared bucket when it cannot resolve one, which would turn five failed
- * attempts into a lockout for everybody.
- */
 export async function getAuth(): Promise<ForwardedAuth> {
   const store = await cookies();
   const incoming = await headers();
