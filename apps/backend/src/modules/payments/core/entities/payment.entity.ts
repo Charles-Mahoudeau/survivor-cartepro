@@ -14,8 +14,8 @@ import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-genera
 import { Partner } from '@/modules/partners/core/entities/partner.entity';
 import { WalletEntry } from '@/modules/wallets/entities/wallet-entry.entity';
 import { Wallet } from '@/modules/wallets/entities/wallet.entity';
-import { PaymentToken } from '@/modules/payments/entities/payment-token.entity';
-import { CaptureMode } from '@/modules/payments/enums/capture-mode.enum';
+import { PaymentToken } from '@/modules/payments/core/entities/payment-token.entity';
+import { CaptureMode } from '@/modules/payments/core/enums/capture-mode.enum';
 
 @Entity()
 @Index('IDX_payment_wallet_id', ['wallet'])
