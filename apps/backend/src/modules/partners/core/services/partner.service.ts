@@ -101,10 +101,6 @@ export class PartnerService {
 
     if (dto.legalName !== undefined) partner.legalName = dto.legalName;
     if (dto.tradeName !== undefined) partner.tradeName = dto.tradeName;
-    if (dto.siren !== undefined) partner.siren = dto.siren;
-    if (dto.businessPurpose !== undefined) {
-      partner.businessPurpose = dto.businessPurpose;
-    }
     if (dto.addressLine !== undefined) partner.addressLine = dto.addressLine;
     if (dto.postalCode !== undefined) partner.postalCode = dto.postalCode;
     if (dto.city !== undefined) partner.city = dto.city;

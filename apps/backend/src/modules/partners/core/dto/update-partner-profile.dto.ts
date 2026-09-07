@@ -5,8 +5,6 @@ import {
   IsNumber,
   IsOptional,
   IsString,
-  Length,
-  Matches,
   Max,
   Min,
 } from 'class-validator';
@@ -22,18 +20,6 @@ export class UpdatePartnerProfileDto {
   @IsOptional()
   @IsString()
   tradeName?: string;
-
-  @ApiPropertyOptional({ example: '123456789' })
-  @IsOptional()
-  @IsString()
-  @Length(9, 9)
-  @Matches(/^[0-9]{9}$/, { message: 'siren must be a 9-digit string' })
-  siren?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  businessPurpose?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
