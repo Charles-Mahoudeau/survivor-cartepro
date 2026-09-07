@@ -1,5 +1,0 @@
-{
-  "apps/*/{src,scripts,test}/**/*.ts": ["prettier --check", "eslint"],
-  "scripts/**/*.ts": ["prettier --check"],
-  "*.{json,md,yml,mjs}": ["prettier --check"]
-}
