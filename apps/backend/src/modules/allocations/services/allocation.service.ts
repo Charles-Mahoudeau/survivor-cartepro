@@ -97,7 +97,9 @@ export class AllocationService {
     }
 
     if (Object.keys(changes).length > 0) {
-      await this.allocationRepo.updateDraft(id, changes);
+      if (!(await this.allocationRepo.updateDraft(id, changes))) {
+        throw new ConflictException(ERROR_CODES.ALLOCATION_ALREADY_APPLIED);
+      }
       Object.assign(allocation, changes);
     }
 
@@ -114,32 +116,37 @@ export class AllocationService {
     this.refuseApplied(allocation);
 
     const appliedAt = new Date();
-    const outcome = await this.dataSource.transaction(async (manager) => {
-      const locked = await this.allocationRepo.lockStatusById(manager, id);
+    const { amount, outcome } = await this.dataSource.transaction(
+      async (manager) => {
+        const locked = await this.allocationRepo.lockById(manager, id);
 
-      if (!locked) {
-        throw new NotFoundException(ERROR_CODES.ALLOCATION_NOT_FOUND);
-      }
-      if (locked.status === AllocationStatus.APPLIED) {
-        throw new ConflictException(ERROR_CODES.ALLOCATION_ALREADY_APPLIED);
-      }
+        if (!locked) {
+          throw new NotFoundException(ERROR_CODES.ALLOCATION_NOT_FOUND);
+        }
+        if (locked.status === AllocationStatus.APPLIED) {
+          throw new ConflictException(ERROR_CODES.ALLOCATION_ALREADY_APPLIED);
+        }
 
-      const credited = await this.walletService.creditFromAllocation(manager, {
-        allocationId: allocation.id,
-        employerId: allocation.employer.id,
-        amount: Number(allocation.amount),
-      });
-      await this.allocationRepo.markApplied(manager, id, appliedAt);
+        const credited = await this.walletService.creditFromAllocation(
+          manager,
+          {
+            allocationId: locked.id,
+            employerId: allocation.employer.id,
+            amount: Number(locked.amount),
+          },
+        );
+        await this.allocationRepo.markApplied(manager, id, appliedAt);
 
-      return credited;
-    });
+        return { amount: locked.amount, outcome: credited };
+      },
+    );
 
     return {
       id: allocation.id,
       status: AllocationStatus.APPLIED,
       appliedAt,
       creditedCount: outcome.credited.length,
-      total: totalCredited(String(allocation.amount), outcome.credited.length),
+      total: totalCredited(String(amount), outcome.credited.length),
       excluded: outcome.excluded.map((wallet) => ({
         ...toHolder(wallet),
         reason: AllocationExclusionReason.WALLET_DISABLED,

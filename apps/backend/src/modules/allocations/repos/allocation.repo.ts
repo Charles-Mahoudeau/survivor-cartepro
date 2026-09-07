@@ -51,25 +51,37 @@ export class AllocationRepo {
     );
   }
 
+  /**
+   * Amends the row only while it is still a draft, and answers whether it
+   * moved. The status sits in the `WHERE`, so an apply committing alongside
+   * makes this write miss rather than race it.
+   */
   async updateDraft(
     id: string,
     changes: { label?: string; amount?: number },
-  ): Promise<void> {
-    await this.repo.update({ id }, changes);
+  ): Promise<boolean> {
+    const result = await this.repo.update(
+      { id, status: AllocationStatus.DRAFT },
+      changes,
+    );
+
+    return (result.affected ?? 0) > 0;
   }
 
   /**
-   * Reads the status under a row lock held until the transaction ends, so a
-   * second apply queues behind the first instead of crediting alongside it.
-   * No join: Postgres refuses `FOR UPDATE` on the nullable side of one.
+   * Reads the row under a lock held until the transaction ends, so a second
+   * apply queues behind the first instead of crediting alongside it. It carries
+   * the amount as well: crediting from a copy read before the lock would spend
+   * a figure an amendment has since replaced. No join, because Postgres refuses
+   * `FOR UPDATE` on the nullable side of one.
    */
-  lockStatusById(
+  lockById(
     manager: EntityManager,
     id: string,
-  ): Promise<Pick<Allocation, 'id' | 'status'> | null> {
+  ): Promise<Pick<Allocation, 'id' | 'status' | 'amount'> | null> {
     return manager
       .createQueryBuilder(Allocation, 'allocation')
-      .select(['allocation.id', 'allocation.status'])
+      .select(['allocation.id', 'allocation.status', 'allocation.amount'])
       .where('allocation.id = :id', { id })
       .setLock('pessimistic_write')
       .getOne();

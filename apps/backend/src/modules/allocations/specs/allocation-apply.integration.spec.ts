@@ -86,6 +86,26 @@ function countEntries(allocationId: string): Promise<number> {
     .countBy({ allocation: { id: allocationId } });
 }
 
+/** Blocks until a backend is queued on a row lock, so no sleep has to guess. */
+async function waitForLockWaiter(timeoutMs = 5000): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+
+  while (Date.now() < deadline) {
+    const [{ waiting }] = await context.dataSource.query<{ waiting: number }[]>(
+      `SELECT count(*)::int AS waiting FROM pg_stat_activity
+       WHERE wait_event_type = 'Lock' AND state = 'active'`,
+    );
+
+    if (waiting > 0) {
+      return;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+
+  throw new Error('no backend ever queued on the allocation row lock');
+}
+
 function readBalances(walletIds: string[]): Promise<Wallet[]> {
   return context.dataSource
     .getRepository(Wallet)
@@ -208,6 +228,39 @@ describe('POST /allocations/:id/apply', () => {
         Number(wallet.balance),
       );
     }
+  });
+
+  it('credits the amount the row carries once the lock is taken, not the one read before it', async () => {
+    const { agent, allocation, active } = await seedCampaign();
+    const runner = context.dataSource.createQueryRunner();
+    await runner.connect();
+    await runner.startTransaction();
+    await runner.query(
+      'SELECT 1 FROM "allocation" WHERE "id" = $1 FOR UPDATE',
+      [allocation.id],
+    );
+
+    const applying = applyAllocation(agent.cookie, allocation.id).then(
+      (response) => response,
+    );
+    await waitForLockWaiter();
+    await runner.query(
+      'UPDATE "allocation" SET "amount" = 120 WHERE "id" = $1',
+      [allocation.id],
+    );
+    await runner.commitTransaction();
+    await runner.release();
+
+    const applied = bodyOf<AppliedBody>(await applying);
+
+    expect(applied).toMatchObject({
+      creditedCount: ACTIVE_WALLETS,
+      total: '5040.00',
+    });
+    const credited = await readBalances(active.map((wallet) => wallet.id));
+    expect(credited.map((wallet) => wallet.balance)).toEqual(
+      Array<string>(ACTIVE_WALLETS).fill('120.00'),
+    );
   });
 
   it('refuses an employee, and credits nobody', async () => {
