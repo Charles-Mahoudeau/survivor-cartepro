@@ -11,10 +11,3 @@ export interface PaymentTokenSource {
 }
 
 export const PAYMENT_TOKEN_SOURCE = Symbol('PAYMENT_TOKEN_SOURCE');
-
-export interface PaymentTokenClaims {
-  userId: string;
-  walletId: string;
-  expiresAt: string;
-  version: number;
-}
