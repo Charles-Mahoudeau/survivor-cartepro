@@ -13,6 +13,7 @@ import { ERROR_CODES } from '@/common/constants/error-codes.constant';
 import { WalletEntry } from '../entities/wallet-entry.entity';
 import { WalletEntryRepo } from '../repos/wallet-entry.repo';
 import { WalletRepo } from '../repos/wallet.repo';
+import type { EmployerWallet } from '../wallets.contract';
 import type { WalletEntryResponseDto } from '../validators/wallet-entry.dto';
 import type { WalletResponseDto } from '../validators/wallet.dto';
 
@@ -66,6 +67,21 @@ export class WalletService {
       ...page,
       items: page.items.map((entry) => this.toEntryResponse(entry)),
     };
+  }
+
+  async listByEmployer(employerId: string): Promise<EmployerWallet[]> {
+    const wallets = await this.walletRepo.findByEmployerId(employerId);
+
+    return wallets.map((wallet) => ({
+      id: wallet.id,
+      employeeRef: wallet.employeeRef,
+      holderName: wallet.user.name,
+      status: wallet.status,
+    }));
+  }
+
+  listWalletIdsCreditedBy(allocationId: string): Promise<string[]> {
+    return this.walletEntryRepo.findCreditedWalletIds(allocationId);
   }
 
   private toEntryResponse(entry: WalletEntry): WalletEntryResponseDto {

@@ -23,4 +23,18 @@ export class WalletRepo {
       select: { id: true },
     });
   }
+
+  findByEmployerId(employerId: string): Promise<Wallet[]> {
+    return this.repo.find({
+      where: { employer: { id: employerId } },
+      select: {
+        id: true,
+        employeeRef: true,
+        status: true,
+        user: { id: true, name: true },
+      },
+      relations: { user: true },
+      order: { id: 'ASC' },
+    });
+  }
 }

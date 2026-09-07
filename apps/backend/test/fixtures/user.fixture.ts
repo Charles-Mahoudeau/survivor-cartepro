@@ -45,6 +45,21 @@ export async function signUp(
 }
 
 /**
+ * Writes the account row alone, for someone a spec only ever needs as the
+ * holder of something. It carries no `account` row, so it cannot sign in — use
+ * `signUp` for anyone who has to. Sign-up is rate limited per address, and a
+ * spec that seeds a dozen wallet holders through it hits the limit.
+ */
+export async function createUser(
+  { dataSource }: TestApp,
+  name: string,
+  email: string,
+): Promise<{ id: string }> {
+  const saved = await dataSource.getRepository(User).save({ name, email });
+  return { id: saved.id };
+}
+
+/**
  * Grants a role out of band, like the promotion script. Not through
  * `/auth/admin/set-role`, which needs an administrator to already exist.
  */

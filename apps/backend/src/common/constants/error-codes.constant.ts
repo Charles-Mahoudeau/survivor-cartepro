@@ -16,6 +16,12 @@ export const ERROR_CODES = {
   WALLET_NOT_FOUND: 'WALLET_NOT_FOUND',
   /** The requested partner does not exist or is not active. */
   PARTNER_NOT_FOUND: 'PARTNER_NOT_FOUND',
+  /** The requested employer does not exist. */
+  EMPLOYER_NOT_FOUND: 'EMPLOYER_NOT_FOUND',
+  /** The requested allocation does not exist. */
+  ALLOCATION_NOT_FOUND: 'ALLOCATION_NOT_FOUND',
+  /** The allocation has already been applied and can no longer change. */
+  ALLOCATION_ALREADY_APPLIED: 'ALLOCATION_ALREADY_APPLIED',
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];

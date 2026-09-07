@@ -33,4 +33,14 @@ export class WalletEntryRepo {
 
     return builder.getMany();
   }
+
+  async findCreditedWalletIds(allocationId: string): Promise<string[]> {
+    const entries = await this.repo.find({
+      where: { allocation: { id: allocationId } },
+      select: { id: true, wallet: { id: true } },
+      relations: { wallet: true },
+    });
+
+    return entries.map((entry) => entry.wallet.id);
+  }
 }
