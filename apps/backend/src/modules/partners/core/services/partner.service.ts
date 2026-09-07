@@ -14,6 +14,7 @@ import {
   ListPartnersQueryDto,
   PartnerProfileResponseDto,
   PartnerResponseDto,
+  UpdatePartnerProfileDto,
 } from '@/modules/partners/core/dto';
 import { PartnerRepo } from '@/modules/partners/core/repos';
 import type { Partner } from '@/modules/partners/core/entities/partner.entity';
@@ -54,6 +55,64 @@ export class PartnerService {
     }
 
     return this.toProfileResponse(partner);
+  }
+
+  async updateProfileByOwnerId(
+    ownerId: string,
+    dto: UpdatePartnerProfileDto,
+  ): Promise<PartnerProfileResponseDto> {
+    const partner = await this.partnerRepo.findByOwnerId(ownerId);
+
+    if (!partner) {
+      throw new NotFoundException(ERROR_CODES.PARTNER_NOT_FOUND);
+    }
+
+    return this.applyProfileUpdate(partner, dto);
+  }
+
+  async updateProfileByPartnerId(
+    partnerId: string,
+    dto: UpdatePartnerProfileDto,
+  ): Promise<PartnerProfileResponseDto> {
+    const partner = await this.partnerRepo.findByIdWithDetails(partnerId);
+
+    if (!partner) {
+      throw new NotFoundException(ERROR_CODES.PARTNER_NOT_FOUND);
+    }
+
+    return this.applyProfileUpdate(partner, dto);
+  }
+
+  private async applyProfileUpdate(
+    partner: Partner,
+    dto: UpdatePartnerProfileDto,
+  ): Promise<PartnerProfileResponseDto> {
+    if (dto.categories !== undefined) {
+      const categories = await this.partnerRepo.findCategoriesBySlugs(
+        dto.categories,
+      );
+      if (categories.length !== dto.categories.length) {
+        throw new BadRequestException(
+          'One or more category slugs do not exist',
+        );
+      }
+      partner.categories = categories;
+    }
+
+    if (dto.legalName !== undefined) partner.legalName = dto.legalName;
+    if (dto.tradeName !== undefined) partner.tradeName = dto.tradeName;
+    if (dto.siren !== undefined) partner.siren = dto.siren;
+    if (dto.businessPurpose !== undefined) {
+      partner.businessPurpose = dto.businessPurpose;
+    }
+    if (dto.addressLine !== undefined) partner.addressLine = dto.addressLine;
+    if (dto.postalCode !== undefined) partner.postalCode = dto.postalCode;
+    if (dto.city !== undefined) partner.city = dto.city;
+    if (dto.latitude !== undefined) partner.latitude = dto.latitude;
+    if (dto.longitude !== undefined) partner.longitude = dto.longitude;
+
+    const saved = await this.partnerRepo.savePartner(partner);
+    return this.toProfileResponse(saved);
   }
 
   async listPublic(

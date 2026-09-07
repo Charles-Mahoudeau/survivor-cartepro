@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { decodeCursor } from '@/common/pagination';
 import { Partner } from '@/modules/partners/core/entities/partner.entity';
+import { PartnerCategory } from '@/modules/partners/categories/entities/partner-category.entity';
 import { PartnerStatus } from '@/modules/partners/core/enums/partner-status.enum';
 import type { ListPartnersQueryDto } from '@/modules/partners/core/dto';
 
@@ -16,6 +17,8 @@ export class PartnerRepo {
   constructor(
     @InjectRepository(Partner)
     private readonly partners: Repository<Partner>,
+    @InjectRepository(PartnerCategory)
+    private readonly categories: Repository<PartnerCategory>,
   ) {}
 
   findActiveById(id: string): Promise<Partner | null> {
@@ -39,6 +42,17 @@ export class PartnerRepo {
       relations: { categories: true, reviews: true },
       order: { reviews: { createdAt: 'DESC' } },
     });
+  }
+
+  findCategoriesBySlugs(slugs: string[]): Promise<PartnerCategory[]> {
+    if (slugs.length === 0) {
+      return Promise.resolve([]);
+    }
+    return this.categories.findBy({ slug: In(slugs) });
+  }
+
+  savePartner(partner: Partner): Promise<Partner> {
+    return this.partners.save(partner);
   }
 
   findActivePage(query: ListPartnersQueryDto): Promise<Partner[]> {
