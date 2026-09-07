@@ -1,18 +1,13 @@
 import { Footer } from '@codegouvfr/react-dsfr/Footer';
 import { SkipLinks } from '@codegouvfr/react-dsfr/SkipLinks';
 import type { Metadata } from 'next';
-import { Geist_Mono } from 'next/font/google';
+import { GeistMono } from 'geist/font/mono';
 
 import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
 import { SITE_CONTENT } from '@/content/site';
 import { DsfrProvider } from '@/lib/dsfr';
 import { DsfrHead, getHtmlAttributes } from '@/lib/dsfr/server-only-index';
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
 
 export const metadata: Metadata = {
   title: SITE_CONTENT.title,
@@ -21,7 +16,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html {...getHtmlAttributes({ lang: 'fr' })} className={geistMono.variable}>
+    <html {...getHtmlAttributes({ lang: 'fr' })} className={GeistMono.variable}>
       <head>
         <DsfrHead
           preloadFonts={[
