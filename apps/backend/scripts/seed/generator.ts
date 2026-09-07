@@ -3,6 +3,11 @@ import { ROLES } from '../../src/config/auth/auth.constants';
 import { CaptureMode } from '../../src/modules/payments/core/enums/capture-mode.enum';
 import { PaymentStatus } from '../../src/modules/payments/core/enums/payment-status.enum';
 import { PartnerStatus } from '../../src/modules/partners/core/enums/partner-status.enum';
+import {
+  SHORT_CODE_ALPHABET,
+  SHORT_CODE_LENGTH,
+} from '../../src/modules/payments/payment-token/constants/payment-token.constants';
+import { capPaymentTokenTtlSeconds } from '../../src/modules/payments/payment-token/services/helpers/payment-token-signer.helper';
 import { isDebitAllowed } from '../../src/modules/wallets/services/helpers/wallet-debit.helper';
 import {
   ADMINS,
@@ -23,11 +28,8 @@ import {
   REVIEWING_AGENT,
   SEED_RANDOM_SEED,
   SEED_REFERENCE_DATE,
-  SHORT_CODE_ALPHABET,
-  SHORT_CODE_LENGTH,
   SPENDING_PROFILES,
   TOKEN_LEAD_TIME_MS,
-  TOKEN_LIFETIME_MS,
   TRANSACTION_COUNT,
   TRANSACTION_WINDOW_DAYS,
   WALLET_OPENING_DATE,
@@ -295,7 +297,18 @@ function instantOn(
   );
 }
 
-export function generateSeedPlan(): SeedPlan {
+export interface SeedPlanOptions {
+  /** Requested token lifetime, in seconds, as the application configures it. */
+  tokenLifetimeSeconds: number;
+}
+
+export function generateSeedPlan({
+  tokenLifetimeSeconds,
+}: SeedPlanOptions): SeedPlan {
+  // Through the same ceiling issuance applies, or the demo would carry tokens
+  // the application can never mint.
+  const tokenLifetimeMs =
+    capPaymentTokenTtlSeconds(tokenLifetimeSeconds) * SECOND_MS;
   const random = new SeededRandom(SEED_RANDOM_SEED);
   const mint = new IdMint(random);
 
@@ -589,7 +602,7 @@ export function generateSeedPlan(): SeedPlan {
       id: mint.at(tokenCreatedAt),
       shortCode: nextShortCode(),
       createdAt: tokenCreatedAt,
-      expiresAt: new Date(tokenCreatedAt.getTime() + TOKEN_LIFETIME_MS),
+      expiresAt: new Date(tokenCreatedAt.getTime() + tokenLifetimeMs),
       consumedAt: item.at,
     };
     const paymentId = mint.at(item.at);

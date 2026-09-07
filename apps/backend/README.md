@@ -189,6 +189,10 @@ Colonnes, dans cet ordre : `id;date_iso8601;employee_id;partner_id;amount_cents;
 
 Le mot de passe commun et les comptes de démonstration sont affichés en fin d'exécution. Sur une base déjà remplie, `--reset` la vide d'abord.
 
+Le script démarre l'application par son conteneur Nest et se connecte donc avec
+le rôle applicatif restreint, comme l'API. Il n'applique aucune migration : le
+schéma reste l'affaire de `db:migrate`.
+
 `synchronize` n'existe pas, et il n'y a pas de variable d'environnement pour le
 réactiver. Le cahier des charges impose que les transactions validées soient
 non modifiables (§3.2), et une passe de synchronisation de schéma est exactement
