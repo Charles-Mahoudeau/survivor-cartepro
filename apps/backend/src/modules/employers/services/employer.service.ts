@@ -15,6 +15,7 @@ import { UserService } from '@/modules/user';
 import { WalletService } from '@/modules/wallets';
 import { Employer } from '../entities/employer.entity';
 import { EmployerRepo } from '../repos/employer.repo';
+import { isUniqueViolation } from './helpers/unique-violation.helper';
 import type {
   CreateEmployerDto,
   EmployerResponseDto,
@@ -61,26 +62,46 @@ export class EmployerService {
       throw new NotFoundException(ERROR_CODES.EMPLOYER_OWNER_NOT_FOUND);
     }
 
+    await this.refuseIfConflicting(dto);
+
+    try {
+      const employer = await this.employerRepo.create({
+        ownerId: dto.ownerId,
+        name: dto.name,
+        siren: dto.siren,
+      });
+
+      return toResponse(employer, 0);
+    } catch (error) {
+      if (!isUniqueViolation(error)) {
+        throw error;
+      }
+      await this.refuseIfConflicting(dto);
+      throw error;
+    }
+  }
+
+  /**
+   * Answers 422 naming the rule that was broken, and returns quietly when
+   * none is. Reading before the insert covers the ordinary case; the same
+   * read runs again on a unique violation, which is what turns a creation
+   * that lost a race into the answer it would have had a moment earlier.
+   */
+  private async refuseIfConflicting(dto: CreateEmployerDto): Promise<void> {
     const conflicting = await this.employerRepo.findConflicting(
       dto.siren,
       dto.ownerId,
     );
 
-    if (conflicting) {
-      throw new UnprocessableEntityException(
-        conflicting.siren === dto.siren
-          ? ERROR_CODES.EMPLOYER_SIREN_ALREADY_USED
-          : ERROR_CODES.EMPLOYER_OWNER_ALREADY_ASSIGNED,
-      );
+    if (!conflicting) {
+      return;
     }
 
-    const employer = await this.employerRepo.create({
-      ownerId: dto.ownerId,
-      name: dto.name,
-      siren: dto.siren,
-    });
-
-    return toResponse(employer, 0);
+    throw new UnprocessableEntityException(
+      conflicting.siren === dto.siren
+        ? ERROR_CODES.EMPLOYER_SIREN_ALREADY_USED
+        : ERROR_CODES.EMPLOYER_OWNER_ALREADY_ASSIGNED,
+    );
   }
 }
 

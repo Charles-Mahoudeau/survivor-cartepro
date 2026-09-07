@@ -1,10 +1,16 @@
 import { ApiResponse } from '@nestjs/swagger';
 
-export const EmployerValidationErrorsDoc = () => {
+export const CreateEmployerValidationErrorsDoc = () => {
   return ApiResponse({
     status: 400,
     description:
-      'Invalid owner identifier, name, SIREN, cursor or limit. A SIREN is ' +
-      'nine digits.',
+      'Invalid owner identifier, name or SIREN. A SIREN is nine digits.',
+  });
+};
+
+export const ListEmployersValidationErrorsDoc = () => {
+  return ApiResponse({
+    status: 400,
+    description: 'Invalid cursor or limit.',
   });
 };

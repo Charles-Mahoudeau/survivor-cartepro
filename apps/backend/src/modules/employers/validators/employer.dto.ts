@@ -1,4 +1,5 @@
 import { ApiProperty, ApiSchema } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsString,
   IsUUID,
@@ -17,6 +18,9 @@ export class CreateEmployerDto {
   ownerId: string;
 
   @ApiProperty({ maxLength: MAX_EMPLOYER_NAME_LENGTH })
+  @Transform(({ value }): unknown =>
+    typeof value === 'string' ? value.trim() : value,
+  )
   @IsString()
   @MinLength(1)
   @MaxLength(MAX_EMPLOYER_NAME_LENGTH)

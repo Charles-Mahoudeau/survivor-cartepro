@@ -41,7 +41,7 @@ export class WalletRepo {
       .createQueryBuilder('wallet')
       .select('wallet.employer_id', 'employerId')
       .addSelect('COUNT(*)', 'count')
-      .where('wallet.employer IN (:...employerIds)', { employerIds })
+      .where('wallet.employer_id IN (:...employerIds)', { employerIds })
       .andWhere('wallet.status = :status', { status: WalletStatus.ACTIVE })
       .groupBy('wallet.employer_id')
       .getRawMany<{ employerId: string; count: string }>();

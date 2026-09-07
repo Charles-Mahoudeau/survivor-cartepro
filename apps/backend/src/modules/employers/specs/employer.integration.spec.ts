@@ -234,6 +234,42 @@ describe('POST /employers', () => {
     await post('55210055A').expect(400);
   });
 
+  it('refuses a name made of nothing but spaces', async () => {
+    const agent = await signUpAdmin();
+    const owner = await createUser(
+      context,
+      'Patron',
+      `owner-${++sequence}-${Date.now()}@tickettout.test`,
+    );
+
+    await createEmployerRequest(agent.cookie, {
+      ownerId: owner.id,
+      name: '   ',
+      siren: '552100554',
+    }).expect(400);
+  });
+
+  it('answers 422 to the loser of two simultaneous creations, never 500', async () => {
+    const agent = await signUpAdmin();
+    const owners = await Promise.all([
+      createUser(context, 'A', `a-${++sequence}-${Date.now()}@tickettout.test`),
+      createUser(context, 'B', `b-${++sequence}-${Date.now()}@tickettout.test`),
+    ]);
+
+    const answers = await Promise.all(
+      owners.map((owner) =>
+        createEmployerRequest(agent.cookie, {
+          ownerId: owner.id,
+          name: 'Mairie de Lyon',
+          siren: '552100554',
+        }).then((response) => response.status),
+      ),
+    );
+
+    expect(answers.filter((status) => status === 201)).toHaveLength(1);
+    expect(answers.filter((status) => status === 422)).toHaveLength(1);
+  });
+
   it('refuses an employee', async () => {
     const employee = await signUp(context.app, 'salarie@tickettout.test');
 

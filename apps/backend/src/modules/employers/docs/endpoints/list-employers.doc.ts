@@ -1,9 +1,9 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiQuery } from '@nestjs/swagger';
-import { ForbiddenRoleDoc } from '@/common/docs';
+import { ForbiddenRoleDoc, UnauthenticatedDoc } from '@/common/docs';
 import {
   EmployerPageResponseDoc,
-  EmployerValidationErrorsDoc,
+  ListEmployersValidationErrorsDoc,
 } from '../commons';
 
 export const ListEmployersDoc = () => {
@@ -30,7 +30,8 @@ export const ListEmployersDoc = () => {
       description: 'Number of employers to return',
     }),
     EmployerPageResponseDoc(),
-    EmployerValidationErrorsDoc(),
+    ListEmployersValidationErrorsDoc(),
+    UnauthenticatedDoc(),
     ForbiddenRoleDoc(),
   );
 };
