@@ -31,3 +31,7 @@ process.env.BETTER_AUTH_SECRET =
   process.env.BETTER_AUTH_SECRET ?? 'integration-secret-at-least-32-characters';
 process.env.BETTER_AUTH_URL = 'http://localhost:3001';
 process.env.AUTH_TRUSTED_ORIGINS = 'http://localhost:3000';
+
+process.env.PAYMENT_TOKEN_SIGNING_SECRET =
+  process.env.PAYMENT_TOKEN_SIGNING_SECRET ??
+  'integration-payment-token-secret-at-least-32-chars';
