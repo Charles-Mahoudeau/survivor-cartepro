@@ -16,6 +16,8 @@ export const ERROR_CODES = {
   WALLET_NOT_FOUND: 'WALLET_NOT_FOUND',
   /** The requested partner does not exist or is not active. */
   PARTNER_NOT_FOUND: 'PARTNER_NOT_FOUND',
+  /** The requested period starts after it ends. */
+  INVALID_PERIOD: 'INVALID_PERIOD',
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];
