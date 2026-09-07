@@ -12,9 +12,11 @@ import {
 import { ERROR_CODES } from '@/common/constants/error-codes.constant';
 import {
   ListPartnersQueryDto,
+  PartnerProfileResponseDto,
   PartnerResponseDto,
 } from '@/modules/partners/core/dto';
 import { PartnerRepo } from '@/modules/partners/core/repos';
+import type { Partner } from '@/modules/partners/core/entities/partner.entity';
 
 @Injectable()
 export class PartnerService {
@@ -28,6 +30,30 @@ export class PartnerService {
     }
 
     return this.toPublicResponse(partner);
+  }
+
+  async getProfileByOwnerId(
+    ownerId: string,
+  ): Promise<PartnerProfileResponseDto> {
+    const partner = await this.partnerRepo.findByOwnerId(ownerId);
+
+    if (!partner) {
+      throw new NotFoundException(ERROR_CODES.PARTNER_NOT_FOUND);
+    }
+
+    return this.toProfileResponse(partner);
+  }
+
+  async getProfileByPartnerId(
+    partnerId: string,
+  ): Promise<PartnerProfileResponseDto> {
+    const partner = await this.partnerRepo.findByIdWithDetails(partnerId);
+
+    if (!partner) {
+      throw new NotFoundException(ERROR_CODES.PARTNER_NOT_FOUND);
+    }
+
+    return this.toProfileResponse(partner);
   }
 
   async listPublic(
@@ -51,6 +77,39 @@ export class PartnerService {
       ...page,
       items: page.items.map((partner) => this.toPublicResponse(partner)),
     };
+  }
+
+  private toProfileResponse(partner: Partner): PartnerProfileResponseDto {
+    const latestReview = partner.reviews?.[0] ?? null;
+
+    return plainToInstance(
+      PartnerProfileResponseDto,
+      {
+        id: partner.id,
+        legalName: partner.legalName,
+        tradeName: partner.tradeName,
+        siren: partner.siren,
+        businessPurpose: partner.businessPurpose,
+        status: partner.status,
+        addressLine: partner.addressLine,
+        postalCode: partner.postalCode,
+        city: partner.city,
+        latitude: Number(partner.latitude),
+        longitude: Number(partner.longitude),
+        categories: partner.categories.map(({ slug, displayName }) => ({
+          slug,
+          displayName,
+        })),
+        lastDecision: latestReview
+          ? {
+              reason: latestReview.reason,
+              toStatus: latestReview.toStatus,
+              createdAt: latestReview.createdAt,
+            }
+          : null,
+      },
+      { excludeExtraneousValues: true },
+    );
   }
 
   private toPublicResponse(
