@@ -1,44 +1,25 @@
-import { createHmac } from 'node:crypto';
 import {
   CURRENT_PAYMENT_TOKEN_VERSION,
   MAX_PAYMENT_TOKEN_TTL_SECONDS,
 } from '../../../constants/payment-token.constants';
-import type { PaymentTokenClaims } from '../../../payment-token.contract';
 import {
   capPaymentTokenTtlSeconds,
-  PaymentTokenExpiredError,
-  PaymentTokenSignatureInvalidError,
-  PaymentTokenUnsupportedVersionError,
   signPaymentToken,
   verifyPaymentToken,
 } from '../payment-token-signer.helper';
+import {
+  PaymentTokenExpiredError,
+  PaymentTokenSignatureInvalidError,
+  PaymentTokenUnsupportedVersionError,
+} from '../payment-token-signer.errors';
+import {
+  buildClaims,
+  flipLastChar,
+  forgeToken,
+} from './helpers/payment-token-fixtures.helper';
 
 const SECRET = 'a'.repeat(32);
 const OTHER_SECRET = 'b'.repeat(32);
-
-function buildClaims(
-  overrides: Partial<PaymentTokenClaims> = {},
-): PaymentTokenClaims {
-  return {
-    userId: 'user-1',
-    walletId: 'wallet-1',
-    expiresAt: new Date(Date.now() + 60_000).toISOString(),
-    version: CURRENT_PAYMENT_TOKEN_VERSION,
-    ...overrides,
-  };
-}
-
-function flipLastChar(value: string): string {
-  const last = value.at(-1);
-  return value.slice(0, -1) + (last === 'A' ? 'B' : 'A');
-}
-
-function forgeToken(body: string, secret: string): string {
-  const signature = createHmac('sha256', secret)
-    .update(body)
-    .digest('base64url');
-  return `${body}.${signature}`;
-}
 
 describe('signPaymentToken / verifyPaymentToken', () => {
   describe('round trip', () => {
