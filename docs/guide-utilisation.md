@@ -1,4 +1,4 @@
-# Ticket Tout, guide d'utilisation du prototype
+# CartePro, guide d'utilisation du prototype
 
 Ministère du Job et Bonheur, Direction Numérique et Innovation
 Référence du cahier des charges : JEB/DNI/2026-002, version 1.1
@@ -6,7 +6,7 @@ Document établi le 3 septembre 2026
 
 ## 1. Objet de ce document
 
-Ce guide décrit le parcours complet d'utilisation du prototype Ticket Tout, écran
+Ce guide décrit le parcours complet d'utilisation du prototype CartePro, écran
 par écran, dans l'ordre où ils se présentent. Il s'adresse à toute personne
 appelée à manipuler l'application devant un tiers, sans l'avoir préparée.
 
@@ -54,7 +54,7 @@ code de paiement, retrouve ses mouvements et cherche un partenaire.
 
 ### Étape 1. L'écran de connexion
 
-Vous voyez le bloc marque de la République en haut à gauche, le bandeau de
+Vous voyez le nom du produit en haut à gauche, le bandeau de
 simulation en ambre juste en dessous, puis le formulaire de connexion et les
 trois raccourcis de démonstration.
 
@@ -136,8 +136,8 @@ L'application ouvre le tableau de bord de KostumParty.
 
 ### Étape 8. Le tableau de bord
 
-Vous voyez, en en-tête, le nom de l'établissement, le badge « Partenaire Officiel
-du Ministère » et la pastille de statut « Actif ». En dessous, trois indicateurs :
+Vous voyez, en en-tête, le nom de l'établissement, le badge « Partenaire officiel »
+et la pastille de statut « Actif ». En dessous, trois indicateurs :
 le nombre d'encaissements du jour, le volume du jour et le volume du mois. Puis
 la liste des encaissements récents, chacun portant son mode, par QR code ou par
 saisie manuelle, sa date et son montant.
@@ -228,7 +228,7 @@ Le bandeau ambre en haut de chaque écran porte la phrase suivante :
 
 Il est présent sur l'écran de connexion et dans les trois espaces. Le titre de
 l'onglet du navigateur porte lui aussi la mention, sous la forme
-« Ticket Tout (simulation) ».
+« CartePro (simulation) ».
 
 Ce bandeau remplace la mention entre parenthèses qui accompagnait auparavant
 chaque montant. Le choix est assumé : la mention reste visible en permanence et

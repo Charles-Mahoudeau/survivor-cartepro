@@ -5,7 +5,7 @@ Instructions pour les agents qui travaillent sur ce dépôt. Elles complètent l
 
 ## Projet
 
-**Ticket Tout** — dispositif d'avantages salariés dématérialisés, trois espaces
+**CartePro** — dispositif d'avantages salariés dématérialisés, trois espaces
 (salarié, partenaire, administration). Projet Epitech tek3, cahier des charges
 `JEB/DNI/2026-002`.
 

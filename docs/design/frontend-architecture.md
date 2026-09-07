@@ -1,5 +1,13 @@
 # Architecture frontend — client API typé et tableau de bord salarié
 
+> **Retrait du 7 septembre 2026.** Les sections de ce document qui décrivent
+> l'adoption du Système de Design de l'État (DSFR), la typographie Marianne et
+> les primitives de couleur Bleu France sont **caduques** : le cabinet a demandé
+> le retrait du bloc-marque et de l'identité de l'État de toutes les interfaces.
+> Elles sont conservées telles quelles à titre d'historique, elles ne décrivent
+> plus le code. L'identité en vigueur est celle décrite dans
+> `apps/frontend/app/globals.css` et `apps/frontend/content/site.ts`.
+
 > **Sources** — conventions du frontend DiscorAds (`DiscorAds/frontend/src/lib/api/**`,
 > `src/hooks/api/**`, `src/app/(app)/(protected)/dashboard/[slug]/**`,
 > `.planning/codebase/{ARCHITECTURE,STRUCTURE,CONVENTIONS,STACK}.md`) ; documentation
