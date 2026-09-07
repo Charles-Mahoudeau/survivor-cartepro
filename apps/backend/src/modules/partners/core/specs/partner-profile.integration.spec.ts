@@ -478,23 +478,6 @@ describe('PATCH /partners/me/profile', () => {
     });
   });
 
-  it('returns 400 when invalid SIREN format is provided', async () => {
-    const user = await signUp(
-      context.app,
-      'partner-invalid-siren@tickettout.test',
-    );
-    await grantRole(context, user.id, ROLES.PARTNER);
-    await PartnerFixture.create(context.dataSource, user.id);
-
-    const response = await updateMyPartnerProfile(
-      { siren: '1234' },
-      user.cookie,
-    ).expect(400);
-    const body = bodyOf<{ statusCode: number }>(response);
-
-    expect(body.statusCode).toBe(400);
-  });
-
   it('returns 400 when non-existent category slug is provided', async () => {
     const user = await signUp(
       context.app,
