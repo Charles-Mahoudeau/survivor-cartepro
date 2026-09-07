@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import type { EntityManager } from 'typeorm';
 import { Repository } from 'typeorm';
 import { decodeCursor, type PaginationQueryDto } from '@/common/pagination';
 import { Partner } from '@/modules/partners/core/entities/partner.entity';
@@ -25,11 +26,33 @@ export class PartnerRepo {
     });
   }
 
-  findByIdWithRelations(id: string): Promise<Partner | null> {
-    return this.partners.findOne({
+  findByIdWithRelations(
+    id: string,
+    manager?: EntityManager,
+  ): Promise<Partner | null> {
+    const repo = manager ? manager.getRepository(Partner) : this.partners;
+    return repo.findOne({
       where: { id },
       relations: { owner: true, categories: true },
     });
+  }
+
+  async activateIfPending(
+    id: string,
+    manager?: EntityManager,
+  ): Promise<boolean> {
+    const repo = manager ? manager.getRepository(Partner) : this.partners;
+    const result = await repo
+      .createQueryBuilder()
+      .update(Partner)
+      .set({ status: PartnerStatus.ACTIVE })
+      .where('id = :id AND status = :pending', {
+        id,
+        pending: PartnerStatus.PENDING,
+      })
+      .execute();
+
+    return result.affected === 1;
   }
 
   findByOwnerId(ownerId: string): Promise<Partner | null> {

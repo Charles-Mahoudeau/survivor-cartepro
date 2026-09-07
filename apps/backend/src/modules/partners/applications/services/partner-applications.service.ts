@@ -1,7 +1,14 @@
 import { Injectable } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
+import type { DataSource } from 'typeorm';
 import { type CursorPage } from '@/common/pagination';
-import { PartnerService, type Partner } from '@/modules/partners/core';
+import {
+  PartnerService,
+  PartnerStatus,
+  type Partner,
+} from '@/modules/partners/core';
+import { PartnerApplicationRepo } from '@/modules/partners/applications/repos';
 import {
   ListPartnerApplicationsQueryDto,
   PartnerApplicationDetailResponseDto,
@@ -10,7 +17,11 @@ import {
 
 @Injectable()
 export class PartnerApplicationsService {
-  constructor(private readonly partnerService: PartnerService) {}
+  constructor(
+    private readonly partnerService: PartnerService,
+    private readonly partnerApplicationRepo: PartnerApplicationRepo,
+    @InjectDataSource() private readonly dataSource: DataSource,
+  ) {}
 
   async list(
     query: ListPartnerApplicationsQueryDto,
@@ -30,6 +41,31 @@ export class PartnerApplicationsService {
 
   async getMine(ownerId: string): Promise<PartnerApplicationDetailResponseDto> {
     const partner = await this.partnerService.findMineForReview(ownerId);
+    return this.toDetailResponse(partner);
+  }
+
+  async approve(
+    id: string,
+    reason: string,
+    decidedById: string,
+  ): Promise<PartnerApplicationDetailResponseDto> {
+    const partner = await this.dataSource.transaction(async (manager) => {
+      const activated = await this.partnerService.activate(id, manager);
+
+      await this.partnerApplicationRepo.create(
+        {
+          partner: activated,
+          fromStatus: PartnerStatus.PENDING,
+          toStatus: PartnerStatus.ACTIVE,
+          reason,
+          decidedById,
+        },
+        manager,
+      );
+
+      return activated;
+    });
+
     return this.toDetailResponse(partner);
   }
 

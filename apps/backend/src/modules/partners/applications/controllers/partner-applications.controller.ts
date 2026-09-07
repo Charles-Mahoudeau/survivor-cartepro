@@ -1,12 +1,24 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { ROLES } from '@/config/auth/auth.constants';
 import type { AuthUser } from '@/config/auth/auth';
-import { ListPartnerApplicationsQueryDto } from '@/modules/partners/applications/dto';
+import {
+  ApprovePartnerApplicationDto,
+  ListPartnerApplicationsQueryDto,
+} from '@/modules/partners/applications/dto';
 import { PartnerApplicationsService } from '@/modules/partners/applications/services';
 import {
+  ApprovePartnerApplicationDoc,
   GetMyPartnerApplicationDoc,
   GetPartnerApplicationDoc,
   ListPartnerApplicationsDoc,
@@ -39,5 +51,16 @@ export class PartnerApplicationsController {
   @GetPartnerApplicationDoc()
   getById(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string) {
     return this.partnerApplicationsService.getById(id);
+  }
+
+  @Post(':id/approve')
+  @Roles(ROLES.ADMIN)
+  @ApprovePartnerApplicationDoc()
+  approve(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @Body() dto: ApprovePartnerApplicationDto,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.partnerApplicationsService.approve(id, dto.reason, user.id);
   }
 }

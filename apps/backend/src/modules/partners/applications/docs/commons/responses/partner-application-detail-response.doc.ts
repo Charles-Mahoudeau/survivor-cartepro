@@ -6,7 +6,7 @@ import {
 } from '@/modules/partners/applications/dto';
 import { PartnerCategorySummaryDto } from '@/modules/partners/core';
 
-export const PartnerApplicationDetailResponseDoc = () => {
+export const PartnerApplicationDetailResponseDoc = (status = 200) => {
   return applyDecorators(
     ApiExtraModels(
       PartnerApplicationDetailResponseDto,
@@ -14,7 +14,7 @@ export const PartnerApplicationDetailResponseDoc = () => {
       PartnerCategorySummaryDto,
     ),
     ApiResponse({
-      status: 200,
+      status,
       description: 'The full detail of a partner application dossier',
       schema: { $ref: getSchemaPath(PartnerApplicationDetailResponseDto) },
     }),

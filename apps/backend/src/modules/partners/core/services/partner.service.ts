@@ -1,9 +1,11 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
+import type { EntityManager } from 'typeorm';
 import {
   InvalidCursorError,
   paginate,
@@ -17,7 +19,7 @@ import {
 } from '@/modules/partners/core/dto';
 import { PartnerRepo } from '@/modules/partners/core/repos';
 import type { Partner } from '@/modules/partners/core/entities/partner.entity';
-import type { PartnerStatus } from '@/modules/partners/core/enums/partner-status.enum';
+import { PartnerStatus } from '@/modules/partners/core/enums/partner-status.enum';
 
 @Injectable()
 export class PartnerService {
@@ -89,6 +91,28 @@ export class PartnerService {
     if (!partner) {
       throw new NotFoundException(ERROR_CODES.PARTNER_NOT_FOUND);
     }
+
+    return partner;
+  }
+
+  async activate(id: string, manager?: EntityManager): Promise<Partner> {
+    const partner = await this.partnerRepo.findByIdWithRelations(id, manager);
+
+    if (!partner) {
+      throw new NotFoundException(ERROR_CODES.PARTNER_NOT_FOUND);
+    }
+
+    if (partner.status !== PartnerStatus.PENDING) {
+      throw new ConflictException(ERROR_CODES.PARTNER_NOT_PENDING);
+    }
+
+    const activated = await this.partnerRepo.activateIfPending(id, manager);
+
+    if (!activated) {
+      throw new ConflictException(ERROR_CODES.PARTNER_NOT_PENDING);
+    }
+
+    partner.status = PartnerStatus.ACTIVE;
 
     return partner;
   }
