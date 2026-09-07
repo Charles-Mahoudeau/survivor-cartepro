@@ -23,7 +23,6 @@ function Toaster({ ...props }: ToasterProps) {
       toastOptions={{
         classNames: {
           toast: 'font-display text-sm',
-          description: 'font-serif',
         },
       }}
       style={

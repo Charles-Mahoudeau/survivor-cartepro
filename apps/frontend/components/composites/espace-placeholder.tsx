@@ -29,11 +29,13 @@ export function EspacePlaceholder({
       />
       <BandeauSimulation />
 
-      <main id="contenu" className="fr-container fr-py-6w flex-1">
-        <div className="fr-grid-row fr-grid-row--center">
-          <div className="fr-col-12 fr-col-md-8 fr-col-lg-6">
-            <h1 className="fr-h3 fr-mb-1w">{titre}</h1>
-            <p className="fr-text--sm fr-mb-4w text-[color:var(--muted-foreground)]">
+      <main id="contenu" className="mx-auto w-full max-w-5xl flex-1 px-4 py-10">
+        <div className="mx-auto w-full max-w-2xl">
+          <div>
+            <h1 className="font-display text-2xl font-bold tracking-tight">
+              {titre}
+            </h1>
+            <p className="mb-8 text-sm text-[color:var(--muted-foreground)]">
               Session ouverte. Les écrans de cet espace restent à construire.
             </p>
             <Suspense fallback={<CompteSkeleton />}>
@@ -82,11 +84,7 @@ async function CompteCard() {
             <dt className="font-display text-xs font-medium uppercase tracking-wider text-[color:var(--muted-foreground)]">
               {row}
             </dt>
-            <dd
-              className={
-                index === 1 ? 'font-mono-data text-sm' : 'font-serif text-sm'
-              }
-            >
+            <dd className={index === 1 ? 'font-mono-data text-sm' : 'text-sm'}>
               {values[index]}
             </dd>
           </div>

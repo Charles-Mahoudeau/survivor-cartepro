@@ -1,5 +1,6 @@
-import { HeaderQuickAccessItem } from '@codegouvfr/react-dsfr/Header';
+import { RiAccountCircleLine } from '@remixicon/react';
 
+import { QuickAccessLink } from '@/components/composites/quick-access';
 import { SignOutQuickAccess } from '@/components/composites/sign-out-quick-access.client';
 import { getCurrentUser } from '@/lib/auth/session';
 
@@ -13,13 +14,9 @@ export async function UserQuickAccess({ home }: { home: string }) {
 
   return (
     <>
-      <HeaderQuickAccessItem
-        quickAccessItem={{
-          iconId: 'fr-icon-account-circle-line',
-          text: user.name,
-          linkProps: { href: home },
-        }}
-      />
+      <QuickAccessLink href={home} icon={RiAccountCircleLine}>
+        {user.name}
+      </QuickAccessLink>
       <SignOutQuickAccess />
     </>
   );

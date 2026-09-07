@@ -3,8 +3,8 @@ import { Suspense } from 'react';
 
 import { PageHeader } from '@/components/composites/page-header';
 import { ME_CONTENT } from '@/content/me';
+import { SITE_CONTENT } from '@/content/site';
 import { listPartnerCategoriesHook, listPartnersHook } from '@/hooks/api';
-import { StartDsfrOnHydration } from '@/lib/dsfr';
 
 import PartnersPageClient from './page.client';
 import {
@@ -14,7 +14,7 @@ import {
 import { PartnersSkeleton } from './skeletons';
 
 export const metadata: Metadata = {
-  title: `${ME_CONTENT.partners.title} — Ticket Tout (simulation)`,
+  title: `${ME_CONTENT.partners.title} — ${SITE_CONTENT.title}`,
 };
 
 function first(value: string | string[] | undefined): string {
@@ -24,7 +24,6 @@ function first(value: string | string[] | undefined): string {
 export default function Page({ searchParams }: PageProps<'/me/partners'>) {
   return (
     <div className="page-enter">
-      <StartDsfrOnHydration />
       <PageHeader
         title={ME_CONTENT.partners.title}
         subtitle={ME_CONTENT.partners.subtitle}

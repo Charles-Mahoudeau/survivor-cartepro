@@ -1,9 +1,10 @@
 'use client';
 
-import { HeaderQuickAccessItem } from '@codegouvfr/react-dsfr/Header';
+import { RiLogoutBoxRLine } from '@remixicon/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import { QuickAccessButton } from '@/components/composites/quick-access';
 import { SITE_CONTENT } from '@/content/site';
 import { authClient } from '@/lib/auth/client';
 
@@ -19,12 +20,12 @@ export function SignOutQuickAccess() {
   }
 
   return (
-    <HeaderQuickAccessItem
-      quickAccessItem={{
-        iconId: 'fr-icon-logout-box-r-line',
-        text: pending ? 'Déconnexion…' : SITE_CONTENT.signOut,
-        buttonProps: { onClick: signOut, disabled: pending },
-      }}
-    />
+    <QuickAccessButton
+      icon={RiLogoutBoxRLine}
+      onClick={signOut}
+      disabled={pending}
+    >
+      {pending ? 'Déconnexion…' : SITE_CONTENT.signOut}
+    </QuickAccessButton>
   );
 }

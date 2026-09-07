@@ -1,11 +1,13 @@
 'use client';
 
-import { Header } from '@codegouvfr/react-dsfr/Header';
-import type { MainNavigationProps } from '@codegouvfr/react-dsfr/MainNavigation';
+import { RiAccountCircleLine, RiCloseLine, RiMenuLine } from '@remixicon/react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 
+import { QuickAccessLink } from '@/components/composites/quick-access';
 import { SITE_CONTENT } from '@/content/site';
+import { cn } from '@/lib/utils';
 
 export interface SiteNavItem {
   href: string;
@@ -27,33 +29,89 @@ function isActive(pathname: string, href: string, home?: string) {
 
 export function SiteHeader({ navigation, home, account }: SiteHeaderProps) {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
 
-  const items: MainNavigationProps.Item[] | undefined = navigation?.map(
-    ({ href, label }) => ({
-      text: label,
-      linkProps: { href },
-      isActive: isActive(pathname, href, home),
-    }),
-  );
+  const links = navigation?.map(({ href, label }) => (
+    <Link
+      key={href}
+      href={href}
+      aria-current={isActive(pathname, href, home) ? 'page' : undefined}
+      className={cn(
+        'rounded-[var(--radius-md)] px-3 py-1.5 text-sm font-medium transition-colors',
+        isActive(pathname, href, home)
+          ? 'bg-secondary text-secondary-foreground'
+          : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+      )}
+      onClick={() => setOpen(false)}
+    >
+      {label}
+    </Link>
+  ));
 
   return (
-    <Header
-      brandTop={SITE_CONTENT.brandTop}
-      homeLinkProps={{ href: home ?? '/', title: SITE_CONTENT.homeTitle }}
-      serviceTitle={SITE_CONTENT.serviceTitle}
-      serviceTagline={SITE_CONTENT.serviceTagline}
-      navigation={items}
-      quickAccessItems={
-        account
-          ? [account]
-          : [
-              {
-                iconId: 'fr-icon-account-circle-line',
-                text: SITE_CONTENT.signIn,
-                linkProps: { href: '/login' },
-              },
-            ]
-      }
-    />
+    <header className="sticky top-0 z-40 border-b border-border bg-card">
+      <div className="mx-auto flex w-full max-w-5xl items-center gap-3 px-4 py-3">
+        <Link
+          href={home ?? '/'}
+          title={SITE_CONTENT.homeTitle}
+          className="mr-auto flex flex-col rounded-[var(--radius-md)] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/30"
+        >
+          <span className="font-display text-lg leading-none font-bold tracking-tight text-primary">
+            {SITE_CONTENT.brand}
+          </span>
+          <span className="hidden text-xs text-muted-foreground sm:block">
+            {SITE_CONTENT.serviceTagline}
+          </span>
+        </Link>
+
+        {links ? (
+          <nav aria-label={SITE_CONTENT.menu} className="hidden gap-1 md:flex">
+            {links}
+          </nav>
+        ) : null}
+
+        <div className="hidden items-center gap-1 md:flex">
+          {account ?? (
+            <QuickAccessLink href="/login" icon={RiAccountCircleLine}>
+              {SITE_CONTENT.signIn}
+            </QuickAccessLink>
+          )}
+        </div>
+
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls="menu-mobile"
+          aria-label={open ? SITE_CONTENT.close : SITE_CONTENT.menu}
+          onClick={() => setOpen((shown) => !shown)}
+          className="rounded-[var(--radius-md)] p-2 text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/30 md:hidden"
+        >
+          {open ? (
+            <RiCloseLine aria-hidden className="size-5" />
+          ) : (
+            <RiMenuLine aria-hidden className="size-5" />
+          )}
+        </button>
+      </div>
+
+      <div
+        id="menu-mobile"
+        hidden={!open}
+        className="border-t border-border px-4 py-3 md:hidden"
+      >
+        {links ? (
+          <nav aria-label={SITE_CONTENT.menu} className="flex flex-col gap-1">
+            {links}
+          </nav>
+        ) : null}
+        <div className="mt-2 flex flex-col items-start gap-1">
+          {account ?? (
+            <QuickAccessLink href="/login" icon={RiAccountCircleLine}>
+              {SITE_CONTENT.signIn}
+            </QuickAccessLink>
+          )}
+        </div>
+      </div>
+    </header>
   );
 }

@@ -12,10 +12,10 @@ import type {
   WalletEntry,
 } from './types';
 
-import { BlocMarque } from '@/components/composites/brand-block';
+import { Wordmark } from '@/components/composites/wordmark';
 import { Card } from '@/components/composites/card';
+import { SITE_CONTENT } from '@/content/site';
 import { BandeauSimulation } from '@/components/composites/simulation-banner';
-import { StartDsfrOnHydration } from '@/lib/dsfr';
 
 /** Le partenaire connecté sur le compte de démonstration. */
 const DEMO_PARTNER = MOCK_PARTNERS[1];
@@ -88,7 +88,7 @@ function statusBadge(s: PartnerStatus) {
   );
 }
 
-/* ─── Badge Partenaire Officiel (CDC v1.1 §2.1) ─── */
+/* ─── Badge Partenaire officiel ─── */
 function BadgeOfficiel() {
   return (
     <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium font-display bg-[color:var(--secondary)] text-[color:var(--primary)] border border-[color:var(--primary)]">
@@ -101,12 +101,11 @@ function BadgeOfficiel() {
       >
         <path d="m5 12.5 4.5 4.5L19 7.5" />
       </svg>
-      Partenaire Officiel du Ministère
+      Partenaire officiel
     </span>
   );
 }
 
-/* ─── Bloc-Marque (République Française) ─── */
 /* ─── Sidebar ─── */
 function Sidebar({
   role,
@@ -178,9 +177,8 @@ function Sidebar({
 
   return (
     <aside className="hidden md:flex fixed left-0 top-0 h-full w-[240px] bg-[color:var(--card)] border-r border-[color:var(--border)] flex-col z-30">
-      {/* Bloc-marque zone */}
       <div className="px-5 py-5 border-b border-[color:var(--border)]">
-        <BlocMarque />
+        <Wordmark />
       </div>
 
       {/* Nav */}
@@ -318,7 +316,7 @@ function PageHeader({
           {title}
         </h1>
         {subtitle && (
-          <p className="font-serif text-sm text-[color:var(--muted-foreground)] mt-1">
+          <p className="text-sm text-[color:var(--muted-foreground)] mt-1">
             {subtitle}
           </p>
         )}
@@ -394,7 +392,7 @@ function LoginPage({ onLogin }: { onLogin: (role: Role) => void }) {
     {
       role: 'admin',
       label: 'Administration',
-      email: 'jean.leclerc@ministere.gouv.fr',
+      email: 'jean.leclerc@cartepro.demo',
     },
   ];
 
@@ -402,7 +400,7 @@ function LoginPage({ onLogin }: { onLogin: (role: Role) => void }) {
     <div className="min-h-screen bg-[color:var(--background)] flex flex-col">
       {/* Header */}
       <header className="px-6 py-5 border-b border-[color:var(--border)] bg-[color:var(--card)]">
-        <BlocMarque />
+        <Wordmark />
       </header>
       <BandeauSimulation />
 
@@ -411,9 +409,9 @@ function LoginPage({ onLogin }: { onLogin: (role: Role) => void }) {
         <div className="w-full max-w-[400px]">
           <div className="mb-8">
             <h1 className="font-display font-semibold text-2xl text-[color:var(--foreground)] mb-2">
-              Connexion à Ticket Tout
+              Connexion à CartePro
             </h1>
-            <p className="font-serif text-sm text-[color:var(--muted-foreground)]">
+            <p className="text-sm text-[color:var(--muted-foreground)]">
               Accédez à votre espace personnel selon votre profil.
             </p>
           </div>
@@ -430,7 +428,7 @@ function LoginPage({ onLogin }: { onLogin: (role: Role) => void }) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="vous@exemple.fr"
-                    className="w-full border border-[color:var(--border)] rounded px-3 py-2.5 text-sm font-serif bg-transparent focus:outline-none focus:border-[color:var(--primary)] transition-colors"
+                    className="w-full border border-[color:var(--border)] rounded px-3 py-2.5 text-sm bg-transparent focus:outline-none focus:border-[color:var(--primary)] transition-colors"
                   />
                 </div>
                 <div>
@@ -442,7 +440,7 @@ function LoginPage({ onLogin }: { onLogin: (role: Role) => void }) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full border border-[color:var(--border)] rounded px-3 py-2.5 text-sm font-serif bg-transparent focus:outline-none focus:border-[color:var(--primary)] transition-colors"
+                    className="w-full border border-[color:var(--border)] rounded px-3 py-2.5 text-sm bg-transparent focus:outline-none focus:border-[color:var(--primary)] transition-colors"
                   />
                 </div>
 
@@ -499,8 +497,7 @@ function LoginPage({ onLogin }: { onLogin: (role: Role) => void }) {
 
       <footer className="px-6 py-4 border-t border-[color:var(--border)]">
         <p className="font-display text-xs text-[color:var(--muted-foreground)] text-center">
-          Ministère du Job et Bonheur · JEB/DNI/2026-002 · Données de
-          démonstration
+          {SITE_CONTENT.disclaimer}
         </p>
       </footer>
     </div>
@@ -514,10 +511,7 @@ function EmployeeDashboard({ onNavigate }: { onNavigate: (v: View) => void }) {
 
   return (
     <div className="page-enter">
-      <PageHeader
-        title="Mon portefeuille"
-        subtitle="Vos avantages Ticket Tout"
-      />
+      <PageHeader title="Mon portefeuille" subtitle="Vos avantages CartePro" />
 
       {/* Balance card */}
       <Card className="p-6 md:p-8 mb-4 relative overflow-hidden">
@@ -534,7 +528,7 @@ function EmployeeDashboard({ onNavigate }: { onNavigate: (v: View) => void }) {
           <div className="text-4xl md:text-5xl font-display font-bold text-[color:var(--primary)] mb-1">
             <Montant cents={balance} />
           </div>
-          <div className="font-serif text-xs text-[color:var(--muted-foreground)]">
+          <div className="text-xs text-[color:var(--muted-foreground)]">
             Mis à jour le {formatDate(new Date().toISOString())} à{' '}
             {formatTime(new Date().toISOString())}
           </div>
@@ -591,7 +585,7 @@ function EmployeeDashboard({ onNavigate }: { onNavigate: (v: View) => void }) {
                     ? 'Abondement'
                     : entry.partner_name}
                 </div>
-                <div className="font-serif text-xs text-[color:var(--muted-foreground)]">
+                <div className="text-xs text-[color:var(--muted-foreground)]">
                   {timeAgo(entry.occurred_at)}
                 </div>
               </div>
@@ -608,12 +602,12 @@ function EmployeeDashboard({ onNavigate }: { onNavigate: (v: View) => void }) {
 
       {/* Wallet info */}
       <div className="mt-4 p-4 bg-[color:var(--secondary)] rounded border-l-2 border-[color:var(--primary)]">
-        <p className="font-serif text-xs text-[color:var(--muted-foreground)]">
+        <p className="text-xs text-[color:var(--muted-foreground)]">
           <span className="font-display font-semibold text-[color:var(--primary)]">
             Note :
           </span>{' '}
-          Votre employeur crédite votre portefeuille Ticket Tout au début de
-          chaque période. Le solde non consommé reste disponible.
+          Votre employeur crédite votre portefeuille CartePro au début de chaque
+          période. Le solde non consommé reste disponible.
         </p>
       </div>
     </div>
@@ -781,7 +775,7 @@ function EmployeePay() {
           </div>
         </div>
 
-        <p className="font-serif text-xs text-[color:var(--muted-foreground)] text-center mt-4 px-4 leading-relaxed">
+        <p className="text-xs text-[color:var(--muted-foreground)] text-center mt-4 px-4 leading-relaxed">
           Ce code est à usage unique. Il expire automatiquement après 30
           minutes. Gardez l’écran visible lors du scan.
         </p>
@@ -835,7 +829,7 @@ function EmployeeHistory() {
                           ? 'Abondement employeur'
                           : entry.partner_name}
                       </div>
-                      <div className="font-serif text-xs text-[color:var(--muted-foreground)]">
+                      <div className="text-xs text-[color:var(--muted-foreground)]">
                         {formatTime(entry.occurred_at)} ·{' '}
                         {entry.direction === 'credit' ? 'Crédit' : 'Paiement'}
                       </div>
@@ -883,7 +877,7 @@ function EmployeeCatalog({ partners }: { partners: Partner[] }) {
     <div className="page-enter">
       <PageHeader
         title="Partenaires"
-        subtitle="Établissements acceptant Ticket Tout"
+        subtitle="Établissements acceptant CartePro"
       />
 
       {/* Search */}
@@ -895,7 +889,7 @@ function EmployeeCatalog({ partners }: { partners: Partner[] }) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Rechercher un commerce, une ville…"
-          className="w-full border border-[color:var(--border)] rounded pl-9 pr-4 py-2.5 text-sm font-serif bg-[color:var(--card)] focus:outline-none focus:border-[color:var(--primary)] transition-colors"
+          className="w-full border border-[color:var(--border)] rounded pl-9 pr-4 py-2.5 text-sm bg-[color:var(--card)] focus:outline-none focus:border-[color:var(--primary)] transition-colors"
         />
       </div>
 
@@ -921,7 +915,7 @@ function EmployeeCatalog({ partners }: { partners: Partner[] }) {
       <div className="space-y-2">
         {filtered.length === 0 && (
           <div className="text-center py-12">
-            <p className="font-serif text-sm text-[color:var(--muted-foreground)]">
+            <p className="text-sm text-[color:var(--muted-foreground)]">
               Aucun partenaire trouvé
             </p>
           </div>
@@ -940,7 +934,7 @@ function EmployeeCatalog({ partners }: { partners: Partner[] }) {
                   <div className="font-display font-semibold text-sm text-[color:var(--foreground)]">
                     {partner.name}
                   </div>
-                  <div className="font-serif text-xs text-[color:var(--muted-foreground)] mt-0.5">
+                  <div className="text-xs text-[color:var(--muted-foreground)] mt-0.5">
                     {partner.address}, {partner.city}
                   </div>
                 </div>
@@ -1004,7 +998,7 @@ function PartnerDashboard({ onNavigate }: { onNavigate: (v: View) => void }) {
             <div className="font-mono-data font-semibold text-xl text-[color:var(--primary)]">
               {stat.value}
             </div>
-            <div className="font-serif text-xs text-[color:var(--muted-foreground)] mt-0.5">
+            <div className="text-xs text-[color:var(--muted-foreground)] mt-0.5">
               {stat.sub}
             </div>
           </Card>
@@ -1031,7 +1025,7 @@ function PartnerDashboard({ onNavigate }: { onNavigate: (v: View) => void }) {
                 <div className="font-display font-medium text-sm text-[color:var(--foreground)]">
                   Encaissement {p.mode === 'QR' ? 'par QR' : 'saisie manuelle'}
                 </div>
-                <div className="font-serif text-xs text-[color:var(--muted-foreground)]">
+                <div className="text-xs text-[color:var(--muted-foreground)]">
                   {formatDate(p.at)} · {formatTime(p.at)}
                 </div>
               </div>
@@ -1091,7 +1085,7 @@ function PartnerProfile() {
                   {f.label}
                 </div>
                 <div
-                  className={`text-sm text-[color:var(--foreground)] ${f.mono ? 'font-mono-data' : 'font-serif'}`}
+                  className={`text-sm text-[color:var(--foreground)] ${f.mono ? 'font-mono-data' : ''}`}
                 >
                   {f.value}
                 </div>
@@ -1117,7 +1111,7 @@ function PartnerProfile() {
                 <div className="font-display text-[10px] uppercase tracking-wider text-[color:var(--muted-foreground)] mb-0.5">
                   {f.label}
                 </div>
-                <div className="font-serif text-sm text-[color:var(--foreground)]">
+                <div className="text-sm text-[color:var(--foreground)]">
                   {f.value}
                 </div>
               </div>
@@ -1125,7 +1119,7 @@ function PartnerProfile() {
           </div>
 
           <div className="mt-4 pt-4 border-t border-[color:var(--border)]">
-            <p className="font-serif text-xs text-[color:var(--muted-foreground)]">
+            <p className="text-xs text-[color:var(--muted-foreground)]">
               Le SIREN et le statut ne peuvent pas être modifiés. Contactez
               l’administration en cas d’erreur.
             </p>
@@ -1153,11 +1147,11 @@ function PartnerProfile() {
                     </span>
                     {statusBadge(d.to_status)}
                   </div>
-                  <div className="font-serif text-xs text-[color:var(--muted-foreground)] shrink-0">
+                  <div className="text-xs text-[color:var(--muted-foreground)] shrink-0">
                     {formatDate(d.decided_at)}
                   </div>
                 </div>
-                <p className="font-serif text-sm text-[color:var(--foreground)] leading-relaxed">
+                <p className="text-sm text-[color:var(--foreground)] leading-relaxed">
                   {d.reason}
                 </p>
                 <p className="font-display text-xs text-[color:var(--muted-foreground)] mt-1.5">
@@ -1267,14 +1261,14 @@ function AdminDashboard({
                   <div className="font-mono-data text-xs text-[color:var(--muted-foreground)] mt-0.5">
                     SIREN {partner.siren}
                   </div>
-                  <div className="font-serif text-xs text-[color:var(--muted-foreground)]">
+                  <div className="text-xs text-[color:var(--muted-foreground)]">
                     {partner.city} · {partner.category}
                   </div>
                 </div>
               </div>
               <div className="flex flex-col items-end gap-1.5 shrink-0">
                 {statusBadge(partner.status)}
-                <span className="font-serif text-xs text-[color:var(--muted-foreground)]">
+                <span className="text-xs text-[color:var(--muted-foreground)]">
                   {timeAgo(partner.submitted_at)}
                 </span>
               </div>
@@ -1357,7 +1351,7 @@ function AdminPartnerDetail({
                   {f.label}
                 </div>
                 <div
-                  className={`text-sm text-[color:var(--foreground)] ${f.mono ? 'font-mono-data' : 'font-serif'}`}
+                  className={`text-sm text-[color:var(--foreground)] ${f.mono ? 'font-mono-data' : ''}`}
                 >
                   {f.value}
                 </div>
@@ -1413,10 +1407,10 @@ function AdminPartnerDetail({
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Saisissez le motif de votre décision. Ce texte sera transmis au partenaire."
                   rows={4}
-                  className="w-full border border-[color:var(--border)] rounded px-3 py-2.5 text-sm font-serif bg-transparent focus:outline-none focus:border-[color:var(--primary)] transition-colors resize-none"
+                  className="w-full border border-[color:var(--border)] rounded px-3 py-2.5 text-sm bg-transparent focus:outline-none focus:border-[color:var(--primary)] transition-colors resize-none"
                 />
                 <div className="flex justify-between items-center mt-1">
-                  <p className="font-serif text-xs text-[color:var(--muted-foreground)]">
+                  <p className="text-xs text-[color:var(--muted-foreground)]">
                     Ce motif est conservé et opposable. Exigence juridique du
                     01/09/2026.
                   </p>
@@ -1457,7 +1451,7 @@ function AdminPartnerDetail({
                       </span>
                       {statusBadge(d.to_status)}
                     </div>
-                    <p className="font-serif text-xs text-[color:var(--foreground)] leading-relaxed mb-1">
+                    <p className="text-xs text-[color:var(--foreground)] leading-relaxed mb-1">
                       {d.reason}
                     </p>
                     <p className="font-display text-[10px] text-[color:var(--muted-foreground)]">
@@ -1504,7 +1498,7 @@ function AppShell({
 
       {/* Mobile top header */}
       <header className="flex md:hidden items-center justify-between fixed top-0 left-0 right-0 bg-[color:var(--card)] border-b border-[color:var(--border)] pl-6 pr-4 py-3 z-20">
-        <BlocMarque compact />
+        <Wordmark compact />
         <button
           onClick={onLogout}
           aria-label="Se déconnecter"
@@ -1625,7 +1619,6 @@ export default function App() {
 
   return (
     <>
-      <StartDsfrOnHydration />
       <AppShell
         role={role}
         currentView={view}

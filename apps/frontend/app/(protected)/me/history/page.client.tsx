@@ -1,6 +1,5 @@
 'use client';
 
-import { Button } from '@codegouvfr/react-dsfr/Button';
 import { useAction } from 'next-safe-action/hooks';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -8,6 +7,7 @@ import { toast } from 'sonner';
 import { Card } from '@/components/composites/card';
 import { formatDate } from '@/components/composites/date-texte';
 import { MouvementLigne } from '@/components/composites/mouvement-ligne';
+import { Button } from '@/components/ui/button';
 import { ME_CONTENT } from '@/content/me';
 import type {
   WalletEntry,
@@ -56,7 +56,7 @@ export default function HistoryPageClient({
   if (entries.length === 0) {
     return (
       <Card className="p-6">
-        <p className="font-serif text-sm text-[color:var(--muted-foreground)]">
+        <p className="text-sm text-[color:var(--muted-foreground)]">
           {ME_CONTENT.history.empty}
         </p>
       </Card>
@@ -68,7 +68,7 @@ export default function HistoryPageClient({
       <div className="space-y-5">
         {groupByDay(entries).map(([day, dayEntries]) => (
           <section key={day}>
-            <h2 className="fr-text--xs fr-mb-1w px-1 font-display font-medium uppercase tracking-wider text-[color:var(--muted-foreground)]">
+            <h2 className="mb-2 px-1 font-display text-xs font-medium tracking-wider text-[color:var(--muted-foreground)] uppercase">
               {day}
             </h2>
             <Card>
@@ -91,7 +91,8 @@ export default function HistoryPageClient({
         <div className="mt-6 text-center">
           <Button
             type="button"
-            priority="secondary"
+            variant="outline"
+            size="lg"
             onClick={() => execute({ cursor: nextCursor })}
             disabled={isPending}
           >

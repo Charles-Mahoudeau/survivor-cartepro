@@ -71,7 +71,7 @@ export const MOCK_PARTNERS: Partner[] = [
         from_status: 'pending',
         to_status: 'active',
         reason:
-          'Artisan glacier immatriculé à la chambre de métiers. Vente en ligne et retrait sur place, les deux canaux acceptent le paiement Ticket Tout. Partenaire retenu pour le lancement.',
+          'Artisan glacier immatriculé à la chambre de métiers. Vente en ligne et retrait sur place, les deux canaux acceptent le paiement CartePro. Partenaire retenu pour le lancement.',
         decided_by: 'Jean-Eudes Berlier',
         decided_at: '2026-08-10T09:50:00Z',
       },

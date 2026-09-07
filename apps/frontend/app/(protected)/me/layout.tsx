@@ -16,9 +16,12 @@ export default function Layout({ children, header }: LayoutProps<'/me'>) {
     <>
       {header}
       <BandeauSimulation />
-      <main id="contenu" className="fr-container fr-py-4w flex-1 md:fr-py-6w">
-        <div className="fr-grid-row fr-grid-row--center">
-          <div className="fr-col-12 fr-col-md-10 fr-col-lg-8">
+      <main
+        id="contenu"
+        className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 md:py-10"
+      >
+        <div className="mx-auto w-full max-w-3xl">
+          <div>
             <Suspense fallback={null}>
               <RoleGate role={ROLES.EMPLOYEE} />
             </Suspense>

@@ -7,8 +7,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: Spectral, Georgia, serif;
-  --font-heading: Marianne, system-ui, sans-serif;
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-heading: var(--font-geist-sans), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -57,89 +57,88 @@
 }
 
 :root {
-  /* Values transcribed from the reference mockup (Web app design with Next.js/src/index.css). */
-  --background: #f5f5f3;
-  --foreground: #1a1a2e;
+  --background: #faf7f2;
+  --foreground: #171a18;
   --card: #ffffff;
-  --card-foreground: #1a1a2e;
+  --card-foreground: #171a18;
   --popover: #ffffff;
-  --popover-foreground: #1a1a2e;
-  --primary: #1b3a6b;
+  --popover-foreground: #171a18;
+  --primary: #0e6b4f;
   --primary-foreground: #ffffff;
-  --primary-dark: #0f2344;
-  --primary-light: #2b5ea7;
-  --secondary: #eef1f7;
-  --secondary-foreground: #1b3a6b;
-  --muted: #f0f0ee;
-  --muted-foreground: #6b7280;
-  --accent: #d93b3b;
-  --accent-foreground: #ffffff;
-  --coral: #d93b3b;
-  --coral-dark: #991b1b;
-  --coral-light: #fef2f2;
-  --emerald-vibrant: #00c48c;
-  --emerald-dark: #065f46;
-  --emerald-light: #d1fae5;
-  --destructive: #d93b3b;
-  --border: #dde1ea;
-  --input: #dde1ea;
-  --ring: #1b3a6b;
-  --chart-1: #1b3a6b;
-  --chart-2: #2b5ea7;
-  --chart-3: #d93b3b;
-  --chart-4: #00c48c;
-  --chart-5: #6b7280;
-  --radius: 4px;
+  --primary-dark: #0a5540;
+  --primary-light: #14876a;
+  --secondary: #e8f1ec;
+  --secondary-foreground: #0e6b4f;
+  --muted: #f1ece3;
+  --muted-foreground: #6b6a63;
+  --accent: #f0a02c;
+  --accent-foreground: #171a18;
+  --coral: #b23a2a;
+  --coral-dark: #8e2e21;
+  --coral-light: #f7e9e6;
+  --emerald-vibrant: #0e6b4f;
+  --emerald-dark: #0a5540;
+  --emerald-light: #e1efe8;
+  --destructive: #b23a2a;
+  --border: #e7e2d9;
+  --input: #e7e2d9;
+  --ring: #0e6b4f;
+  --chart-1: #0e6b4f;
+  --chart-2: #14876a;
+  --chart-3: #f0a02c;
+  --chart-4: #b23a2a;
+  --chart-5: #6b6a63;
+  --radius: 12px;
   --sidebar: #ffffff;
-  --sidebar-foreground: #1a1a2e;
-  --sidebar-primary: #1b3a6b;
+  --sidebar-foreground: #171a18;
+  --sidebar-primary: #0e6b4f;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #eef1f7;
-  --sidebar-accent-foreground: #1b3a6b;
-  --sidebar-border: #dde1ea;
-  --sidebar-ring: #1b3a6b;
+  --sidebar-accent: #e8f1ec;
+  --sidebar-accent-foreground: #0e6b4f;
+  --sidebar-border: #e7e2d9;
+  --sidebar-ring: #0e6b4f;
 }
 
 .dark {
-  --background: #0b1a30;
-  --foreground: #f4f7fc;
-  --card: #13243f;
-  --card-foreground: #f4f7fc;
-  --popover: #13243f;
-  --popover-foreground: #f4f7fc;
-  --primary: #4c82d4;
-  --primary-foreground: #ffffff;
-  --primary-dark: #2b5ea7;
-  --primary-light: #7aaaf0;
-  --secondary: #1d3356;
-  --secondary-foreground: #f4f7fc;
-  --muted: #1d3356;
-  --muted-foreground: #94a3b8;
-  --accent: #064e3b;
-  --accent-foreground: #a7f3d0;
-  --coral: #ff7a59;
-  --coral-dark: #ff5a36;
-  --coral-light: #3d1c16;
-  --emerald-vibrant: #00e6a4;
-  --emerald-dark: #10b981;
-  --emerald-light: #064e3b;
-  --destructive: #f87171;
+  --background: #141614;
+  --foreground: #f4f1ea;
+  --card: #1d201d;
+  --card-foreground: #f4f1ea;
+  --popover: #1d201d;
+  --popover-foreground: #f4f1ea;
+  --primary: #4cb391;
+  --primary-foreground: #0a1a14;
+  --primary-dark: #14876a;
+  --primary-light: #7ccbb0;
+  --secondary: #1e2b25;
+  --secondary-foreground: #f4f1ea;
+  --muted: #1e2b25;
+  --muted-foreground: #a7a49a;
+  --accent: #f0a02c;
+  --accent-foreground: #171a18;
+  --coral: #e0705f;
+  --coral-dark: #f0a89c;
+  --coral-light: #33201c;
+  --emerald-vibrant: #4cb391;
+  --emerald-dark: #7ccbb0;
+  --emerald-light: #14312a;
+  --destructive: #e0705f;
   --border: rgba(255, 255, 255, 0.12);
   --input: rgba(255, 255, 255, 0.15);
-  --ring: #4c82d4;
-  --chart-1: #4c82d4;
-  --chart-2: #7aaaf0;
-  --chart-3: #ff7a59;
-  --chart-4: #00e6a4;
-  --chart-5: #94a3b8;
-  --sidebar: #13243f;
-  --sidebar-foreground: #f4f7fc;
-  --sidebar-primary: #4c82d4;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #1d3356;
-  --sidebar-accent-foreground: #f4f7fc;
+  --ring: #4cb391;
+  --chart-1: #4cb391;
+  --chart-2: #7ccbb0;
+  --chart-3: #f0a02c;
+  --chart-4: #e0705f;
+  --chart-5: #a7a49a;
+  --sidebar: #1d201d;
+  --sidebar-foreground: #f4f1ea;
+  --sidebar-primary: #4cb391;
+  --sidebar-primary-foreground: #0a1a14;
+  --sidebar-accent: #1e2b25;
+  --sidebar-accent-foreground: #f4f1ea;
   --sidebar-border: rgba(255, 255, 255, 0.12);
-  --sidebar-ring: #4c82d4;
+  --sidebar-ring: #4cb391;
 }
 
 @layer base {
@@ -161,16 +160,16 @@
     font-family: var(--font-heading);
   }
 }
+
 @theme inline {
-  --font-serif: Spectral, Georgia, serif;
-  --font-display: Marianne, system-ui, sans-serif;
+  --font-display: var(--font-geist-sans), system-ui, sans-serif;
 }
 
-/* Compatibilité avec la maquette Ticket Tout : elle nomme les rôles
-   typographiques `font-display` et `font-mono-data`, et porte les statuts
-   par des classes plutôt que par des utilitaires. */
+/* Two typographic roles are named by the screens: `font-display` carries
+   headings, amounts and the wordmark, `font-mono-data` carries figures that
+   have to line up column by column. */
 .font-display {
-  font-family: Marianne, system-ui, sans-serif;
+  font-family: var(--font-display);
 }
 
 .font-mono-data {
@@ -178,17 +177,13 @@
   font-variant-numeric: tabular-nums;
 }
 
-.badge-pending {
-  background: var(--coral-light);
-  color: var(--coral-dark);
-}
 .badge-active {
   background: var(--emerald-light);
   color: var(--emerald-dark);
 }
 .badge-rejected {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--coral-light);
+  color: var(--coral-dark);
 }
 .badge-suspended {
   background: var(--muted);
@@ -224,18 +219,18 @@
   }
 }
 
-/* Avertissement : mention de simulation, exigence 1 du courrier du 01/09/2026.
-   Ambre plutôt que corail, pour ne pas se confondre avec une erreur. */
+/* Amber rather than the refusal red, so a pending state is not read as a
+   rejected one. */
 :root {
-  --warning: #b45309;
-  --warning-light: #fef3c7;
-  --warning-border: #f0b429;
+  --warning: #8a5a12;
+  --warning-light: #fbf0dc;
+  --warning-border: #f0a02c;
 }
 
 .dark {
-  --warning: #fcd34d;
-  --warning-light: #3a2a06;
-  --warning-border: #a16207;
+  --warning: #f0c274;
+  --warning-light: #33280f;
+  --warning-border: #a97a1c;
 }
 
 @theme inline {
@@ -247,43 +242,4 @@
 .badge-pending {
   background: var(--warning-light);
   color: var(--warning);
-}
-
-/* Direction artistique posée sur le DSFR : les primitives de couleur du DSFR
-   prennent les valeurs des jetons ci-dessus. Tout ce qui n'a pas de jeton ici
-   garde la valeur de la bibliothèque. Thème clair uniquement. */
-:root:not([data-fr-theme='dark']) {
-  --blue-france-sun-113-625: var(--primary);
-  --blue-france-sun-113-625-hover: var(--primary-light);
-  --blue-france-sun-113-625-active: var(--primary-dark);
-  --blue-france-main-525: var(--primary-light);
-  --blue-france-975-75: var(--secondary);
-  --blue-france-975-75-hover: #dfe5f0;
-  --blue-france-975-75-active: #d1d9e8;
-  --blue-france-950-100: var(--secondary);
-  --blue-france-950-100-hover: #dfe5f0;
-  --blue-france-950-100-active: #d1d9e8;
-  --blue-france-925-125: #e3e8f2;
-  --blue-france-850-200: #c5cfe3;
-
-  --grey-1000-50: var(--card);
-  --grey-1000-50-hover: var(--muted);
-  --grey-1000-50-active: #e6e6e3;
-  --grey-975-75: var(--background);
-  --grey-975-75-hover: #ebebe8;
-  --grey-975-75-active: #e1e1de;
-  --grey-950-100: var(--muted);
-  --grey-950-100-hover: #e3e3e0;
-  --grey-950-100-active: #d6d6d3;
-  --grey-925-125: #e5e9f0;
-  --grey-900-175: var(--border);
-  --grey-200-850: var(--foreground);
-  --grey-200-850-hover: #4a4a5e;
-  --grey-200-850-active: #5c5c72;
-  --grey-425-625: var(--muted-foreground);
-  --grey-625-425: var(--muted-foreground);
-
-  --error-425-625: var(--destructive);
-  --error-425-625-hover: #e05a5a;
-  --error-425-625-active: #e77474;
 }

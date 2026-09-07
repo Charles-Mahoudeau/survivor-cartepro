@@ -3,20 +3,19 @@ import { Suspense } from 'react';
 
 import { PageHeader } from '@/components/composites/page-header';
 import { ME_CONTENT } from '@/content/me';
+import { SITE_CONTENT } from '@/content/site';
 import { listMyWalletEntriesHook } from '@/hooks/api';
-import { StartDsfrOnHydration } from '@/lib/dsfr';
 
 import { MovementsSkeleton } from '../skeletons';
 import HistoryPageClient from './page.client';
 
 export const metadata: Metadata = {
-  title: `${ME_CONTENT.history.title} — Ticket Tout (simulation)`,
+  title: `${ME_CONTENT.history.title} — ${SITE_CONTENT.title}`,
 };
 
 export default function Page() {
   return (
     <div className="page-enter">
-      <StartDsfrOnHydration />
       <PageHeader
         title={ME_CONTENT.history.title}
         subtitle={ME_CONTENT.history.subtitle}

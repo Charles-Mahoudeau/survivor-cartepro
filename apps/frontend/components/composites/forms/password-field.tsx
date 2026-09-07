@@ -1,10 +1,11 @@
 'use client';
 
-import { Button } from '@codegouvfr/react-dsfr/Button';
-import { Input } from '@codegouvfr/react-dsfr/Input';
+import { RiEyeLine, RiEyeOffLine } from '@remixicon/react';
 import { useState } from 'react';
 import type { UseFormRegisterReturn } from 'react-hook-form';
 
+import { TextField } from '@/components/composites/forms/text-field';
+import { Button } from '@/components/ui/button';
 import { AUTH_CONTENT } from '@/content/auth';
 
 interface PasswordFieldProps {
@@ -29,32 +30,31 @@ export function PasswordField({
   const { show, hide } = AUTH_CONTENT.fields.password;
 
   return (
-    <Input
+    <TextField
       label={label}
-      hintText={hint}
-      state={error ? 'error' : 'default'}
-      stateRelatedMessage={error}
-      nativeInputProps={{
-        id: registration.name,
+      hint={hint}
+      error={error}
+      registration={registration}
+      input={{
         type: revealed ? 'text' : 'password',
         autoComplete,
         minLength,
         spellCheck: false,
         autoCapitalize: 'none',
-        ...registration,
       }}
       action={
         <Button
           type="button"
-          priority="tertiary"
-          iconId={revealed ? 'fr-icon-eye-off-line' : 'fr-icon-eye-line'}
+          variant="outline"
+          size="icon-lg"
           title={revealed ? hide : show}
-          nativeButtonProps={{
-            'aria-pressed': revealed,
-            'aria-controls': registration.name,
-          }}
+          aria-label={revealed ? hide : show}
+          aria-pressed={revealed}
+          aria-controls={registration.name}
           onClick={() => setRevealed((shown) => !shown)}
-        />
+        >
+          {revealed ? <RiEyeOffLine /> : <RiEyeLine />}
+        </Button>
       }
     />
   );

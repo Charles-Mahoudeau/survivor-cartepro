@@ -1,3 +1,5 @@
+import { RiArrowDownLine, RiArrowUpLine } from '@remixicon/react';
+
 import { DateTexte } from '@/components/composites/date-texte';
 import { Montant } from '@/components/composites/montant';
 import { ME_CONTENT } from '@/content/me';
@@ -19,8 +21,9 @@ export function entryTitle(entry: WalletEntry): string {
   }
 }
 
-const CREDIT_BUBBLE = 'bg-[#D1FAE5] text-[#065F46]';
-const DEBIT_BUBBLE = 'bg-[#EEF1F7] text-[color:var(--primary)]';
+const CREDIT_BUBBLE =
+  'bg-[color:var(--emerald-light)] text-[color:var(--emerald-dark)]';
+const DEBIT_BUBBLE = 'bg-[color:var(--muted)] text-[color:var(--foreground)]';
 
 interface MouvementLigneProps {
   entry: WalletEntry;
@@ -52,12 +55,11 @@ export function MouvementLigne({ entry, last, variant }: MouvementLigneProps) {
             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${bubble}`}
             aria-hidden="true"
           >
-            <span
-              className={
-                credit ? 'fr-icon-arrow-down-line' : 'fr-icon-arrow-up-line'
-              }
-              aria-hidden="true"
-            />
+            {credit ? (
+              <RiArrowDownLine aria-hidden className="size-4" />
+            ) : (
+              <RiArrowUpLine aria-hidden className="size-4" />
+            )}
           </div>
         )}
         <div>
@@ -66,7 +68,7 @@ export function MouvementLigne({ entry, last, variant }: MouvementLigneProps) {
               ? ME_CONTENT.history.allocationShort
               : entryTitle(entry)}
           </div>
-          <div className="font-serif text-xs text-[color:var(--muted-foreground)]">
+          <div className="text-xs text-[color:var(--muted-foreground)]">
             {variant === 'compact' ? (
               <DateTexte iso={entry.createdAt} format="relatif" />
             ) : (
@@ -83,7 +85,9 @@ export function MouvementLigne({ entry, last, variant }: MouvementLigneProps) {
         sign={entry.direction}
         mention={false}
         className={`text-sm ${variant === 'compact' ? 'font-medium' : 'font-semibold'} ${
-          credit ? 'text-[#065F46]' : 'text-[color:var(--foreground)]'
+          credit
+            ? 'text-[color:var(--emerald-dark)]'
+            : 'text-[color:var(--foreground)]'
         }`}
       />
     </li>

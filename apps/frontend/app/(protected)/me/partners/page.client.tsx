@@ -1,14 +1,15 @@
 'use client';
 
-import { Button } from '@codegouvfr/react-dsfr/Button';
-import { SearchBar } from '@codegouvfr/react-dsfr/SearchBar';
-import { Tag } from '@codegouvfr/react-dsfr/Tag';
+import { RiSearchLine } from '@remixicon/react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useAction } from 'next-safe-action/hooks';
 import { useEffect, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 
 import { CartePartenaire } from '@/components/composites/carte-partenaire';
+import { Button } from '@/components/ui/button';
+import { Chip } from '@/components/ui/chip';
+import { Input } from '@/components/ui/input';
 import { ME_CONTENT } from '@/content/me';
 import type { PartnerPage } from '@/lib/api/schemas/backend/partner';
 import type { PartnerCategory } from '@/lib/api/schemas/backend/partner-category';
@@ -57,22 +58,21 @@ function SearchField({ value }: { value: string }) {
   }, [text, value, pathname, router, searchParams]);
 
   return (
-    <SearchBar
-      className="fr-mb-2w"
-      label={ME_CONTENT.partners.searchLabel}
-      onButtonClick={(submitted) => setText(submitted)}
-      allowEmptySearch
-      renderInput={({ className, id, placeholder, type }) => (
-        <input
-          className={className}
-          id={id}
-          type={type}
-          placeholder={placeholder || ME_CONTENT.partners.searchPlaceholder}
-          value={text}
-          onChange={(event) => setText(event.target.value)}
-        />
-      )}
-    />
+    <div className="relative mb-4">
+      <RiSearchLine
+        aria-hidden
+        className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[color:var(--muted-foreground)]"
+      />
+      <Input
+        id="recherche-partenaire"
+        type="search"
+        aria-label={ME_CONTENT.partners.searchLabel}
+        placeholder={ME_CONTENT.partners.searchPlaceholder}
+        className="pl-9"
+        value={text}
+        onChange={(event) => setText(event.target.value)}
+      />
+    </div>
   );
 }
 
@@ -109,18 +109,16 @@ function CategoryChips({
   ];
 
   return (
-    <ul className="fr-tags-group fr-mb-3w" role="group" aria-label="Catégories">
+    <ul
+      className="mb-6 flex flex-wrap gap-2"
+      role="group"
+      aria-label="Catégories"
+    >
       {chips.map(({ slug, label }) => (
         <li key={slug || 'all'}>
-          <Tag
-            as="button"
-            small
-            pressed={slug === selected}
-            nativeButtonProps={{ type: 'button' }}
-            onClick={() => select(slug)}
-          >
+          <Chip pressed={slug === selected} onClick={() => select(slug)}>
             {label}
-          </Tag>
+          </Chip>
         </li>
       ))}
     </ul>
@@ -158,7 +156,7 @@ export default function PartnersPageClient({
       <div className="space-y-2">
         {partners.length === 0 ? (
           <div className="py-12 text-center">
-            <p className="font-serif text-sm text-[color:var(--muted-foreground)]">
+            <p className="text-sm text-[color:var(--muted-foreground)]">
               {ME_CONTENT.partners.empty}
             </p>
           </div>
@@ -172,7 +170,8 @@ export default function PartnersPageClient({
         <div className="mt-6 text-center">
           <Button
             type="button"
-            priority="secondary"
+            variant="outline"
+            size="lg"
             onClick={() =>
               execute({
                 cursor: nextCursor,
