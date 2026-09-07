@@ -7,3 +7,8 @@ export const STATIC_PAYMENT_TOKEN: PaymentTokenPayload = {
   shortCode: 'CPR4F7X2',
   expiresAt: '2026-09-04T02:02:00.000Z',
 };
+/** Payload format version. Bump when the claims shape changes; old tokens then fail closed. */
+export const CURRENT_PAYMENT_TOKEN_VERSION = 1;
+
+/** Hard ceiling on QR lifetime, independent of the configured PAYMENT_TOKEN_TTL_SECONDS. */
+export const MAX_PAYMENT_TOKEN_TTL_SECONDS = 300;
