@@ -14,7 +14,7 @@ import type { Relation } from 'typeorm';
 import { PrimaryGeneratedUuidV7Column } from '@/common/decorators/primary-generated-uuid-v7.column';
 import { User } from '@/modules/user/entities/user.entity';
 import { PartnerCategory } from '@/modules/partners/categories/entities/partner-category.entity';
-import { PartnerReview } from '@/modules/partners/reviews/entities/partner-review.entity';
+import { PartnerApplication } from '@/modules/partners/applications/entities/partner-application.entity';
 import { Payment } from '@/modules/payments/core/entities/payment.entity';
 import { PartnerStatus } from '@/modules/partners/core/enums/partner-status.enum';
 
@@ -84,8 +84,11 @@ export class Partner {
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 
-  @OneToMany(() => PartnerReview, (partnerReview) => partnerReview.partner)
-  reviews: Relation<PartnerReview>[];
+  @OneToMany(
+    () => PartnerApplication,
+    (partnerApplication) => partnerApplication.partner,
+  )
+  applications: Relation<PartnerApplication>[];
 
   @OneToMany(() => Payment, (payment) => payment.partner)
   payments: Relation<Payment>[];

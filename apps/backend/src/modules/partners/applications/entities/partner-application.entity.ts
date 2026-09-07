@@ -12,13 +12,17 @@ import { User } from '@/modules/user/entities/user.entity';
 import { Partner } from '@/modules/partners/core/entities/partner.entity';
 import { PartnerStatus } from '@/modules/partners/core/enums/partner-status.enum';
 
-@Entity()
-@Index('IDX_partner_review_partner_id', ['partner'])
-export class PartnerReview {
+// Physical table name is pinned to its pre-merge value so the rename stays a
+// pure class rename (no destructive DROP/CREATE emitted by db:generate).
+@Entity('partner_review')
+@Index('IDX_partner_application_partner_id', ['partner'])
+export class PartnerApplication {
   @PrimaryGeneratedUuidV7Column()
   id: string;
 
-  @ManyToOne(() => Partner, (partner) => partner.reviews, { nullable: false })
+  @ManyToOne(() => Partner, (partner) => partner.applications, {
+    nullable: false,
+  })
   @JoinColumn({ name: 'partner_id' })
   partner: Relation<Partner>;
 
@@ -31,7 +35,7 @@ export class PartnerReview {
   @Column({ type: 'text' })
   reason: string;
 
-  @ManyToOne(() => User, (user) => user.decidedPartnerReviews, {
+  @ManyToOne(() => User, (user) => user.decidedPartnerApplications, {
     nullable: false,
   })
   @JoinColumn({ name: 'decided_by' })
