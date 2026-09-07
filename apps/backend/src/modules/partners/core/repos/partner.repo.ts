@@ -25,6 +25,20 @@ export class PartnerRepo {
     });
   }
 
+  findByIdWithRelations(id: string): Promise<Partner | null> {
+    return this.partners.findOne({
+      where: { id },
+      relations: { owner: true, categories: true },
+    });
+  }
+
+  findByOwnerId(ownerId: string): Promise<Partner | null> {
+    return this.partners.findOne({
+      where: { owner: { id: ownerId } },
+      relations: { owner: true, categories: true },
+    });
+  }
+
   findActivePage(query: ListPartnersQueryDto): Promise<Partner[]> {
     const builder = this.partners
       .createQueryBuilder('partner')

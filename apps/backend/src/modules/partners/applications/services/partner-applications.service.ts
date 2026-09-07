@@ -4,6 +4,7 @@ import { type CursorPage } from '@/common/pagination';
 import { PartnerService, type Partner } from '@/modules/partners/core';
 import {
   ListPartnerApplicationsQueryDto,
+  PartnerApplicationDetailResponseDto,
   PartnerApplicationResponseDto,
 } from '@/modules/partners/applications/dto';
 
@@ -22,6 +23,16 @@ export class PartnerApplicationsService {
     };
   }
 
+  async getById(id: string): Promise<PartnerApplicationDetailResponseDto> {
+    const partner = await this.partnerService.findForReview(id);
+    return this.toDetailResponse(partner);
+  }
+
+  async getMine(ownerId: string): Promise<PartnerApplicationDetailResponseDto> {
+    const partner = await this.partnerService.findMineForReview(ownerId);
+    return this.toDetailResponse(partner);
+  }
+
   private toResponse(partner: Partner): PartnerApplicationResponseDto {
     return plainToInstance(
       PartnerApplicationResponseDto,
@@ -33,6 +44,39 @@ export class PartnerApplicationsService {
         city: partner.city,
         status: partner.status,
         createdAt: partner.createdAt,
+      },
+      { excludeExtraneousValues: true },
+    );
+  }
+
+  private toDetailResponse(
+    partner: Partner,
+  ): PartnerApplicationDetailResponseDto {
+    return plainToInstance(
+      PartnerApplicationDetailResponseDto,
+      {
+        id: partner.id,
+        legalName: partner.legalName,
+        tradeName: partner.tradeName,
+        siren: partner.siren,
+        businessPurpose: partner.businessPurpose,
+        status: partner.status,
+        addressLine: partner.addressLine,
+        postalCode: partner.postalCode,
+        city: partner.city,
+        latitude: Number(partner.latitude),
+        longitude: Number(partner.longitude),
+        categories: partner.categories.map(({ slug, displayName }) => ({
+          slug,
+          displayName,
+        })),
+        owner: {
+          id: partner.owner.id,
+          name: partner.owner.name,
+          email: partner.owner.email,
+        },
+        createdAt: partner.createdAt,
+        updatedAt: partner.updatedAt,
       },
       { excludeExtraneousValues: true },
     );

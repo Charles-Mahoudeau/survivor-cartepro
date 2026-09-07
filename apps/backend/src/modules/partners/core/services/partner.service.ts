@@ -73,6 +73,26 @@ export class PartnerService {
     return paginate<Partner>(partners, pagination.limit);
   }
 
+  async findForReview(id: string): Promise<Partner> {
+    const partner = await this.partnerRepo.findByIdWithRelations(id);
+
+    if (!partner) {
+      throw new NotFoundException(ERROR_CODES.PARTNER_NOT_FOUND);
+    }
+
+    return partner;
+  }
+
+  async findMineForReview(ownerId: string): Promise<Partner> {
+    const partner = await this.partnerRepo.findByOwnerId(ownerId);
+
+    if (!partner) {
+      throw new NotFoundException(ERROR_CODES.PARTNER_NOT_FOUND);
+    }
+
+    return partner;
+  }
+
   private toPublicResponse(
     partner: NonNullable<Awaited<ReturnType<PartnerRepo['findActiveById']>>>,
   ): PartnerResponseDto {
