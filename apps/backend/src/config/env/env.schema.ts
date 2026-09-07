@@ -30,6 +30,17 @@ export const EnvSchema = z.object({
 
   /** Comma-separated. Empty means nobody can sign in from a browser. */
   AUTH_TRUSTED_ORIGINS: z.string().min(1),
+
+  /** Signs and verifies self-contained payment tokens; a short value fails at boot, not later. */
+  PAYMENT_TOKEN_SIGNING_SECRET: z.string().min(32),
+
+  /** Requested QR lifetime, in seconds. The token service still hard-caps issued tokens at 300s regardless of this setting. */
+  PAYMENT_TOKEN_TTL_SECONDS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .max(1800)
+    .default(300),
 });
 
 export type Env = z.infer<typeof EnvSchema>;
