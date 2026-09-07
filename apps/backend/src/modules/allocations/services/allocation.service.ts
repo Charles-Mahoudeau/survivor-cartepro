@@ -11,6 +11,8 @@ import {
   type CursorPage,
   type PaginationQueryDto,
 } from '@/common/pagination';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { EmployerService } from '@/modules/employers';
 import { WalletStatus } from '@/modules/wallets/enums/wallet-status.enum';
 import { WalletService, type EmployerWallet } from '@/modules/wallets';
@@ -20,6 +22,7 @@ import { AllocationStatus } from '../enums/allocation-status.enum';
 import { AllocationRepo } from '../repos/allocation.repo';
 import { totalCredited } from './helpers/total.helper';
 import type {
+  AllocationAppliedResponseDto,
   AllocationBeneficiaryDto,
   AllocationDetailResponseDto,
   AllocationExcludedDto,
@@ -31,6 +34,7 @@ import type {
 @Injectable()
 export class AllocationService {
   constructor(
+    @InjectDataSource() private readonly dataSource: DataSource,
     private readonly allocationRepo: AllocationRepo,
     private readonly employerService: EmployerService,
     private readonly walletService: WalletService,
@@ -82,10 +86,7 @@ export class AllocationService {
     dto: UpdateAllocationDto,
   ): Promise<AllocationDetailResponseDto> {
     const allocation = await this.findOrThrow(id);
-
-    if (allocation.status === AllocationStatus.APPLIED) {
-      throw new ConflictException(ERROR_CODES.ALLOCATION_ALREADY_APPLIED);
-    }
+    this.refuseApplied(allocation);
 
     const changes: { label?: string; amount?: number } = {};
     if (dto.label !== undefined) {
@@ -101,6 +102,55 @@ export class AllocationService {
     }
 
     return this.toDetailResponse(allocation);
+  }
+
+  /**
+   * Credits every active wallet of the employer, in one transaction: the
+   * movements, the balances and the status of the allocation land together or
+   * not at all. A second call finds the allocation applied and answers 409.
+   */
+  async apply(id: string): Promise<AllocationAppliedResponseDto> {
+    const allocation = await this.findOrThrow(id);
+    this.refuseApplied(allocation);
+
+    const appliedAt = new Date();
+    const outcome = await this.dataSource.transaction(async (manager) => {
+      const locked = await this.allocationRepo.lockStatusById(manager, id);
+
+      if (!locked) {
+        throw new NotFoundException(ERROR_CODES.ALLOCATION_NOT_FOUND);
+      }
+      if (locked.status === AllocationStatus.APPLIED) {
+        throw new ConflictException(ERROR_CODES.ALLOCATION_ALREADY_APPLIED);
+      }
+
+      const credited = await this.walletService.creditFromAllocation(manager, {
+        allocationId: allocation.id,
+        employerId: allocation.employer.id,
+        amount: Number(allocation.amount),
+      });
+      await this.allocationRepo.markApplied(manager, id, appliedAt);
+
+      return credited;
+    });
+
+    return {
+      id: allocation.id,
+      status: AllocationStatus.APPLIED,
+      appliedAt,
+      creditedCount: outcome.credited.length,
+      total: totalCredited(String(allocation.amount), outcome.credited.length),
+      excluded: outcome.excluded.map((wallet) => ({
+        ...toHolder(wallet),
+        reason: AllocationExclusionReason.WALLET_DISABLED,
+      })),
+    };
+  }
+
+  private refuseApplied(allocation: Allocation): void {
+    if (allocation.status === AllocationStatus.APPLIED) {
+      throw new ConflictException(ERROR_CODES.ALLOCATION_ALREADY_APPLIED);
+    }
   }
 
   private async findOrThrow(id: string): Promise<Allocation> {

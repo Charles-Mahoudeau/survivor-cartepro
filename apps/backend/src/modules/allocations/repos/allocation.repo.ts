@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { decodeCursor, type PaginationQueryDto } from '@/common/pagination';
 import { Allocation } from '../entities/allocation.entity';
+import { AllocationStatus } from '../enums/allocation-status.enum';
 
 @Injectable()
 export class AllocationRepo {
@@ -55,5 +56,34 @@ export class AllocationRepo {
     changes: { label?: string; amount?: number },
   ): Promise<void> {
     await this.repo.update({ id }, changes);
+  }
+
+  /**
+   * Reads the status under a row lock held until the transaction ends, so a
+   * second apply queues behind the first instead of crediting alongside it.
+   * No join: Postgres refuses `FOR UPDATE` on the nullable side of one.
+   */
+  lockStatusById(
+    manager: EntityManager,
+    id: string,
+  ): Promise<Pick<Allocation, 'id' | 'status'> | null> {
+    return manager
+      .createQueryBuilder(Allocation, 'allocation')
+      .select(['allocation.id', 'allocation.status'])
+      .where('allocation.id = :id', { id })
+      .setLock('pessimistic_write')
+      .getOne();
+  }
+
+  async markApplied(
+    manager: EntityManager,
+    id: string,
+    appliedAt: Date,
+  ): Promise<void> {
+    await manager.update(
+      Allocation,
+      { id },
+      { status: AllocationStatus.APPLIED, appliedAt },
+    );
   }
 }

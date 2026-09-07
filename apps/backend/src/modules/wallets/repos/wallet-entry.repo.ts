@@ -1,8 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { decodeCursor, type PaginationQueryDto } from '@/common/pagination';
 import { WalletEntry } from '../entities/wallet-entry.entity';
+import type { WalletEntryDirection } from '../enums/wallet-entry-direction.enum';
+import type { WalletEntryKind } from '../enums/wallet-entry-kind.enum';
+
+export interface NewWalletEntry {
+  wallet: { id: string };
+  direction: WalletEntryDirection;
+  amount: number;
+  balanceAfter: number;
+  kind: WalletEntryKind;
+  allocation: { id: string };
+}
 
 @Injectable()
 export class WalletEntryRepo {
@@ -32,6 +43,17 @@ export class WalletEntryRepo {
     }
 
     return builder.getMany();
+  }
+
+  async insertAll(
+    manager: EntityManager,
+    entries: NewWalletEntry[],
+  ): Promise<void> {
+    if (entries.length === 0) {
+      return;
+    }
+
+    await manager.insert(WalletEntry, entries);
   }
 
   async findCreditedWalletIds(allocationId: string): Promise<string[]> {

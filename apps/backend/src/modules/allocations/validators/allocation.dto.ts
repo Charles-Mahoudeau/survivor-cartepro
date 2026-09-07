@@ -96,6 +96,27 @@ export class AllocationDetailResponseDto extends AllocationResponseDto {
   total: string;
 }
 
+@ApiSchema({ name: 'AllocationApplied' })
+export class AllocationAppliedResponseDto {
+  @ApiProperty() id: string;
+  @ApiProperty({ enum: AllocationStatus }) status: AllocationStatus;
+  @ApiProperty() appliedAt: Date;
+
+  @ApiProperty({
+    description: 'How many wallets the allocation just credited.',
+  })
+  creditedCount: number;
+
+  @ApiProperty({ description: 'Amount multiplied by the credited count.' })
+  total: string;
+
+  @ApiProperty({
+    type: () => [AllocationExcludedDto],
+    description: 'Wallets of the employer the apply skipped, and why.',
+  })
+  excluded: AllocationExcludedDto[];
+}
+
 @ApiSchema({ name: 'AllocationPage' })
 export class AllocationPageResponseDto {
   @ApiProperty({ type: () => [AllocationResponseDto] })

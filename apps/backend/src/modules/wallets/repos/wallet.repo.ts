@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { Wallet } from '../entities/wallet.entity';
 
 @Injectable()
@@ -22,6 +22,45 @@ export class WalletRepo {
       where: { user: { id: userId } },
       select: { id: true },
     });
+  }
+
+  /**
+   * The wallets of an employer, locked for the rest of the transaction so a
+   * status or a balance cannot move while an allocation is being applied.
+   * `FOR UPDATE OF wallet` leaves the joined holder row untouched.
+   */
+  lockByEmployerId(
+    manager: EntityManager,
+    employerId: string,
+  ): Promise<Wallet[]> {
+    return manager
+      .createQueryBuilder(Wallet, 'wallet')
+      .select([
+        'wallet.id',
+        'wallet.employeeRef',
+        'wallet.balance',
+        'wallet.status',
+      ])
+      .innerJoin('wallet.user', 'user')
+      .addSelect(['user.id', 'user.name'])
+      .where('wallet.employer = :employerId', { employerId })
+      .orderBy('wallet.id', 'ASC')
+      .setLock('pessimistic_write', undefined, ['wallet'])
+      .getMany();
+  }
+
+  creditAll(
+    manager: EntityManager,
+    walletIds: string[],
+    amount: number,
+  ): Promise<unknown> {
+    return manager
+      .createQueryBuilder()
+      .update(Wallet)
+      .set({ balance: () => 'balance + :amount' })
+      .where('id IN (:...walletIds)', { walletIds })
+      .setParameter('amount', amount)
+      .execute();
   }
 
   findByEmployerId(employerId: string): Promise<Wallet[]> {
