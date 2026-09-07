@@ -6,6 +6,7 @@ import { DataSource, type EntityManager } from 'typeorm';
 import { auth, authOptions } from '../src/config/auth/auth';
 import { buildDataSourceOptions } from '../src/config/database/data-source';
 import { Allocation } from '../src/modules/allocations/entities/allocation.entity';
+import { AllocationStatus } from '../src/modules/allocations/enums/allocation-status.enum';
 import { Employer } from '../src/modules/employers/entities/employer.entity';
 import { PartnerCategory } from '../src/modules/partners/categories/entities/partner-category.entity';
 import { Partner } from '../src/modules/partners/core/entities/partner.entity';
@@ -251,6 +252,8 @@ async function writePlan(
         employer: { id: allocation.employerId },
         label: allocation.label,
         amount: euros(allocation.amountCents),
+        status: AllocationStatus.APPLIED,
+        appliedAt: allocation.createdAt,
         createdBy: { id: allocation.createdById },
         createdAt: allocation.createdAt,
       });
