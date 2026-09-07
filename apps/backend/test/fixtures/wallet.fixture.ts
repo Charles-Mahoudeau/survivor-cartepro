@@ -8,7 +8,7 @@ import { WalletStatus } from '@/modules/wallets/enums/wallet-status.enum';
 export function createWallet(
   dataSource: DataSource,
   userId: string,
-  overrides: Partial<Wallet> = {},
+  overrides: DeepPartial<Wallet> = {},
 ): Promise<Wallet> {
   return dataSource.getRepository(Wallet).save({
     user: { id: userId },

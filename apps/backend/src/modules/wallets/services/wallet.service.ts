@@ -68,6 +68,15 @@ export class WalletService {
     };
   }
 
+  /** Spendable wallets per employer, keyed by employer, in one read. */
+  async countActiveByEmployer(
+    employerIds: string[],
+  ): Promise<Map<string, number>> {
+    const rows = await this.walletRepo.countActiveByEmployerIds(employerIds);
+
+    return new Map(rows.map((row) => [row.employerId, Number(row.count)]));
+  }
+
   private toEntryResponse(entry: WalletEntry): WalletEntryResponseDto {
     return {
       id: entry.id,

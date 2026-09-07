@@ -16,6 +16,12 @@ export const ERROR_CODES = {
   WALLET_NOT_FOUND: 'WALLET_NOT_FOUND',
   /** The requested partner does not exist or is not active. */
   PARTNER_NOT_FOUND: 'PARTNER_NOT_FOUND',
+  /** No account carries the identifier given as the employer owner. */
+  EMPLOYER_OWNER_NOT_FOUND: 'EMPLOYER_OWNER_NOT_FOUND',
+  /** Another employer already registers this SIREN. */
+  EMPLOYER_SIREN_ALREADY_USED: 'EMPLOYER_SIREN_ALREADY_USED',
+  /** The account already owns an employer, and it may own only one. */
+  EMPLOYER_OWNER_ALREADY_ASSIGNED: 'EMPLOYER_OWNER_ALREADY_ASSIGNED',
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];
