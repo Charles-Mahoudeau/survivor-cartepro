@@ -8,6 +8,7 @@ import {
   InvalidCursorError,
   paginate,
   type CursorPage,
+  type PaginationQueryDto,
 } from '@/common/pagination';
 import { ERROR_CODES } from '@/common/constants/error-codes.constant';
 import {
@@ -15,6 +16,8 @@ import {
   PartnerResponseDto,
 } from '@/modules/partners/core/dto';
 import { PartnerRepo } from '@/modules/partners/core/repos';
+import type { Partner } from '@/modules/partners/core/entities/partner.entity';
+import type { PartnerStatus } from '@/modules/partners/core/enums/partner-status.enum';
 
 @Injectable()
 export class PartnerService {
@@ -51,6 +54,23 @@ export class PartnerService {
       ...page,
       items: page.items.map((partner) => this.toPublicResponse(partner)),
     };
+  }
+
+  async listByStatus(
+    status: PartnerStatus,
+    pagination: PaginationQueryDto,
+  ): Promise<CursorPage<Partner>> {
+    let partners: Partner[];
+    try {
+      partners = await this.partnerRepo.findPageByStatus(status, pagination);
+    } catch (error) {
+      if (error instanceof InvalidCursorError) {
+        throw new BadRequestException(error.message);
+      }
+      throw error;
+    }
+
+    return paginate<Partner>(partners, pagination.limit);
   }
 
   private toPublicResponse(
