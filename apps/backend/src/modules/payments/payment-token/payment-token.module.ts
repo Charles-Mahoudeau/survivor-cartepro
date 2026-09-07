@@ -5,19 +5,19 @@ import { WalletsModule } from '@/modules/wallets';
 import { PaymentTokenController } from './controllers';
 import { PAYMENT_TOKEN_SOURCE } from './payment-token.contract';
 import { PaymentTokenService } from './services';
-import { StaticPaymentTokenService } from './services/helpers';
+import { SignedPaymentTokenService } from './services/helpers';
 import { PaymentTokenRepo } from './repos/payment-token.repo';
 
 @Module({
   imports: [TypeOrmModule.forFeature([PaymentToken]), WalletsModule],
   controllers: [PaymentTokenController],
   providers: [
-    StaticPaymentTokenService,
+    SignedPaymentTokenService,
     PaymentTokenService,
     PaymentTokenRepo,
     {
       provide: PAYMENT_TOKEN_SOURCE,
-      useExisting: StaticPaymentTokenService,
+      useExisting: SignedPaymentTokenService,
     },
   ],
   exports: [PAYMENT_TOKEN_SOURCE, PaymentTokenService],
