@@ -71,3 +71,16 @@ bun run db:migrate`) — jamais les factoriser dans une variable zsh.
 3. Si la cible était distante : ne pas tenter de « réparer » seul — signaler
    immédiatement à l'utilisateur l'état exact (migration appliquée, DDL, réversibilité)
    et la commande de retour (`bun run db:revert` depuis la branche qui porte le fichier).
+
+## Récidive (2026-09-04) — une commande dans une variable, `$G log …`
+
+En automatisant un découpage en commits, j'ai factorisé l'invocation dans une
+variable : `G="git -C $R"` puis `$G log -1 …`. En zsh, `$G` non quoté reste UN mot :
+le shell a cherché un exécutable nommé `git -C /…/Survivor`, la substitution `$(…)`
+est revenue vide, et mon garde-fou (« ce commit est-il vide ? ») a conclu à tort que
+le commit n'était pas vide. Un appel entier perdu sur le même piège que le
+`perl $files` de cette règle.
+
+Règle renforcée : **une commande à réutiliser est une fonction, jamais une
+variable** — `gitr() { git -C "$R" "$@"; }` puis `gitr log …`. Si une variable est
+inévitable, l'expanser par `${=G}`, mais la fonction reste la forme sûre.
