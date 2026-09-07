@@ -23,4 +23,13 @@ export class WalletRepo {
       select: { id: true },
     });
   }
+
+  findSummaryByUserId(
+    userId: string,
+  ): Promise<Pick<Wallet, 'id' | 'status' | 'balance'> | null> {
+    return this.repo.findOne({
+      where: { user: { id: userId } },
+      select: { id: true, status: true, balance: true },
+    });
+  }
 }
