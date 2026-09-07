@@ -1,1 +1,1 @@
-export * from './partner-application.repo';
+export * from './application.repo';

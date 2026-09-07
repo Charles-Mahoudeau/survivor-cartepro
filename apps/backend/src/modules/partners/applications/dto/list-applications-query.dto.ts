@@ -3,7 +3,7 @@ import { IsEnum, IsOptional } from 'class-validator';
 import { PaginationQueryDto } from '@/common/pagination';
 import { PartnerStatus } from '@/modules/partners/core';
 
-export class ListPartnerApplicationsQueryDto extends PaginationQueryDto {
+export class ListApplicationsQueryDto extends PaginationQueryDto {
   @ApiPropertyOptional({
     enum: PartnerStatus,
     default: PartnerStatus.PENDING,

@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { EntityManager } from 'typeorm';
 import { Repository } from 'typeorm';
-import { PartnerApplication } from '@/modules/partners/applications/entities/partner-application.entity';
+import { Application } from '@/modules/partners/applications/entities/application.entity';
 import type { Partner } from '@/modules/partners/core/entities/partner.entity';
 import type { PartnerStatus } from '@/modules/partners/core/enums/partner-status.enum';
 
-interface PartnerApplicationDecision {
+interface ApplicationDecision {
   partner: Partner;
   fromStatus: PartnerStatus;
   toStatus: PartnerStatus;
@@ -15,19 +15,19 @@ interface PartnerApplicationDecision {
 }
 
 @Injectable()
-export class PartnerApplicationRepo {
+export class ApplicationRepo {
   constructor(
-    @InjectRepository(PartnerApplication)
-    private readonly partnerApplications: Repository<PartnerApplication>,
+    @InjectRepository(Application)
+    private readonly applications: Repository<Application>,
   ) {}
 
   create(
-    decision: PartnerApplicationDecision,
+    decision: ApplicationDecision,
     manager?: EntityManager,
-  ): Promise<PartnerApplication> {
+  ): Promise<Application> {
     const repo = manager
-      ? manager.getRepository(PartnerApplication)
-      : this.partnerApplications;
+      ? manager.getRepository(Application)
+      : this.applications;
 
     const entry = repo.create({
       partner: decision.partner,

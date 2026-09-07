@@ -13,7 +13,7 @@ import { Session } from './session.entity';
 import { Allocation } from '@/modules/allocations/entities/allocation.entity';
 import { Employer } from '@/modules/employers/entities/employer.entity';
 import { Partner } from '@/modules/partners/core/entities/partner.entity';
-import { PartnerApplication } from '@/modules/partners/applications/entities/partner-application.entity';
+import { Application } from '@/modules/partners/applications/entities/application.entity';
 import { Wallet } from '@/modules/wallets/entities/wallet.entity';
 
 @Entity('user')
@@ -66,11 +66,8 @@ export class User {
   @OneToMany(() => Wallet, (wallet) => wallet.user)
   wallets: Relation<Wallet[]>;
 
-  @OneToMany(
-    () => PartnerApplication,
-    (partnerApplication) => partnerApplication.decidedBy,
-  )
-  decidedPartnerApplications: Relation<PartnerApplication[]>;
+  @OneToMany(() => Application, (application) => application.decidedBy)
+  decidedApplications: Relation<Application[]>;
 
   @OneToMany(() => Allocation, (allocation) => allocation.createdBy)
   createdAllocations: Relation<Allocation[]>;

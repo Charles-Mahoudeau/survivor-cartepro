@@ -16,7 +16,7 @@ import { PartnerStatus } from '@/modules/partners/core/enums/partner-status.enum
 // pure class rename (no destructive DROP/CREATE emitted by db:generate).
 @Entity('partner_review')
 @Index('IDX_partner_application_partner_id', ['partner'])
-export class PartnerApplication {
+export class Application {
   @PrimaryGeneratedUuidV7Column()
   id: string;
 
@@ -35,7 +35,7 @@ export class PartnerApplication {
   @Column({ type: 'text' })
   reason: string;
 
-  @ManyToOne(() => User, (user) => user.decidedPartnerApplications, {
+  @ManyToOne(() => User, (user) => user.decidedApplications, {
     nullable: false,
   })
   @JoinColumn({ name: 'decided_by' })

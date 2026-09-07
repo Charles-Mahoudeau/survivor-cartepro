@@ -2,22 +2,22 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { ForbiddenRoleDoc, UnauthenticatedDoc } from '@/common/docs';
 import {
-  PartnerApplicationDetailResponseDoc,
-  PartnerApplicationNotFoundDoc,
-  PartnerApplicationNotPendingDoc,
-  PartnerApplicationValidationErrorsDoc,
+  ApplicationDetailResponseDoc,
+  ApplicationNotFoundDoc,
+  ApplicationNotPendingDoc,
+  ApplicationValidationErrorsDoc,
 } from '../commons';
 
-export const ApprovePartnerApplicationDoc = () => {
+export const ApproveApplicationDoc = () => {
   return applyDecorators(
     ApiOperation({
       summary:
         'Approve a partner application and activate the partner (admin only)',
     }),
-    PartnerApplicationDetailResponseDoc(201),
-    PartnerApplicationValidationErrorsDoc(),
-    PartnerApplicationNotFoundDoc(),
-    PartnerApplicationNotPendingDoc(),
+    ApplicationDetailResponseDoc(201),
+    ApplicationValidationErrorsDoc(),
+    ApplicationNotFoundDoc(),
+    ApplicationNotPendingDoc(),
     ForbiddenRoleDoc(),
     UnauthenticatedDoc(),
   );

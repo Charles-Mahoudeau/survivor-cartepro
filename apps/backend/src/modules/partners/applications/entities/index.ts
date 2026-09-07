@@ -1,1 +1,1 @@
-export * from './partner-application.entity';
+export * from './application.entity';

@@ -1,3 +1,3 @@
-export * from './partner-application-validation-errors.doc';
-export * from './partner-application-not-found.doc';
-export * from './partner-application-not-pending.doc';
+export * from './application-validation-errors.doc';
+export * from './application-not-found.doc';
+export * from './application-not-pending.doc';

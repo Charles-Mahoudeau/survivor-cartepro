@@ -1,1 +1,1 @@
-export { PartnerApplicationsModule } from './partner-applications.module';
+export { ApplicationsModule } from './applications.module';

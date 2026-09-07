@@ -1,22 +1,22 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import {
-  PartnerApplicationDetailResponseDto,
-  PartnerApplicationOwnerSummaryDto,
+  ApplicationDetailResponseDto,
+  ApplicationOwnerSummaryDto,
 } from '@/modules/partners/applications/dto';
 import { PartnerCategorySummaryDto } from '@/modules/partners/core';
 
-export const PartnerApplicationDetailResponseDoc = (status = 200) => {
+export const ApplicationDetailResponseDoc = (status = 200) => {
   return applyDecorators(
     ApiExtraModels(
-      PartnerApplicationDetailResponseDto,
-      PartnerApplicationOwnerSummaryDto,
+      ApplicationDetailResponseDto,
+      ApplicationOwnerSummaryDto,
       PartnerCategorySummaryDto,
     ),
     ApiResponse({
       status,
       description: 'The full detail of a partner application dossier',
-      schema: { $ref: getSchemaPath(PartnerApplicationDetailResponseDto) },
+      schema: { $ref: getSchemaPath(ApplicationDetailResponseDto) },
     }),
   );
 };

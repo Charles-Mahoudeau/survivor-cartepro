@@ -2,18 +2,18 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { ForbiddenRoleDoc, UnauthenticatedDoc } from '@/common/docs';
 import {
-  PartnerApplicationDetailResponseDoc,
-  PartnerApplicationNotFoundDoc,
+  ApplicationDetailResponseDoc,
+  ApplicationNotFoundDoc,
 } from '../commons';
 
-export const GetPartnerApplicationDoc = () => {
+export const GetApplicationDoc = () => {
   return applyDecorators(
     ApiOperation({
       summary:
         'Get the full detail of a partner application dossier (admin only)',
     }),
-    PartnerApplicationDetailResponseDoc(),
-    PartnerApplicationNotFoundDoc(),
+    ApplicationDetailResponseDoc(),
+    ApplicationNotFoundDoc(),
     ForbiddenRoleDoc(),
     UnauthenticatedDoc(),
   );

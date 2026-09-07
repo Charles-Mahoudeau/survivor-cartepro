@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { PartnerStatus } from '@/modules/partners/core';
 
-export class PartnerApplicationResponseDto {
+export class ApplicationResponseDto {
   @ApiProperty()
   @Expose()
   id: string;

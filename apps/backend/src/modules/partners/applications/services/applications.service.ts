@@ -8,24 +8,24 @@ import {
   PartnerStatus,
   type Partner,
 } from '@/modules/partners/core';
-import { PartnerApplicationRepo } from '@/modules/partners/applications/repos';
+import { ApplicationRepo } from '@/modules/partners/applications/repos';
 import {
-  ListPartnerApplicationsQueryDto,
-  PartnerApplicationDetailResponseDto,
-  PartnerApplicationResponseDto,
+  ListApplicationsQueryDto,
+  ApplicationDetailResponseDto,
+  ApplicationResponseDto,
 } from '@/modules/partners/applications/dto';
 
 @Injectable()
-export class PartnerApplicationsService {
+export class ApplicationsService {
   constructor(
     private readonly partnerService: PartnerService,
-    private readonly partnerApplicationRepo: PartnerApplicationRepo,
+    private readonly applicationRepo: ApplicationRepo,
     @InjectDataSource() private readonly dataSource: DataSource,
   ) {}
 
   async list(
-    query: ListPartnerApplicationsQueryDto,
-  ): Promise<CursorPage<PartnerApplicationResponseDto>> {
+    query: ListApplicationsQueryDto,
+  ): Promise<CursorPage<ApplicationResponseDto>> {
     const page = await this.partnerService.listByStatus(query.status, query);
 
     return {
@@ -34,12 +34,12 @@ export class PartnerApplicationsService {
     };
   }
 
-  async getById(id: string): Promise<PartnerApplicationDetailResponseDto> {
+  async getById(id: string): Promise<ApplicationDetailResponseDto> {
     const partner = await this.partnerService.findForReview(id);
     return this.toDetailResponse(partner);
   }
 
-  async getMine(ownerId: string): Promise<PartnerApplicationDetailResponseDto> {
+  async getMine(ownerId: string): Promise<ApplicationDetailResponseDto> {
     const partner = await this.partnerService.findMineForReview(ownerId);
     return this.toDetailResponse(partner);
   }
@@ -48,11 +48,11 @@ export class PartnerApplicationsService {
     id: string,
     reason: string,
     decidedById: string,
-  ): Promise<PartnerApplicationDetailResponseDto> {
+  ): Promise<ApplicationDetailResponseDto> {
     const partner = await this.dataSource.transaction(async (manager) => {
       const activated = await this.partnerService.activate(id, manager);
 
-      await this.partnerApplicationRepo.create(
+      await this.applicationRepo.create(
         {
           partner: activated,
           fromStatus: PartnerStatus.PENDING,
@@ -69,9 +69,9 @@ export class PartnerApplicationsService {
     return this.toDetailResponse(partner);
   }
 
-  private toResponse(partner: Partner): PartnerApplicationResponseDto {
+  private toResponse(partner: Partner): ApplicationResponseDto {
     return plainToInstance(
-      PartnerApplicationResponseDto,
+      ApplicationResponseDto,
       {
         id: partner.id,
         legalName: partner.legalName,
@@ -85,11 +85,9 @@ export class PartnerApplicationsService {
     );
   }
 
-  private toDetailResponse(
-    partner: Partner,
-  ): PartnerApplicationDetailResponseDto {
+  private toDetailResponse(partner: Partner): ApplicationDetailResponseDto {
     return plainToInstance(
-      PartnerApplicationDetailResponseDto,
+      ApplicationDetailResponseDto,
       {
         id: partner.id,
         legalName: partner.legalName,

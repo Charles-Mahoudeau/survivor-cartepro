@@ -1,1 +1,1 @@
-export * from './partner-applications.controller';
+export * from './applications.controller';

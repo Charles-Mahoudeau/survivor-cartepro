@@ -10,22 +10,22 @@ import { ROLES } from '@/config/auth/auth.constants';
 import { PartnerStatus } from '@/modules/partners/core/enums/partner-status.enum';
 import { PartnerFixture } from '@/modules/partners/core/specs/partner.fixture';
 import { PartnerCategoryFixture } from '@/modules/partners/categories/specs/partner-category.fixture';
-import { PartnerApplication } from '@/modules/partners/applications/entities/partner-application.entity';
+import { Application } from '@/modules/partners/applications/entities/application.entity';
 
 let context: TestApp;
 
 const listApplications = (query = '', cookie?: string[]) => {
-  const req = api(context.app).get(apiPath(`/partner-applications${query}`));
+  const req = api(context.app).get(apiPath(`/partners/applications${query}`));
   return cookie ? req.set('Cookie', cookie) : req;
 };
 
 const getApplication = (id: string, cookie?: string[]) => {
-  const req = api(context.app).get(apiPath(`/partner-applications/${id}`));
+  const req = api(context.app).get(apiPath(`/partners/applications/${id}`));
   return cookie ? req.set('Cookie', cookie) : req;
 };
 
 const getMyApplication = (cookie?: string[]) => {
-  const req = api(context.app).get(apiPath('/partner-applications/me'));
+  const req = api(context.app).get(apiPath('/partners/applications/me'));
   return cookie ? req.set('Cookie', cookie) : req;
 };
 
@@ -35,7 +35,7 @@ const approveApplication = (
   cookie?: string[],
 ) => {
   const req = api(context.app)
-    .post(apiPath(`/partner-applications/${id}/approve`))
+    .post(apiPath(`/partners/applications/${id}/approve`))
     .send(body);
   return cookie ? req.set('Cookie', cookie) : req;
 };
@@ -88,7 +88,7 @@ beforeEach(async () => {
   await resetDatabase(context);
 });
 
-describe('GET /partner-applications', () => {
+describe('GET /partners/applications', () => {
   it('defaults to the pending review queue', async () => {
     const admin = await signUpAdmin();
     const pendingOwner = await signUp(
@@ -203,7 +203,7 @@ describe('GET /partner-applications', () => {
   );
 });
 
-describe('GET /partner-applications/:id', () => {
+describe('GET /partners/applications/:id', () => {
   it('returns the full dossier detail for an admin', async () => {
     const admin = await signUpAdmin();
     const owner = await signUp(context.app, 'detail-owner@tickettout.test');
@@ -292,7 +292,7 @@ describe('GET /partner-applications/:id', () => {
   });
 });
 
-describe('GET /partner-applications/me', () => {
+describe('GET /partners/applications/me', () => {
   it("returns the caller's own dossier detail", async () => {
     const owner = await signUpPartner('me-owner@tickettout.test');
     const category = await PartnerCategoryFixture.create(context.dataSource, {
@@ -368,7 +368,7 @@ describe('GET /partner-applications/me', () => {
   });
 });
 
-describe('POST /partner-applications/:id/approve', () => {
+describe('POST /partners/applications/:id/approve', () => {
   it('approves a pending application and activates the partner', async () => {
     const admin = await signUpAdmin();
     const owner = await signUp(context.app, 'approve-owner@tickettout.test');
@@ -386,7 +386,7 @@ describe('POST /partner-applications/:id/approve', () => {
     expect(body.status).toBe(PartnerStatus.ACTIVE);
 
     const decision = await context.dataSource
-      .getRepository(PartnerApplication)
+      .getRepository(Application)
       .findOne({
         where: { partner: { id: partner.id } },
         relations: { partner: true, decidedBy: true },

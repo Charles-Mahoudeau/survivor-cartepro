@@ -4,9 +4,9 @@ import {
   PartnerCategorySummaryDto,
   PartnerStatus,
 } from '@/modules/partners/core';
-import { PartnerApplicationOwnerSummaryDto } from './partner-application-owner-summary.dto';
+import { ApplicationOwnerSummaryDto } from './application-owner-summary.dto';
 
-export class PartnerApplicationDetailResponseDto {
+export class ApplicationDetailResponseDto {
   @ApiProperty()
   @Expose()
   id: string;
@@ -56,10 +56,10 @@ export class PartnerApplicationDetailResponseDto {
   @Type(() => PartnerCategorySummaryDto)
   categories: PartnerCategorySummaryDto[];
 
-  @ApiProperty({ type: () => PartnerApplicationOwnerSummaryDto })
+  @ApiProperty({ type: () => ApplicationOwnerSummaryDto })
   @Expose()
-  @Type(() => PartnerApplicationOwnerSummaryDto)
-  owner: PartnerApplicationOwnerSummaryDto;
+  @Type(() => ApplicationOwnerSummaryDto)
+  owner: ApplicationOwnerSummaryDto;
 
   @ApiProperty()
   @Expose()

@@ -1,7 +1,7 @@
 import { ApiResponse } from '@nestjs/swagger';
 import { ERROR_CODES } from '@/common/constants/error-codes.constant';
 
-export const PartnerApplicationNotFoundDoc = () => {
+export const ApplicationNotFoundDoc = () => {
   return ApiResponse({
     status: 404,
     description: 'No such partner application dossier',

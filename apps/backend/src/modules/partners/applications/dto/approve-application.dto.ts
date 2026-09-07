@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
-export class ApprovePartnerApplicationDto {
+export class ApproveApplicationDto {
   @ApiProperty({ description: 'Why the application is approved' })
   @IsString()
   @IsNotEmpty()

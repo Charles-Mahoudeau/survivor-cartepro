@@ -10,7 +10,7 @@ import { Employer } from '../src/modules/employers/entities/employer.entity';
 import { PartnerCategory } from '../src/modules/partners/categories/entities/partner-category.entity';
 import { Partner } from '../src/modules/partners/core/entities/partner.entity';
 import { PartnerStatus } from '../src/modules/partners/core/enums/partner-status.enum';
-import { PartnerApplication } from '../src/modules/partners/applications/entities/partner-application.entity';
+import { Application } from '../src/modules/partners/applications/entities/application.entity';
 import { Payment } from '../src/modules/payments/core/entities/payment.entity';
 import { PaymentToken } from '../src/modules/payments/core/entities/payment-token.entity';
 import { PaymentStatus } from '../src/modules/payments/core/enums/payment-status.enum';
@@ -224,7 +224,7 @@ async function writePlan(
       .of(partner.id)
       .add(partner.categorySlugs);
     for (const application of partner.applications) {
-      await manager.insert(PartnerApplication, {
+      await manager.insert(Application, {
         id: application.id,
         partner: { id: application.partnerId },
         fromStatus: application.fromStatus,

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
-export class PartnerApplicationOwnerSummaryDto {
+export class ApplicationOwnerSummaryDto {
   @ApiProperty()
   @Expose()
   id: string;

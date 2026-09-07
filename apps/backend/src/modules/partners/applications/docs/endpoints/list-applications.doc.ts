@@ -3,11 +3,11 @@ import { ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { ForbiddenRoleDoc, UnauthenticatedDoc } from '@/common/docs';
 import { PartnerStatus } from '@/modules/partners/core';
 import {
-  PartnerApplicationListResponseDoc,
-  PartnerApplicationValidationErrorsDoc,
+  ApplicationListResponseDoc,
+  ApplicationValidationErrorsDoc,
 } from '../commons';
 
-export const ListPartnerApplicationsDoc = () => {
+export const ListApplicationsDoc = () => {
   return applyDecorators(
     ApiOperation({
       summary: 'List partner applications awaiting review (admin only)',
@@ -34,8 +34,8 @@ export const ListPartnerApplicationsDoc = () => {
       maximum: 100,
       description: 'Number of applications to return',
     }),
-    PartnerApplicationListResponseDoc(),
-    PartnerApplicationValidationErrorsDoc(),
+    ApplicationListResponseDoc(),
+    ApplicationValidationErrorsDoc(),
     ForbiddenRoleDoc(),
     UnauthenticatedDoc(),
   );
