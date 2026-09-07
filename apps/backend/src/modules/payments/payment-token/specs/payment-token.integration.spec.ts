@@ -14,18 +14,12 @@ import { createWallet } from '../../../../../test/fixtures/wallet.fixture';
 import { api, apiPath, bodyOf } from '../../../../../test/http';
 import { MAX_PAYMENT_TOKEN_TTL_SECONDS } from '../constants/payment-token.constants';
 import { verifyPaymentToken } from '../services/helpers/payment-token-signer.helper';
+import type { PaymentTokenResponseDto } from '../validators';
 
 let context: TestApp;
 
 const PAYMENT_TOKEN_SIGNING_SECRET = process.env
   .PAYMENT_TOKEN_SIGNING_SECRET as string;
-
-interface PaymentTokenResponse {
-  token: string;
-  qrPayload: string;
-  shortCode: string;
-  expiresAt: string;
-}
 
 const issueToken = (cookie: string[]) =>
   api(context.app).post(apiPath('/me/payment-tokens')).set('Cookie', cookie);
@@ -57,7 +51,7 @@ describe('POST /me/payment-tokens', () => {
     });
 
     const response = await issueToken(employee.cookie).expect(201);
-    const body = bodyOf<PaymentTokenResponse>(response);
+    const body = bodyOf<PaymentTokenResponseDto>(response);
 
     expect(body.shortCode).toMatch(/^[A-Z0-9]{8}$/);
     const expiresInSeconds =
@@ -91,10 +85,10 @@ describe('POST /me/payment-tokens', () => {
     );
     await createWallet(context.dataSource, employee.id, { balance: 10 });
 
-    const first = bodyOf<PaymentTokenResponse>(
+    const first = bodyOf<PaymentTokenResponseDto>(
       await issueToken(employee.cookie).expect(201),
     );
-    const second = bodyOf<PaymentTokenResponse>(
+    const second = bodyOf<PaymentTokenResponseDto>(
       await issueToken(employee.cookie).expect(201),
     );
 
@@ -186,7 +180,7 @@ describe('GET /me/payment-tokens/current', () => {
       'payment-token-current@tickettout.test',
     );
     await createWallet(context.dataSource, employee.id, { balance: 10 });
-    const issued = bodyOf<PaymentTokenResponse>(
+    const issued = bodyOf<PaymentTokenResponseDto>(
       await issueToken(employee.cookie).expect(201),
     );
 

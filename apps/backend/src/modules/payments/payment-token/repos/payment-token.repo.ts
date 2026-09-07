@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { PaymentToken } from '../../core/entities';
 import { PaymentTokenStatus } from '../../core/enums';
 import { generateUniqueShortCode } from '../services/helpers';
@@ -10,7 +10,6 @@ export class PaymentTokenRepo {
   constructor(
     @InjectRepository(PaymentToken)
     private readonly repo: Repository<PaymentToken>,
-    private readonly dataSource: DataSource,
   ) {}
 
   findLiveByWalletId(walletId: string): Promise<PaymentToken | null> {
@@ -27,7 +26,7 @@ export class PaymentTokenRepo {
     walletId: string,
     expiresAt: Date,
   ): Promise<PaymentToken> {
-    const token = await this.dataSource.transaction(async (manager) => {
+    const token = await this.repo.manager.transaction(async (manager) => {
       const repo = manager.getRepository(PaymentToken);
 
       await repo.update(
