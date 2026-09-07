@@ -1,7 +1,7 @@
 {
   "name": "@tickettout/backend",
   "version": "0.0.1",
-  "description": "API Ticket Tout — avantages salariés dématérialisés",
+  "description": "API CartePro — avantages salariés dématérialisés",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
