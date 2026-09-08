@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 
-import { SidebarUser } from '@/components/composites/sidebar-user';
+import { SidebarUser } from '@/components/composites/sidebar/user';
 
 import EmployeeSidebarClient from './page.client';
 
@@ -13,7 +13,7 @@ export default function EmployeeSidebar() {
     <EmployeeSidebarClient
       account={
         <Suspense fallback={null}>
-          <SidebarUser home="/me" />
+          <SidebarUser />
         </Suspense>
       }
     />

@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 
-import { SidebarUser } from '@/components/composites/sidebar-user';
+import { SidebarUser } from '@/components/composites/sidebar/user';
 
 import ProSidebarClient from './page.client';
 
@@ -13,7 +13,7 @@ export default function ProSidebar() {
     <ProSidebarClient
       account={
         <Suspense fallback={null}>
-          <SidebarUser home="/pro" />
+          <SidebarUser />
         </Suspense>
       }
     />

@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 
-import { SidebarUser } from '@/components/composites/sidebar-user';
+import { SidebarUser } from '@/components/composites/sidebar/user';
 
 import AdminSidebarClient from './page.client';
 
@@ -13,7 +13,7 @@ export default function AdminSidebar() {
     <AdminSidebarClient
       account={
         <Suspense fallback={null}>
-          <SidebarUser home="/admin" />
+          <SidebarUser />
         </Suspense>
       }
     />

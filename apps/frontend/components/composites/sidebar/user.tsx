@@ -1,7 +1,12 @@
-import Link from 'next/link';
+import { RiLogoutBoxRLine } from '@remixicon/react';
 
+import { SignOutMenuButton } from '@/components/composites/sidebar/sign-out.client';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import {
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from '@/components/ui/sidebar';
 import { getCurrentUser } from '@/lib/auth/session';
 
 function initials(name: string): string {
@@ -15,7 +20,7 @@ function initials(name: string): string {
 }
 
 /** The only part of the sidebar that reads the session, so it streams alone. */
-export async function SidebarUser({ home }: { home: string }) {
+export async function SidebarUser() {
   const user = await getCurrentUser();
 
   if (!user) {
@@ -23,9 +28,9 @@ export async function SidebarUser({ home }: { home: string }) {
   }
 
   return (
-    <SidebarMenuItem>
-      <SidebarMenuButton size="lg" asChild>
-        <Link href={home}>
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <SidebarMenuButton size="lg">
           <Avatar className="size-8 rounded-lg">
             <AvatarFallback className="rounded-lg">
               {initials(user.name)}
@@ -33,10 +38,15 @@ export async function SidebarUser({ home }: { home: string }) {
           </Avatar>
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-semibold">{user.name}</span>
-            <span className="truncate text-xs">{user.email}</span>
+            <span className="text-muted-foreground truncate text-xs">
+              {user.email}
+            </span>
           </div>
-        </Link>
-      </SidebarMenuButton>
-    </SidebarMenuItem>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SignOutMenuButton icon={<RiLogoutBoxRLine />} />
+      </SidebarMenuItem>
+    </SidebarMenu>
   );
 }

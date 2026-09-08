@@ -1,38 +1,37 @@
 'use client';
 
+import { RiStoreLine, RiWalletLine } from '@remixicon/react';
+import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { RiHistoryLine, RiStoreLine, RiWalletLine } from '@remixicon/react';
-
+import { SidebarBrand } from '@/components/composites/sidebar/brand';
 import {
-  AppSidebar,
-  type AppSidebarGroup,
-} from '@/components/composites/app-sidebar';
-import { ME_CONTENT } from '@/content/me';
+  Sidebar,
+  SidebarBuildContent,
+  SidebarFooter,
+  SidebarHeader,
+  type SidebarGroupData,
+} from '@/components/ui/sidebar';
 
-export const ME_HOME = '/me';
+const HOME = '/me';
 
-const GROUPS: AppSidebarGroup[] = [
+const GROUPS: SidebarGroupData[] = [
   {
-    label: ME_CONTENT.roleLabel,
+    id: 'compte',
+    label: 'Compte',
     items: [
       {
         id: 'wallet',
-        label: ME_CONTENT.nav.wallet,
-        href: ME_HOME,
-        icon: RiWalletLine,
-      },
-      {
-        id: 'history',
-        label: ME_CONTENT.nav.history,
-        href: '/me/history',
-        icon: RiHistoryLine,
+        label: 'Mon compte',
+        href: '/me',
+        icon: <RiWalletLine />,
+        subItems: [{ id: 'history', label: 'Historique', href: '/me/history' }],
       },
       {
         id: 'partners',
-        label: ME_CONTENT.nav.partners,
+        label: 'Partenaires',
         href: '/me/partners',
-        icon: RiStoreLine,
+        icon: <RiStoreLine />,
       },
     ],
   },
@@ -43,5 +42,20 @@ export default function EmployeeSidebarClient({
 }: {
   account: ReactNode;
 }) {
-  return <AppSidebar home={ME_HOME} groups={GROUPS} account={account} />;
+  const pathname = usePathname();
+
+  return (
+    <Sidebar variant="inset">
+      <SidebarHeader>
+        <SidebarBrand description="Espace salarié" />
+      </SidebarHeader>
+      <SidebarBuildContent
+        sidebarGroups={GROUPS}
+        isActive={(href) =>
+          href === HOME ? pathname === HOME : pathname.startsWith(href)
+        }
+      />
+      <SidebarFooter>{account}</SidebarFooter>
+    </Sidebar>
+  );
 }

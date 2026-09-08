@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
-import { Slot } from 'radix-ui';
+import { Collapsible, Slot } from 'radix-ui';
 
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -20,9 +20,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   Tooltip,
   TooltipContent,
+  TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { RiSideBarLine } from '@remixicon/react';
+import { RiArrowRightSLine, RiSideBarLine } from '@remixicon/react';
+import Link from 'next/link';
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -127,23 +129,25 @@ function SidebarProvider({
 
   return (
     <SidebarContext.Provider value={contextValue}>
-      <div
-        data-slot="sidebar-wrapper"
-        style={
-          {
-            '--sidebar-width': SIDEBAR_WIDTH,
-            '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
-            ...style,
-          } as React.CSSProperties
-        }
-        className={cn(
-          'group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar',
-          className,
-        )}
-        {...props}
-      >
-        {children}
-      </div>
+      <TooltipProvider delayDuration={0}>
+        <div
+          data-slot="sidebar-wrapper"
+          style={
+            {
+              '--sidebar-width': SIDEBAR_WIDTH,
+              '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
+              ...style,
+            } as React.CSSProperties
+          }
+          className={cn(
+            'group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar',
+            className,
+          )}
+          {...props}
+        >
+          {children}
+        </div>
+      </TooltipProvider>
     </SidebarContext.Provider>
   );
 }
@@ -674,6 +678,103 @@ function SidebarMenuSubButton({
   );
 }
 
+export interface SidebarSubItemData {
+  id: string;
+  label: string;
+  href: string;
+  disabled?: boolean;
+}
+
+export interface SidebarItemData {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+  href: string;
+  disabled?: boolean;
+  subItems?: SidebarSubItemData[];
+  badge?: React.ReactNode;
+}
+
+export interface SidebarGroupData {
+  id: string;
+  label: string;
+  items: SidebarItemData[];
+}
+
+/** Builds the navigation from data, so every space declares groups, not markup. */
+function SidebarBuildContent({
+  sidebarGroups,
+  isActive,
+}: {
+  sidebarGroups: SidebarGroupData[];
+  isActive: (href: string) => boolean;
+}) {
+  return (
+    <SidebarContent>
+      {sidebarGroups.map((group) => (
+        <SidebarGroup key={group.id}>
+          <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+          <SidebarMenu>
+            {group.items.map((item) => (
+              <Collapsible.Root
+                asChild
+                defaultOpen
+                key={item.id}
+                className="group/collapsible"
+              >
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip={item.label}
+                    isActive={isActive(item.href)}
+                  >
+                    <Link href={item.href} aria-disabled={item.disabled}>
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                  {item.badge ? (
+                    <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
+                  ) : null}
+                  {item.subItems ? (
+                    <>
+                      <Collapsible.Trigger asChild>
+                        <SidebarMenuAction className="rounded-lg data-[state=open]:rotate-90">
+                          <RiArrowRightSLine />
+                          <span className="sr-only">{item.label}</span>
+                        </SidebarMenuAction>
+                      </Collapsible.Trigger>
+                      <Collapsible.Content>
+                        <SidebarMenuSub>
+                          {item.subItems.map((subItem) => (
+                            <SidebarMenuSubItem key={subItem.id}>
+                              <SidebarMenuSubButton
+                                asChild
+                                isActive={isActive(subItem.href)}
+                              >
+                                <Link
+                                  href={subItem.href}
+                                  aria-disabled={subItem.disabled}
+                                >
+                                  {subItem.label}
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      </Collapsible.Content>
+                    </>
+                  ) : null}
+                </SidebarMenuItem>
+              </Collapsible.Root>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+      ))}
+    </SidebarContent>
+  );
+}
+
 export {
   Sidebar,
   SidebarContent,
@@ -698,5 +799,6 @@ export {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
+  SidebarBuildContent,
   useSidebar,
 };
