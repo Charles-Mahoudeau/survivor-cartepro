@@ -24,6 +24,15 @@ export class WalletRepo {
     });
   }
 
+  findSummaryByUserId(
+    userId: string,
+  ): Promise<Pick<Wallet, 'id' | 'status' | 'balance'> | null> {
+    return this.repo.findOne({
+      where: { user: { id: userId } },
+      select: { id: true, status: true, balance: true },
+    });
+  }
+
   /**
    * The wallets of an employer, locked for the rest of the transaction so a
    * status or a balance cannot move while an allocation is being applied.

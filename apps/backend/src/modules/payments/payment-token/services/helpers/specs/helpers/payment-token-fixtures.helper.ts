@@ -15,8 +15,12 @@ export function buildClaims(
 }
 
 export function flipLastChar(value: string): string {
+  // A base64url string's final character can carry padding bits that don't
+  // affect the decoded bytes, so swapping adjacent characters (e.g. A -> B)
+  // can silently decode to the same byte. E and A sit 4 apart, guaranteeing
+  // a different 4-bit group regardless of the original character.
   const last = value.at(-1);
-  return value.slice(0, -1) + (last === 'A' ? 'B' : 'A');
+  return value.slice(0, -1) + (last === 'A' ? 'E' : 'A');
 }
 
 /** Signs an arbitrary body with the real HMAC math, bypassing `signPaymentToken`'s JSON encoding. */
