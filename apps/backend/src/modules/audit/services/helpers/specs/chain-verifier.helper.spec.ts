@@ -131,4 +131,46 @@ describe('verifyChain', () => {
       { type: 'tampered', id: 'entry-3', index: 3 },
     ]);
   });
+
+  describe('a window that does not start at the chain origin', () => {
+    it('accepts the caller-supplied boundary instead of requiring a null previousHash', () => {
+      const full = buildChain(5);
+      const window = full.slice(2); // entries 2..4; entry 2's previousHash is entry 1's hash
+
+      // Without the boundary, index 0's real (non-null) previousHash would
+      // itself look like a missing link — this is exactly what an export
+      // verifier must avoid reporting for a period that isn't the origin.
+      expect(verifyChain(window).ok).toBe(false);
+
+      expect(verifyChain(window, window[0].previousHash)).toEqual({
+        ok: true,
+        checked: 3,
+        anomalies: [],
+      });
+    });
+
+    it('still finds a tampered row inside the window', () => {
+      const full = buildChain(5);
+      const window = full.slice(2);
+      window[1] = { ...window[1], targetId: 'forged' };
+
+      const result = verifyChain(window, window[0].previousHash);
+
+      expect(result.anomalies).toEqual([
+        { type: 'tampered', id: 'entry-3', index: 1 },
+      ]);
+    });
+
+    it('still finds a row deleted from inside the window', () => {
+      const full = buildChain(5);
+      const window = full.slice(2);
+      window.splice(1, 1);
+
+      const result = verifyChain(window, window[0].previousHash);
+
+      expect(result.anomalies).toEqual([
+        { type: 'missing_link', id: 'entry-4', index: 1 },
+      ]);
+    });
+  });
 });

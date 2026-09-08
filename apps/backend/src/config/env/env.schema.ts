@@ -41,6 +41,13 @@ export const EnvSchema = z.object({
     .positive()
     .max(1800)
     .default(300),
+
+  /**
+   * Signs the audit log's JSON export, so its integrity can be checked with
+   * the exported file and this key alone — no database, no PKI. A short
+   * value fails at boot, not later.
+   */
+  AUDIT_EXPORT_SIGNING_SECRET: z.string().min(32),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

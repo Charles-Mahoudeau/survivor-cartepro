@@ -1,8 +1,9 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Roles } from '@/common/decorators/roles.decorator';
+import { PeriodQueryDto } from '@/common/period';
 import { ROLES } from '@/config/auth/auth.constants';
-import { ListAuditDoc } from '../docs';
+import { ExportAuditDoc, ListAuditDoc } from '../docs';
 import { AuditService } from '../services';
 import { ListAuditQueryDto } from '../validators';
 
@@ -16,5 +17,12 @@ export class AuditController {
   @ListAuditDoc()
   list(@Query() query: ListAuditQueryDto) {
     return this.auditService.list(query);
+  }
+
+  @Get('export')
+  @Roles(ROLES.ADMIN)
+  @ExportAuditDoc()
+  exportPeriod(@Query() query: PeriodQueryDto) {
+    return this.auditService.exportPeriod(query);
   }
 }

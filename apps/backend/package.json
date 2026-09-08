@@ -26,7 +26,8 @@
     "db:drop": "bun scripts/db-drop.ts",
     "db:reset": "bun scripts/db-reset.ts",
     "db:seed": "bun scripts/db-seed.ts",
-    "auth:promote": "bun scripts/auth-promote.ts"
+    "auth:promote": "bun scripts/auth-promote.ts",
+    "audit:verify": "bun scripts/audit-verify.ts"
   },
   "dependencies": {
     "@better-auth/api-key": "^1.7.2",

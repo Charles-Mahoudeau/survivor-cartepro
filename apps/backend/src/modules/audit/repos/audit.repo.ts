@@ -102,6 +102,23 @@ export class AuditRepo {
     return builder.getMany();
   }
 
+  /**
+   * Oldest first — the chain's own order, for `verifyChain` and for an
+   * export where the point is to prove a sequence, not to browse it.
+   */
+  findRange(period: Period): Promise<Audit[]> {
+    const builder = this.audits
+      .createQueryBuilder('audit')
+      .where('audit.occurredAt >= :from', { from: period.from })
+      .orderBy('audit.id', 'ASC');
+
+    if (period.to) {
+      builder.andWhere('audit.occurredAt <= :to', { to: period.to });
+    }
+
+    return builder.getMany();
+  }
+
   async append(entry: NewAuditEntry, manager: EntityManager): Promise<Audit> {
     const repo = manager.getRepository(Audit);
     // `payload` is a jsonb column typed as a plain `Record<string, unknown>`,

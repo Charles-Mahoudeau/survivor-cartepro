@@ -35,3 +35,7 @@ process.env.AUTH_TRUSTED_ORIGINS = 'http://localhost:3000';
 process.env.PAYMENT_TOKEN_SIGNING_SECRET =
   process.env.PAYMENT_TOKEN_SIGNING_SECRET ??
   'integration-payment-token-secret-at-least-32-chars';
+
+process.env.AUDIT_EXPORT_SIGNING_SECRET =
+  process.env.AUDIT_EXPORT_SIGNING_SECRET ??
+  'integration-audit-export-secret-at-least-32-chars';

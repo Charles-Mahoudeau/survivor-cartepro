@@ -22,7 +22,7 @@ const FIELD_DELIMITER = '|';
  * the same value at write time even though nothing in it changed. Array
  * order is left alone: it is significant, unlike object key order.
  */
-function canonicalize(value: unknown): unknown {
+export function canonicalize(value: unknown): unknown {
   if (Array.isArray(value)) {
     return value.map(canonicalize);
   }

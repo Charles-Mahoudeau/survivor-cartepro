@@ -31,9 +31,18 @@ export interface ChainVerificationResult {
  * breaks the link into the row that follows the gap. A row can report at
  * most one anomaly — once its own hash is wrong there is nothing more
  * reliable left to say about its link to what precedes it.
+ *
+ * `expectedFirstPreviousHash` is what the very first entry's `previousHash`
+ * must equal — `null` (the default) when `entries` is expected to start at
+ * the chain's true origin. A signed export of one period cannot prove what
+ * came before its own first row without the database, so the export
+ * verifier passes that row's own `previousHash` back in here: it trusts the
+ * boundary the signature already vouches for, and this function then checks
+ * only the links it actually can — every row after the first.
  */
 export function verifyChain(
   entries: readonly ChainEntry[],
+  expectedFirstPreviousHash: string | null = null,
 ): ChainVerificationResult {
   const anomalies: ChainAnomaly[] = [];
 
@@ -46,7 +55,8 @@ export function verifyChain(
       continue;
     }
 
-    const expectedPreviousHash = index === 0 ? null : entries[index - 1].hash;
+    const expectedPreviousHash =
+      index === 0 ? expectedFirstPreviousHash : entries[index - 1].hash;
     if (entry.previousHash !== expectedPreviousHash) {
       anomalies.push({ type: 'missing_link', id: entry.id, index });
     }
