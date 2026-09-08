@@ -12,24 +12,31 @@ import {
   SidebarHeader,
   type SidebarGroupData,
 } from '@/components/ui/sidebar';
+import { ME_CONTENT } from '@/content/me';
 
 const HOME = '/me';
 
 const GROUPS: SidebarGroupData[] = [
   {
     id: 'compte',
-    label: 'Compte',
+    label: ME_CONTENT.roleLabel,
     items: [
       {
         id: 'wallet',
-        label: 'Mon compte',
-        href: '/me',
+        label: ME_CONTENT.nav.wallet,
+        href: HOME,
         icon: <RiWalletLine />,
-        subItems: [{ id: 'history', label: 'Historique', href: '/me/history' }],
+        subItems: [
+          {
+            id: 'history',
+            label: ME_CONTENT.nav.history,
+            href: '/me/history',
+          },
+        ],
       },
       {
         id: 'partners',
-        label: 'Partenaires',
+        label: ME_CONTENT.nav.partners,
         href: '/me/partners',
         icon: <RiStoreLine />,
       },
@@ -37,11 +44,7 @@ const GROUPS: SidebarGroupData[] = [
   },
 ];
 
-export default function EmployeeSidebarClient({
-  account,
-}: {
-  account: ReactNode;
-}) {
+export function EmployeeSidebar({ account }: { account: ReactNode }) {
   const pathname = usePathname();
 
   return (

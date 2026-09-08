@@ -1,3 +1,4 @@
-import ProSidebar from './page';
+import Page from './page';
 
-export default ProSidebar;
+/** Every page of the space carries the same navigation, reload included. */
+export default Page;

@@ -17,24 +17,20 @@ const HOME = '/admin';
 
 const GROUPS: SidebarGroupData[] = [
   {
-    id: 'pilotage',
+    id: 'admin',
     label: 'Pilotage',
     items: [
       {
         id: 'overview',
         label: 'Tableau de bord',
-        href: '/admin',
+        href: HOME,
         icon: <RiDashboardLine />,
       },
     ],
   },
 ];
 
-export default function AdminSidebarClient({
-  account,
-}: {
-  account: ReactNode;
-}) {
+export function AdminSidebar({ account }: { account: ReactNode }) {
   const pathname = usePathname();
 
   return (

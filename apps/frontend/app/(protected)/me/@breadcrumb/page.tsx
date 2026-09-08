@@ -1,14 +1,8 @@
-import {
-  LayoutBreadcrumb,
-  type LayoutBreadcrumbPath,
-} from '@/components/composites/layout-breadcrumb';
+import { LayoutBreadcrumb } from '@/components/composites/layout-breadcrumb';
 import { ME_CONTENT } from '@/content/me';
 
-export const ME_BREADCRUMB_ROOT: LayoutBreadcrumbPath = {
-  title: ME_CONTENT.nav.wallet,
-  href: '/me',
-};
+export const ME_TRAIL_ROOT = { title: ME_CONTENT.nav.wallet, href: '/me' };
 
-export default function WalletBreadcrumb() {
-  return <LayoutBreadcrumb path={[ME_BREADCRUMB_ROOT]} />;
+export default function Page() {
+  return <LayoutBreadcrumb path={[ME_TRAIL_ROOT]} />;
 }

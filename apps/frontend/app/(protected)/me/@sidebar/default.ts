@@ -1,3 +1,4 @@
-import EmployeeSidebar from './page';
+import Page from './page';
 
-export default EmployeeSidebar;
+/** Every page of the space carries the same navigation, reload included. */
+export default Page;

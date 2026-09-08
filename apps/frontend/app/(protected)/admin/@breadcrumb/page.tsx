@@ -1,6 +1,6 @@
 import { LayoutBreadcrumb } from '@/components/composites/layout-breadcrumb';
 
-export default function AdminBreadcrumb() {
+export default function Page() {
   return (
     <LayoutBreadcrumb path={[{ title: 'Administration', href: '/admin' }]} />
   );

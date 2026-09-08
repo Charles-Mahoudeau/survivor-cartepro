@@ -1,3 +1,4 @@
-import AdminSidebar from './page';
+import Page from './page';
 
-export default AdminSidebar;
+/** Every page of the space carries the same navigation, reload included. */
+export default Page;

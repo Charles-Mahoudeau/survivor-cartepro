@@ -17,20 +17,20 @@ const HOME = '/pro';
 
 const GROUPS: SidebarGroupData[] = [
   {
-    id: 'etablissement',
+    id: 'pro',
     label: 'Établissement',
     items: [
       {
         id: 'overview',
         label: 'Tableau de bord',
-        href: '/pro',
+        href: HOME,
         icon: <RiStoreLine />,
       },
     ],
   },
 ];
 
-export default function ProSidebarClient({ account }: { account: ReactNode }) {
+export function ProSidebar({ account }: { account: ReactNode }) {
   const pathname = usePathname();
 
   return (
