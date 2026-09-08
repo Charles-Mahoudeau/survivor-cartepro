@@ -178,7 +178,7 @@ describe('POST /employers', () => {
       ownerId: owner.id,
       name: 'Doublon',
       siren: '552100554',
-    }).expect(422);
+    }).expect(409);
 
     expect(bodyOf<{ message: string }>(response).message).toBe(
       'EMPLOYER_SIREN_ALREADY_USED',
@@ -198,7 +198,7 @@ describe('POST /employers', () => {
       ownerId: owner.id,
       name: 'Deuxième employeur',
       siren: '552100554',
-    }).expect(422);
+    }).expect(409);
 
     expect(bodyOf<{ message: string }>(response).message).toBe(
       'EMPLOYER_OWNER_ALREADY_ASSIGNED',
@@ -249,7 +249,7 @@ describe('POST /employers', () => {
     }).expect(400);
   });
 
-  it('answers 422 to the loser of two simultaneous creations, never 500', async () => {
+  it('answers 409 to the loser of two simultaneous creations, never 500', async () => {
     const agent = await signUpAdmin();
     const owners = await Promise.all([
       createUser(context, 'A', `a-${++sequence}-${Date.now()}@tickettout.test`),
@@ -267,7 +267,7 @@ describe('POST /employers', () => {
     );
 
     expect(answers.filter((status) => status === 201)).toHaveLength(1);
-    expect(answers.filter((status) => status === 422)).toHaveLength(1);
+    expect(answers.filter((status) => status === 409)).toHaveLength(1);
   });
 
   it('refuses an employee', async () => {

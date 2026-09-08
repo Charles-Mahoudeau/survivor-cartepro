@@ -1,8 +1,8 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
-  UnprocessableEntityException,
 } from '@nestjs/common';
 import { ERROR_CODES } from '@/common/constants/error-codes.constant';
 import {
@@ -92,7 +92,7 @@ export class EmployerService {
   }
 
   /**
-   * Answers 422 naming the rule that was broken, and returns quietly when
+   * Answers 409 naming the rule that was broken, and returns quietly when
    * none is. Reading before the insert covers the ordinary case; the same
    * read runs again on a unique violation, which is what turns a creation
    * that lost a race into the answer it would have had a moment earlier.
@@ -107,7 +107,7 @@ export class EmployerService {
       return;
     }
 
-    throw new UnprocessableEntityException(
+    throw new ConflictException(
       conflicting.siren === dto.siren
         ? ERROR_CODES.EMPLOYER_SIREN_ALREADY_USED
         : ERROR_CODES.EMPLOYER_OWNER_ALREADY_ASSIGNED,

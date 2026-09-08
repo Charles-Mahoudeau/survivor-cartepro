@@ -15,8 +15,9 @@ export const CreateEmployerDoc = () => {
       description:
         'Registers an employer under an existing account, which becomes the ' +
         'one that administers it. A SIREN already registered, or an account ' +
-        'that already owns an employer, answers 422 — including when two ' +
-        'creations race each other.',
+        'that already owns an employer, answers 409 — including when two ' +
+        'creations race each other. Partner registration answers the same ' +
+        'code for the same class of refusal.',
     }),
     EmployerResponseDoc(),
     CreateEmployerValidationErrorsDoc(),
