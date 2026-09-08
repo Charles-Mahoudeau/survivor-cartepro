@@ -1,9 +1,5 @@
 import { EspacePlaceholder } from '@/components/composites/espace-placeholder';
 
 export default function Page() {
-  return (
-    <>
-      <EspacePlaceholder titre="Espace partenaire" home="/pro" />
-    </>
-  );
+  return <EspacePlaceholder titre="Espace partenaire" />;
 }

@@ -1,9 +1,5 @@
 import { EspacePlaceholder } from '@/components/composites/espace-placeholder';
 
 export default function Page() {
-  return (
-    <>
-      <EspacePlaceholder titre="Administration" home="/admin" />
-    </>
-  );
+  return <EspacePlaceholder titre="Administration" />;
 }

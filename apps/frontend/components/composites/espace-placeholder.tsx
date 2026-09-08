@@ -1,50 +1,24 @@
 import { Suspense } from 'react';
 
 import { Card } from '@/components/composites/card';
-import { BandeauSimulation } from '@/components/composites/simulation-banner';
-import { SiteHeader } from '@/components/composites/site-header.client';
-import { UserQuickAccess } from '@/components/composites/user-quick-access';
+import { PageHeader } from '@/components/composites/page-header';
 import { getCurrentUser } from '@/lib/auth/session';
 
 /**
- * Waiting screen of a space whose pages are not built yet. The chrome is
- * static; the account details stream behind their own boundary.
+ * Waiting screen of a space whose pages are not built yet. The chrome comes
+ * from the layout; only the account details stream, behind their own boundary.
  */
-export function EspacePlaceholder({
-  titre,
-  home,
-}: {
-  titre: string;
-  home: string;
-}) {
+export function EspacePlaceholder({ titre }: { titre: string }) {
   return (
-    <>
-      <SiteHeader
-        home={home}
-        account={
-          <Suspense fallback={null}>
-            <UserQuickAccess home={home} />
-          </Suspense>
-        }
+    <div className="page-enter mx-auto w-full max-w-2xl">
+      <PageHeader
+        title={titre}
+        subtitle="Session ouverte. Les écrans de cet espace restent à construire."
       />
-      <BandeauSimulation />
-
-      <main id="contenu" className="mx-auto w-full max-w-5xl flex-1 px-4 py-10">
-        <div className="mx-auto w-full max-w-2xl">
-          <div>
-            <h1 className="font-display text-2xl font-bold tracking-tight">
-              {titre}
-            </h1>
-            <p className="mb-8 text-sm text-[color:var(--muted-foreground)]">
-              Session ouverte. Les écrans de cet espace restent à construire.
-            </p>
-            <Suspense fallback={<CompteSkeleton />}>
-              <CompteCard />
-            </Suspense>
-          </div>
-        </div>
-      </main>
-    </>
+      <Suspense fallback={<CompteSkeleton />}>
+        <CompteCard />
+      </Suspense>
+    </div>
   );
 }
 
@@ -56,10 +30,10 @@ function CompteSkeleton() {
       <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3">
         {ROWS.map((row) => (
           <div key={row} className="contents">
-            <dt className="font-display text-xs font-medium uppercase tracking-wider text-[color:var(--muted-foreground)]">
+            <dt className="font-display text-muted-foreground text-xs font-medium tracking-wider uppercase">
               {row}
             </dt>
-            <dd className="h-4 w-40 animate-pulse rounded bg-[color:var(--muted)]" />
+            <dd className="bg-muted h-4 w-40 animate-pulse rounded" />
           </div>
         ))}
       </dl>
@@ -81,7 +55,7 @@ async function CompteCard() {
       <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3">
         {ROWS.map((row, index) => (
           <div key={row} className="contents">
-            <dt className="font-display text-xs font-medium uppercase tracking-wider text-[color:var(--muted-foreground)]">
+            <dt className="font-display text-muted-foreground text-xs font-medium tracking-wider uppercase">
               {row}
             </dt>
             <dd className={index === 1 ? 'font-mono-data text-sm' : 'text-sm'}>
