@@ -29,6 +29,16 @@ export class EmployerService {
     private readonly walletService: WalletService,
   ) {}
 
+  async findByIdOrThrow(id: string): Promise<Employer> {
+    const employer = await this.employerRepo.findById(id);
+
+    if (!employer) {
+      throw new NotFoundException(ERROR_CODES.EMPLOYER_NOT_FOUND);
+    }
+
+    return employer;
+  }
+
   async list(
     query: PaginationQueryDto,
   ): Promise<CursorPage<EmployerResponseDto>> {

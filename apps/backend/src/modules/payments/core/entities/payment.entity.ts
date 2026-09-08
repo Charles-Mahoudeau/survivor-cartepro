@@ -21,7 +21,12 @@ import { PaymentStatus } from '@/modules/payments/core/enums/payment-status.enum
 @Entity()
 @Index('IDX_payment_wallet_id', ['wallet'])
 @Index('IDX_payment_partner_id', ['partner'])
+@Index('IDX_payment_created_at', ['createdAt'])
 @Check('CHK_payment_amount_positive', 'amount > 0')
+@Check(
+  'CHK_payment_partner_reference_not_blank',
+  '(partner_reference IS NULL OR length(btrim(partner_reference)) > 0)',
+)
 export class Payment {
   @PrimaryGeneratedUuidV7Column()
   id: string;
@@ -45,6 +50,9 @@ export class Payment {
 
   @Column({ type: 'enum', enum: CaptureMode })
   captureMode: CaptureMode;
+
+  @Column({ type: 'text', nullable: true })
+  partnerReference: string | null;
 
   @Column({
     type: 'enum',

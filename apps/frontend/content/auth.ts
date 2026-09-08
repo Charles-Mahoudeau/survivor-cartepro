@@ -25,7 +25,7 @@ export const AUTH_CONTENT = {
     },
   },
   signIn: {
-    title: 'Connexion à Ticket Tout',
+    title: 'Connexion à CartePro',
     subtitle: 'Accédez à votre espace personnel selon votre profil.',
     submit: 'Se connecter',
     submitting: 'Connexion…',
@@ -33,7 +33,7 @@ export const AUTH_CONTENT = {
     createAccount: 'Créer un compte',
   },
   signUp: {
-    title: 'Créer un compte Ticket Tout',
+    title: 'Créer un compte CartePro',
     subtitle:
       'Votre espace salarié, pour dépenser vos avantages chez les partenaires.',
     submit: 'Créer mon compte',

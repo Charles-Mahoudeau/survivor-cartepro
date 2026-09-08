@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { decodeCursor } from '@/common/pagination';
+import type { EntityManager } from 'typeorm';
+import { In, Repository } from 'typeorm';
+import { decodeCursor, type PaginationQueryDto } from '@/common/pagination';
 import { Partner } from '@/modules/partners/core/entities/partner.entity';
+import { PartnerCategory } from '@/modules/partners/categories/entities/partner-category.entity';
 import { PartnerStatus } from '@/modules/partners/core/enums/partner-status.enum';
 import type { ListPartnersQueryDto } from '@/modules/partners/core/dto';
 
@@ -16,7 +18,14 @@ export class PartnerRepo {
   constructor(
     @InjectRepository(Partner)
     private readonly partners: Repository<Partner>,
+    @InjectRepository(PartnerCategory)
+    private readonly categories: Repository<PartnerCategory>,
   ) {}
+
+  /** Starts a transaction on this repo's connection, for a caller in another module to join. */
+  transaction<T>(work: (manager: EntityManager) => Promise<T>): Promise<T> {
+    return this.partners.manager.transaction(work);
+  }
 
   findActiveById(id: string): Promise<Partner | null> {
     return this.partners.findOne({
@@ -25,6 +34,88 @@ export class PartnerRepo {
     });
   }
 
+  findByOwnerId(ownerId: string): Promise<Partner | null> {
+    return this.partners.findOne({
+      where: { owner: { id: ownerId } },
+      relations: { owner: true, categories: true, applications: true },
+      order: { applications: { createdAt: 'DESC' } },
+    });
+  }
+
+  findByIdWithRelations(
+    id: string,
+    manager?: EntityManager,
+  ): Promise<Partner | null> {
+    const repo = manager ? manager.getRepository(Partner) : this.partners;
+    return repo.findOne({
+      where: { id },
+      relations: { owner: true, categories: true },
+    });
+  }
+
+  async transitionIfPending(
+    id: string,
+    toStatus: PartnerStatus,
+    manager?: EntityManager,
+  ): Promise<boolean> {
+    const repo = manager ? manager.getRepository(Partner) : this.partners;
+    const result = await repo
+      .createQueryBuilder()
+      .update(Partner)
+      .set({ status: toStatus })
+      .where('id = :id AND status = :pending', {
+        id,
+        pending: PartnerStatus.PENDING,
+      })
+      .execute();
+
+    return result.affected === 1;
+  }
+
+  findByIdWithDetails(id: string): Promise<Partner | null> {
+    return this.partners.findOne({
+      where: { id },
+      relations: { categories: true, applications: true },
+      order: { applications: { createdAt: 'DESC' } },
+    });
+  }
+
+  findCategoriesBySlugs(slugs: string[]): Promise<PartnerCategory[]> {
+    if (slugs.length === 0) {
+      return Promise.resolve([]);
+    }
+    return this.categories.findBy({ slug: In(slugs) });
+  }
+
+  savePartner(partner: Partner): Promise<Partner> {
+    return this.partners.save(partner);
+  }
+
+  /**
+   * Inserts a new dossier. `status` is hardcoded to `PENDING` regardless of
+   * what `data` carries — the create DTO never exposes the field, and this is
+   * the second, repo-level guarantee that a client can't inject another one.
+   */
+  createPending(
+    data: {
+      owner: { id: string };
+      legalName: string;
+      tradeName: string;
+      siren: string;
+      businessPurpose: string;
+      addressLine: string;
+      postalCode: string;
+      city: string;
+      latitude: number;
+      longitude: number;
+      categories: PartnerCategory[];
+    },
+    manager?: EntityManager,
+  ): Promise<Partner> {
+    const repo = manager ? manager.getRepository(Partner) : this.partners;
+    const partner = repo.create({ ...data, status: PartnerStatus.PENDING });
+    return repo.save(partner);
+  }
   findActivePage(query: ListPartnersQueryDto): Promise<Partner[]> {
     const builder = this.partners
       .createQueryBuilder('partner')
@@ -62,6 +153,25 @@ export class PartnerRepo {
           search,
         },
       );
+    }
+
+    return builder.getMany();
+  }
+
+  findPageByStatus(
+    status: PartnerStatus,
+    pagination: PaginationQueryDto,
+  ): Promise<Partner[]> {
+    const builder = this.partners
+      .createQueryBuilder('partner')
+      .where('partner.status = :status', { status })
+      .orderBy('partner.id', 'DESC')
+      .take(pagination.limit + 1);
+
+    if (pagination.cursor) {
+      builder.andWhere('partner.id < :cursor', {
+        cursor: decodeCursor(pagination.cursor),
+      });
     }
 
     return builder.getMany();

@@ -11,6 +11,10 @@ export class EmployerRepo {
     private readonly repo: Repository<Employer>,
   ) {}
 
+  findById(id: string): Promise<Employer | null> {
+    return this.repo.findOneBy({ id });
+  }
+
   findPage(query: PaginationQueryDto): Promise<Employer[]> {
     const builder = this.repo
       .createQueryBuilder('employer')

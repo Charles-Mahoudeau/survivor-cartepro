@@ -23,6 +23,8 @@ import {
   AUTH_MODEL_FIELDS,
   AUTH_RATE_LIMIT_MODEL_NAME,
 } from './auth.schema';
+import { getAuthProvisioning } from './auth-provisioning';
+import { handleUserCreated } from './user-created.handler';
 
 /**
  * Origins allowed to carry a session cookie. The same list feeds CORS in the
@@ -50,7 +52,7 @@ export function trustedOrigins(): string[] {
  * until it expired, and this plugin set exists to ban accounts and change roles.
  */
 export const authOptions = {
-  appName: 'Ticket Tout',
+  appName: 'CartePro',
   basePath: AUTH_BASE_PATH,
   baseURL: process.env.BETTER_AUTH_URL,
   secret: process.env.BETTER_AUTH_SECRET,
@@ -77,6 +79,26 @@ export const authOptions = {
     enabled: true,
     autoSignIn: true,
     minPasswordLength: MIN_PASSWORD_LENGTH,
+  },
+
+  /**
+   * Every account needs a wallet. This runs after Better Auth's own
+   * transaction has already committed the user (see `user-created.handler.ts`
+   * for why), so a failure here removes the account rather than leaving one
+   * that can sign in with no wallet.
+   */
+  databaseHooks: {
+    user: {
+      create: {
+        async after(user) {
+          const { walletService, userService } = getAuthProvisioning();
+          await handleUserCreated(user.id, {
+            createWallet: (id) => walletService.createDefault(id),
+            deleteUser: (id) => userService.remove(id),
+          });
+        },
+      },
+    },
   },
 
   /**

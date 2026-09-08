@@ -1,27 +1,21 @@
-import { Card } from '@codegouvfr/react-dsfr/Card';
-import { Tag } from '@codegouvfr/react-dsfr/Tag';
-
 import type { Partner } from '@/lib/api/schemas/backend/partner';
 
 export function CartePartenaire({ partner }: { partner: Partner }) {
   const category = partner.categories[0];
 
   return (
-    <Card
-      size="small"
-      border
-      title={partner.tradeName}
-      titleAs="h3"
-      desc={`${partner.addressLine}, ${partner.postalCode} ${partner.city}`}
-      start={
-        category ? (
-          <ul className="fr-tags-group">
-            <li>
-              <Tag small>{category.displayName}</Tag>
-            </li>
-          </ul>
-        ) : undefined
-      }
-    />
+    <li className="flex items-baseline justify-between gap-4 px-3 py-3">
+      <div className="min-w-0">
+        <p className="truncate text-sm font-medium">{partner.tradeName}</p>
+        <p className="text-muted-foreground truncate text-xs">
+          {partner.addressLine}, {partner.postalCode} {partner.city}
+        </p>
+      </div>
+      {category ? (
+        <span className="text-muted-foreground shrink-0 text-xs">
+          {category.displayName}
+        </span>
+      ) : null}
+    </li>
   );
 }

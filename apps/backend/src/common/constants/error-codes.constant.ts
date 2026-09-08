@@ -8,20 +8,42 @@
 export const ERROR_CODES = {
   /** No session on the request, or it has expired. */
   UNAUTHENTICATED: 'UNAUTHENTICATED',
-  /** The account is banned and the ban has not expired. */
+  /** The account is banned and the ban has not expired, or the wallet itself is disabled. */
   ACCOUNT_BANNED: 'ACCOUNT_BANNED',
   /** The session is valid, but its role is not one the route accepts. */
   FORBIDDEN_ROLE: 'FORBIDDEN_ROLE',
   /** The connected account has no wallet. */
   WALLET_NOT_FOUND: 'WALLET_NOT_FOUND',
+  /** The wallet balance is zero or negative — nothing to spend. */
+  EMPTY_BALANCE: 'EMPTY_BALANCE',
+  /** The wallet has no live payment token. */
+  PAYMENT_TOKEN_NOT_FOUND: 'PAYMENT_TOKEN_NOT_FOUND',
   /** The requested partner does not exist or is not active. */
   PARTNER_NOT_FOUND: 'PARTNER_NOT_FOUND',
+  /** The requested period starts after it ends. */
+  INVALID_PERIOD: 'INVALID_PERIOD',
+  /** The partner application is not pending, so it cannot be decided again. */
+  PARTNER_NOT_PENDING: 'PARTNER_NOT_PENDING',
+  /** The account depositing a dossier already owns one. */
+  PARTNER_ALREADY_EXISTS: 'PARTNER_ALREADY_EXISTS',
+  /** The SIREN is already registered to another partner dossier. */
+  PARTNER_SIREN_ALREADY_REGISTERED: 'PARTNER_SIREN_ALREADY_REGISTERED',
+  /** One or more category slugs in the request do not exist. */
+  PARTNER_CATEGORY_NOT_FOUND: 'PARTNER_CATEGORY_NOT_FOUND',
+  /** The account was created, but its wallet could not be — registration is rolled back. */
+  WALLET_CREATION_FAILED: 'WALLET_CREATION_FAILED',
+  /** The requested employer does not exist. */
+  EMPLOYER_NOT_FOUND: 'EMPLOYER_NOT_FOUND',
   /** No account carries the identifier given as the employer owner. */
   EMPLOYER_OWNER_NOT_FOUND: 'EMPLOYER_OWNER_NOT_FOUND',
   /** Another employer already registers this SIREN. */
   EMPLOYER_SIREN_ALREADY_USED: 'EMPLOYER_SIREN_ALREADY_USED',
   /** The account already owns an employer, and it may own only one. */
   EMPLOYER_OWNER_ALREADY_ASSIGNED: 'EMPLOYER_OWNER_ALREADY_ASSIGNED',
+  /** The requested allocation does not exist. */
+  ALLOCATION_NOT_FOUND: 'ALLOCATION_NOT_FOUND',
+  /** The allocation has already been applied and can no longer change. */
+  ALLOCATION_ALREADY_APPLIED: 'ALLOCATION_ALREADY_APPLIED',
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];

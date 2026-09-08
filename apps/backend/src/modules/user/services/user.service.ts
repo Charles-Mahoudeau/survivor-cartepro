@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import type { EntityManager } from 'typeorm';
 import type { Role } from '@/config/auth/auth.constants';
 import type { User } from '../entities';
 import { UserRepo } from '../repos/user.repo';
@@ -30,9 +31,15 @@ export class UserService {
 
   /**
    * Grants a role. `false` means no account carried that id. Who is allowed to
-   * call it is the caller's guard, not this method.
+   * call it is the caller's guard, not this method. Pass a manager to have the
+   * write join a caller-provided transaction.
    */
-  setRole(id: string, role: Role): Promise<boolean> {
-    return this.userRepo.setRole(id, role);
+  setRole(id: string, role: Role, manager?: EntityManager): Promise<boolean> {
+    return this.userRepo.setRole(id, role, manager);
+  }
+
+  /** Used to undo a registration whose wallet could not be created. */
+  remove(id: string): Promise<void> {
+    return this.userRepo.deleteById(id);
   }
 }

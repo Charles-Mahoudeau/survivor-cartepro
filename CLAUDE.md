@@ -5,7 +5,7 @@ Instructions pour les agents qui travaillent sur ce dépôt. Elles complètent l
 
 ## Projet
 
-**Ticket Tout** — dispositif d'avantages salariés dématérialisés, trois espaces
+**CartePro** — dispositif d'avantages salariés dématérialisés, trois espaces
 (salarié, partenaire, administration). Projet Epitech tek3, cahier des charges
 `JEB/DNI/2026-002`.
 
@@ -25,14 +25,15 @@ un défaut, pas une préférence.
 
 Points d'entrée, par situation :
 
-| Situation                  | À appliquer                                                                       |
-| -------------------------- | --------------------------------------------------------------------------------- |
-| Créer / modifier un module | skill `architecture-module-conventions`                                           |
-| Écrire un test             | skills `write-unit-tests`, `write-integration-tests`                              |
-| Faire une revue            | `.claude/rules/code-review.md`                                                    |
-| Committer                  | `.claude/rules/commit.md`, `.claude/rules/fix-process-pas-de-co-author-commit.md` |
-| Toucher au schéma          | `.claude/rules/fix-process-migrations-via-db-generate.md`                         |
-| Se tromper                 | `.claude/rules/errors-learning.md` — l'erreur produit une nouvelle règle          |
+| Situation                  | À appliquer                                                                                                           |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Créer / modifier un module | skill `architecture-module-conventions`                                                                               |
+| Écrire un test             | skills `write-unit-tests`, `write-integration-tests`                                                                  |
+| Faire une revue            | `.claude/rules/code-review.md`                                                                                        |
+| Committer                  | `.claude/rules/commit.md`, `.claude/rules/fix-process-pas-de-co-author-commit.md`                                     |
+| Ouvrir une PR              | `.claude/rules/fix-format-pull-requests-en-anglais.md`, `.claude/rules/fix-process-pr-en-draft-jusqu-a-validation.md` |
+| Toucher au schéma          | `.claude/rules/fix-process-migrations-via-db-generate.md`                                                             |
+| Se tromper                 | `.claude/rules/errors-learning.md` — l'erreur produit une nouvelle règle                                              |
 
 ## Invariants du backend
 

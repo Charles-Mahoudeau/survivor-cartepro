@@ -1,7 +1,5 @@
 'use client';
 
-import { Alert } from '@codegouvfr/react-dsfr/Alert';
-import { Button } from '@codegouvfr/react-dsfr/Button';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -9,6 +7,8 @@ import { useForm } from 'react-hook-form';
 
 import { PasswordField } from '@/components/composites/forms/password-field';
 import { TextField } from '@/components/composites/forms/text-field';
+import { Alert } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { AUTH_CONTENT } from '@/content/auth';
 import { authClient } from '@/lib/auth/client';
 import { MIN_PASSWORD_LENGTH } from '@/lib/auth/constants';
@@ -60,10 +60,9 @@ export function SignUpForm() {
       >
         {errors.root ? (
           <Alert
-            small
             severity="error"
             description={errors.root.message ?? AUTH_CONTENT.errorSummary}
-            className="fr-mb-3w"
+            className="mb-6"
           />
         ) : null}
 
@@ -103,19 +102,17 @@ export function SignUpForm() {
           minLength={MIN_PASSWORD_LENGTH}
         />
 
-        <Button
-          type="submit"
-          priority="primary"
-          disabled={busy}
-          className="fr-mt-2w"
-        >
+        <Button type="submit" size="lg" disabled={busy} className="mt-2 w-full">
           {busy ? signUp.submitting : signUp.submit}
         </Button>
       </form>
 
-      <p className="fr-text--sm fr-mt-4w text-center text-[color:var(--muted-foreground)]">
+      <p className="mt-8 text-center text-sm text-[color:var(--muted-foreground)]">
         {signUp.hasAccount}{' '}
-        <Link href="/login" className="fr-link">
+        <Link
+          href="/login"
+          className="text-primary underline underline-offset-4"
+        >
           {signUp.signIn}
         </Link>
       </p>
