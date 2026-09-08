@@ -14,14 +14,14 @@ export function Wordmark({
     <div className={cn('flex flex-col select-none', className)}>
       <span
         className={cn(
-          'font-display font-bold tracking-tight text-[color:var(--primary)]',
+          'font-display font-semibold tracking-tight',
           compact ? 'text-base leading-none' : 'text-xl leading-none',
         )}
       >
         {SITE_CONTENT.brand}
       </span>
       {compact ? null : (
-        <span className="mt-1 text-[10px] tracking-widest text-[color:var(--muted-foreground)] uppercase">
+        <span className="text-muted-foreground mt-1 text-[10px] tracking-widest uppercase">
           {SITE_CONTENT.serviceTagline}
         </span>
       )}
