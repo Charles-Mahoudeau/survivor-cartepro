@@ -7,6 +7,9 @@ import { auth, authOptions } from '../src/config/auth/auth';
 import { registerAuthProvisioning } from '../src/config/auth/auth-provisioning';
 import { buildDataSourceOptions } from '../src/config/database/data-source';
 import { Allocation } from '../src/modules/allocations/entities/allocation.entity';
+import { Audit } from '../src/modules/audit/entities';
+import { AuditRepo } from '../src/modules/audit/repos';
+import { AuditService } from '../src/modules/audit/services';
 import { AllocationStatus } from '../src/modules/allocations/enums/allocation-status.enum';
 import { Employer } from '../src/modules/employers/entities/employer.entity';
 import { PartnerCategory } from '../src/modules/partners/categories/entities/partner-category.entity';
@@ -344,6 +347,9 @@ try {
       new WalletEntryRepo(dataSource.getRepository(WalletEntry)),
     ),
     userService: new UserService(new UserRepo(dataSource.getRepository(User))),
+    auditService: new AuditService(
+      new AuditRepo(dataSource.getRepository(Audit)),
+    ),
   });
 
   const existingUsers = await dataSource.getRepository(User).count();
