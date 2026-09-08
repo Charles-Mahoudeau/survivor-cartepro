@@ -1,8 +1,26 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import type { EntityManager } from 'typeorm';
+import { ERROR_CODES } from '@/common/constants/error-codes.constant';
+import {
+  InvalidCursorError,
+  paginate,
+  type CursorPage,
+} from '@/common/pagination';
+import {
+  InvalidPeriodError,
+  resolvePeriod,
+  type Period,
+} from '@/common/period';
 import { AuditRepo } from '@/modules/audit/repos/audit.repo';
 import { AuditAction } from '@/modules/audit/enums/audit-action.enum';
+import type { Audit } from '@/modules/audit/entities';
 import { computeChainHash } from '@/modules/audit/services/helpers/chain-hash.helper';
+import type { AuditResponseDto, ListAuditQueryDto } from '../validators';
 
 export interface RecordAuditEntry {
   action: AuditAction;
@@ -78,6 +96,35 @@ export class AuditService {
     } catch (error) {
       this.logger.error('Failed to write the audit chain origin entry', error);
     }
+  }
+
+  /** The admin read side: a filtered, paginated view over the chain. */
+  async list(query: ListAuditQueryDto): Promise<CursorPage<AuditResponseDto>> {
+    let period: Period;
+    try {
+      period = resolvePeriod(query);
+    } catch (error) {
+      if (error instanceof InvalidPeriodError) {
+        throw new UnprocessableEntityException(ERROR_CODES.INVALID_PERIOD);
+      }
+      throw error;
+    }
+
+    let rows: Audit[];
+    try {
+      rows = await this.auditRepo.findPage(query, {
+        period,
+        actorId: query.actorId,
+        action: query.action,
+      });
+    } catch (error) {
+      if (error instanceof InvalidCursorError) {
+        throw new BadRequestException(error.message);
+      }
+      throw error;
+    }
+
+    return paginate(rows, query.limit);
   }
 
   private async append(

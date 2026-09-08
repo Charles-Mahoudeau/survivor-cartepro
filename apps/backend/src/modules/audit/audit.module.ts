@@ -1,6 +1,7 @@
 import { Global, Module, type OnApplicationBootstrap } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuditController } from '@/modules/audit/controllers';
 import { Audit } from '@/modules/audit/entities';
 import { AuditRepo } from '@/modules/audit/repos';
 import { AuditService } from '@/modules/audit/services';
@@ -19,6 +20,7 @@ import { AuditInterceptor } from '@/modules/audit/interceptors';
 @Global()
 @Module({
   imports: [TypeOrmModule.forFeature([Audit])],
+  controllers: [AuditController],
   providers: [
     AuditRepo,
     AuditService,
