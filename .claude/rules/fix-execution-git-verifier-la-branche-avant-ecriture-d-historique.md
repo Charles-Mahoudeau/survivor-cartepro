@@ -131,3 +131,48 @@ Règle renforcée :
    sur le tree, la vérification de branche ne suffit pas — l'état peut changer **entre
    deux de mes commandes**. Toute opération mutante doit soit viser un chemin explicite
    (`git -C`), soit être précédée d'une revérification dans le même appel.
+
+## Récidive (2026-09-08) — `git add` échoué sur un chemin périmé, `git commit` parti quand même
+
+En découpant les commits de la PR #65, j'ai envoyé dans le même appel :
+
+```sh
+git add apps/frontend/app/mock-data.ts apps/frontend/app/types.ts \
+        apps/frontend/app/page.test.tsx apps/frontend/app/page.tsx
+git commit -q -m "refactor(frontend): remove the mock application" …
+```
+
+Les trois premiers chemins avaient déjà été supprimés par un `git rm` antérieur : ils
+n'existaient plus sur le disque. `git add` a donc échoué en bloc
+(`fatal: pathspec … did not match any files`) et **n'a rien ajouté** — pas même le
+quatrième chemin, le nouveau `page.tsx` qui remplaçait la maquette.
+
+Le `git commit` de la ligne suivante s'est exécuté quand même, et a committé ce qui
+traînait dans l'index (les suppressions du `git rm`, plus un `git mv` sans rapport). Le
+commit livré supprimait donc la route racine **sans sa remplaçante** : un commit
+intermédiaire qui ne compile pas, dans une PR qui se veut relisible commit par commit.
+
+C'est **exactement le point 2 de cette règle**, transposé du heredoc et du `cd` au
+`git add` : `git add …` et `git commit …` sur deux lignes sont **deux commandes
+séparées**, et l'échec de la première n'empêche rien.
+
+Aggravant : la sortie disait `fatal:` **et** `exit: 0` sur la même réponse — l'exit code
+affiché était celui du `git commit`, pas celui du `git add`. Lire « exit: 0 » sans lire
+la ligne au-dessus, c'est le même piège que `PIPESTATUS`
+(`fix-execution-zsh-pipestatus.md`).
+
+Règle renforcée :
+
+10. **`git add` est une commande faillible.** Ne jamais la faire suivre d'un `git commit`
+    dans le même appel. Un appel pour le `add`, on **lit son exit code et sa sortie**,
+    puis un second appel pour le `commit`.
+11. **Avant tout commit, vérifier que l'index contient ce qu'on croit** :
+    `[ -n "$(git diff --cached --name-only)" ]` ne suffit pas — un index non vide peut
+    contenir les restes d'une opération précédente. Lire la liste
+    (`git diff --cached --name-only`) et la comparer à l'intention.
+12. **Un `git add` sur un chemin déjà supprimé par `git rm` échoue** : les suppressions
+    sont déjà dans l'index, il n'y a rien à ajouter. Ne lister dans un `git add` que ce
+    qui existe encore sur le disque.
+13. **Réparation** : `git add <ce qui manquait>` dans un appel, lire, puis
+    `git commit --amend --no-edit` dans un second, après la vérification de branche et
+    d'index. Tant que rien n'est poussé, l'amend est la bonne réponse.
