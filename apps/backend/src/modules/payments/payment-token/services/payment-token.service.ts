@@ -26,4 +26,8 @@ export class PaymentTokenService {
       await this.paymentTokenSource.getCurrent(userId),
     );
   }
+
+  async revokeCurrent(userId: string): Promise<void> {
+    return this.paymentTokenSource.revokeCurrent(userId);
+  }
 }

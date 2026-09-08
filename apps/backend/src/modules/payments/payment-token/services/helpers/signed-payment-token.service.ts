@@ -85,4 +85,13 @@ export class SignedPaymentTokenService implements PaymentTokenSource {
       expiresAt,
     };
   }
+
+  async revokeCurrent(userId: string): Promise<void> {
+    const wallet = await this.walletService.findSummaryByUserId(userId);
+
+    const revoked = await this.paymentTokenRepo.revokeLiveByWalletId(wallet.id);
+    if (!revoked) {
+      throw new NotFoundException(ERROR_CODES.PAYMENT_TOKEN_NOT_FOUND);
+    }
+  }
 }

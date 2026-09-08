@@ -8,6 +8,7 @@ export interface PaymentTokenPayload {
 export interface PaymentTokenSource {
   issue(userId: string): Promise<PaymentTokenPayload>;
   getCurrent(userId: string): Promise<PaymentTokenPayload>;
+  revokeCurrent(userId: string): Promise<void>;
 }
 
 export const PAYMENT_TOKEN_SOURCE = Symbol('PAYMENT_TOKEN_SOURCE');
