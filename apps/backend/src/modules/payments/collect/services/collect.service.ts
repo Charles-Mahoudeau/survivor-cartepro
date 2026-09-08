@@ -1,7 +1,12 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import type { DataSource } from 'typeorm';
 import { ERROR_CODES } from '@/common/constants/error-codes.constant';
+import { toCents, toEuros } from '@/common/money';
 import { PartnerService } from '@/modules/partners/core';
 import type { Payment } from '@/modules/payments/core/entities/payment.entity';
 import { PaymentTokenService } from '@/modules/payments/payment-token/services/payment-token.service';
@@ -43,10 +48,16 @@ export class CollectService {
       if (outcome.status === 'already-consumed') {
         const existing = await this.paymentRepo.findByTokenId(tokenId, manager);
         if (!existing) {
-          // Invariant violation: a token only turns `consumed` in the same
-          // transaction that creates its payment. Never expected in practice.
           throw new InternalServerErrorException(
             ERROR_CODES.PAYMENT_TOKEN_CONSUMED,
+          );
+        }
+        const sameRequest =
+          existing.partner.id === input.partnerId &&
+          Number(existing.amount) === input.amount;
+        if (!sameRequest) {
+          throw new ConflictException(
+            ERROR_CODES.PAYMENT_TOKEN_ALREADY_CLAIMED,
           );
         }
         return existing;
@@ -79,7 +90,7 @@ export class CollectService {
   private toResult(payment: Payment): CollectResult {
     return {
       paymentId: payment.id,
-      amount: payment.amount.toString(),
+      amount: toEuros(toCents(Number(payment.amount))),
       partnerReference: payment.partnerReference,
       createdAt: payment.createdAt,
     };

@@ -44,6 +44,8 @@ export const ERROR_CODES = {
   PAYMENT_TOKEN_REVOKED: 'PAYMENT_TOKEN_REVOKED',
   /** The token is consumed but carries no payment — an invariant violation, never expected. */
   PAYMENT_TOKEN_CONSUMED: 'PAYMENT_TOKEN_CONSUMED',
+  /** The token was already consumed by a collection for a different partner or amount. */
+  PAYMENT_TOKEN_ALREADY_CLAIMED: 'PAYMENT_TOKEN_ALREADY_CLAIMED',
   /** The payment token's validity window has passed. */
   PAYMENT_TOKEN_EXPIRED: 'PAYMENT_TOKEN_EXPIRED',
   /** The wallet balance cannot absorb this debit, even within the overdraft limit. */

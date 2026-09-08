@@ -38,6 +38,9 @@ export class PaymentRepo {
     manager?: EntityManager,
   ): Promise<Payment | null> {
     const repo = manager ? manager.getRepository(Payment) : this.repo;
-    return repo.findOne({ where: { paymentToken: { id: paymentTokenId } } });
+    return repo.findOne({
+      where: { paymentToken: { id: paymentTokenId } },
+      relations: { partner: true },
+    });
   }
 }

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
@@ -179,29 +180,36 @@ export class WalletService {
     if (!wallet) {
       throw new NotFoundException(ERROR_CODES.WALLET_NOT_FOUND);
     }
+    if (wallet.status !== WalletStatus.ACTIVE) {
+      throw new ForbiddenException(ERROR_CODES.ACCOUNT_BANNED);
+    }
 
     const balance = Number(wallet.balance);
-    if (!isDebitAllowed(balance, amount)) {
+    const normalizedAmount = Number(toEuros(toCents(amount)));
+
+    if (!isDebitAllowed(balance, normalizedAmount)) {
       throw new UnprocessableEntityException({
         code: ERROR_CODES.INSUFFICIENT_BALANCE,
         balance: toEuros(toCents(balance)),
-        amount: toEuros(toCents(amount)),
+        amount: toEuros(toCents(normalizedAmount)),
       });
     }
 
-    const balanceAfter = Number(toEuros(toCents(balance) - toCents(amount)));
+    const balanceAfter = Number(
+      toEuros(toCents(balance) - toCents(normalizedAmount)),
+    );
 
     await this.walletEntryRepo.insertAll(manager, [
       {
         wallet: { id: walletId },
         direction: WalletEntryDirection.DEBIT,
-        amount,
+        amount: normalizedAmount,
         balanceAfter,
         kind: WalletEntryKind.PAYMENT_SENT,
         payment: { id: paymentId },
       },
     ]);
-    await this.walletRepo.debitById(manager, walletId, amount);
+    await this.walletRepo.debitById(manager, walletId, normalizedAmount);
   }
 
   private readPeriod(query: PeriodQueryDto): Period {

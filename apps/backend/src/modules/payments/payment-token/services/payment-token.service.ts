@@ -55,13 +55,14 @@ export class PaymentTokenService {
   }
 
   /**
-   * Resolves a scan or a short code to the live token behind it, before any
+   * Resolves a scan or a short code to the token behind it, before any
    * transaction opens. A QR carries no token id, only signed wallet claims —
-   * finding the token still means reading the wallet's current live one.
+   * finding the token still means reading the wallet's current one, whatever
+   * its status. `lockAndConsume` is what decides if it can still be used.
    */
   async resolveLive(lookup: PaymentTokenLookup): Promise<ResolvedPaymentToken> {
     if ('shortCode' in lookup) {
-      const token = await this.paymentTokenRepo.findLiveByShortCode(
+      const token = await this.paymentTokenRepo.findLatestByShortCode(
         lookup.shortCode,
       );
       if (!token) {
@@ -71,7 +72,7 @@ export class PaymentTokenService {
     }
 
     const walletId = this.verifyWalletId(lookup.qrPayload);
-    const token = await this.paymentTokenRepo.findLiveByWalletId(walletId);
+    const token = await this.paymentTokenRepo.findLatestByWalletId(walletId);
     if (!token) {
       throw new BadRequestException(ERROR_CODES.PAYMENT_TOKEN_INVALID);
     }

@@ -23,6 +23,13 @@ export class PaymentTokenRepo {
     });
   }
 
+  findLatestByWalletId(walletId: string): Promise<PaymentToken | null> {
+    return this.repo.findOne({
+      where: { wallet: { id: walletId } },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async revokeLiveByWalletId(walletId: string): Promise<boolean> {
     const result = await this.repo.update(
       { wallet: { id: walletId }, status: PaymentTokenStatus.LIVE },
@@ -65,10 +72,10 @@ export class PaymentTokenRepo {
     return token;
   }
 
-  /** The live token for a short code — `null` covers unknown, stale and already-superseded codes alike. */
-  findLiveByShortCode(shortCode: string): Promise<PaymentToken | null> {
+  findLatestByShortCode(shortCode: string): Promise<PaymentToken | null> {
     return this.repo.findOne({
-      where: { shortCode, status: PaymentTokenStatus.LIVE },
+      where: { shortCode },
+      order: { createdAt: 'DESC' },
       relations: { wallet: true },
     });
   }
