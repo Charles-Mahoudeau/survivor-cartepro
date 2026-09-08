@@ -12,7 +12,7 @@ import { createWalletEntry } from '../../../../test/fixtures/wallet.fixture';
 import { api, apiPath, bodyOf } from '../../../../test/http';
 import { Allocation } from '../entities/allocation.entity';
 import { AllocationStatus } from '../enums/allocation-status.enum';
-import { AllocationFixture } from './allocation.fixture';
+import { AllocationCampaignFixture } from './allocation-campaign.fixture';
 
 const ACTIVE_WALLETS = 42;
 const SUSPENDED_WALLETS = 2;
@@ -34,20 +34,13 @@ const applyAllocation = (cookie: string[], id: string) =>
     .set('Cookie', cookie);
 
 async function seedCampaign() {
-  const agent = await AllocationFixture.signUpAgent(context);
-  const { employer, active, disabled } = await AllocationFixture.seedEmployer(
+  const campaign = await AllocationCampaignFixture.create(
     context,
-    agent.id,
     { active: ACTIVE_WALLETS, disabled: SUSPENDED_WALLETS },
-  );
-  const allocation = await AllocationFixture.create(
-    context.dataSource,
-    employer.id,
-    agent.id,
     { amount: AMOUNT },
   );
 
-  return { agent, employer, allocation, active, suspended: disabled };
+  return { ...campaign, suspended: campaign.disabled };
 }
 
 function countEntries(allocationId: string): Promise<number> {
@@ -57,7 +50,29 @@ function countEntries(allocationId: string): Promise<number> {
 }
 
 function readBalances(walletIds: string[]): Promise<Wallet[]> {
-  return AllocationFixture.readWallets(context, walletIds);
+  return context.dataSource
+    .getRepository(Wallet)
+    .find({ where: walletIds.map((id) => ({ id })) });
+}
+
+/** Blocks until a backend is queued on a row lock, so no sleep has to guess. */
+async function waitForLockWaiter(timeoutMs = 5000): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+
+  while (Date.now() < deadline) {
+    const [{ waiting }] = await context.dataSource.query<{ waiting: number }[]>(
+      `SELECT count(*)::int AS waiting FROM pg_stat_activity
+       WHERE wait_event_type = 'Lock' AND state = 'active'`,
+    );
+
+    if (waiting > 0) {
+      return;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+
+  throw new Error('no backend ever queued on the allocation row lock');
 }
 
 beforeAll(async () => {
@@ -191,7 +206,7 @@ describe('POST /allocations/:id/apply', () => {
     const applying = applyAllocation(agent.cookie, allocation.id).then(
       (response) => response,
     );
-    await AllocationFixture.waitForLockWaiter(context);
+    await waitForLockWaiter();
     await runner.query(
       'UPDATE "allocation" SET "amount" = 120 WHERE "id" = $1',
       [allocation.id],
