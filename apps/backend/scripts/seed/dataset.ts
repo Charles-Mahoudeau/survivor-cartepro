@@ -158,7 +158,6 @@ export interface SeedEmployer {
   employeeRefPrefix: string;
   headcount: number;
   createdAt: string;
-  owner: SeedAccount;
   allocations: SeedAllocation[];
 }
 
@@ -532,10 +531,9 @@ export const PARTNERS: SeedPartner[] = [
 ];
 
 /**
- * Three payrolls, fifty employees between them. An owner holds `employee` like
- * everyone who is neither a partner nor an agent: the role column is scalar
- * and the brief defines exactly three spaces. Owners carry no wallet, which
- * also keeps the 404 of `GET /me/wallet` reachable from a real account.
+ * Three payrolls, fifty employees between them. An employer carries no account
+ * of its own: the brief defines three spaces, and none of them is the employer.
+ * Its allocations are created by the agent who instructs the dossiers.
  */
 export const EMPLOYERS: SeedEmployer[] = [
   {
@@ -545,12 +543,6 @@ export const EMPLOYERS: SeedEmployer[] = [
     employeeRefPrefix: 'GEF',
     headcount: 24,
     createdAt: '2026-05-28T09:00:00Z',
-    owner: {
-      name: 'Sophie Bernard',
-      email: 'sophie.bernard@entreprise.fr',
-      role: ROLES.EMPLOYEE,
-      createdAt: '2026-05-28T08:55:00Z',
-    },
     allocations: [
       {
         label: 'Abondement de juin 2026',
@@ -581,12 +573,6 @@ export const EMPLOYERS: SeedEmployer[] = [
     employeeRefPrefix: 'NLS',
     headcount: 16,
     createdAt: '2026-05-28T10:30:00Z',
-    owner: {
-      name: 'Marc Lefebvre',
-      email: 'marc.lefebvre@normandie-logistique.fr',
-      role: ROLES.EMPLOYEE,
-      createdAt: '2026-05-28T10:25:00Z',
-    },
     allocations: [
       {
         label: 'Abondement de juin 2026',
@@ -617,12 +603,6 @@ export const EMPLOYERS: SeedEmployer[] = [
     employeeRefPrefix: 'CVA',
     headcount: 10,
     createdAt: '2026-05-29T14:00:00Z',
-    owner: {
-      name: 'Nadia Benali',
-      email: 'nadia.benali@cabinet-vidal.fr',
-      role: ROLES.EMPLOYEE,
-      createdAt: '2026-05-29T13:55:00Z',
-    },
     allocations: [
       {
         label: 'Abondement de juin 2026',

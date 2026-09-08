@@ -51,9 +51,8 @@ beforeEach(async () => {
 describe('GET /allocations', () => {
   it('lists the allocations, most recent first', async () => {
     const agent = await AllocationCampaignFixture.signUpAgent(context);
-    const employer = (
-      await AllocationCampaignFixture.seedEmployer(context, agent.id)
-    ).employer;
+    const employer = (await AllocationCampaignFixture.seedEmployer(context))
+      .employer;
     const first = await AllocationFixture.create(
       context.dataSource,
       employer.id,
@@ -97,9 +96,8 @@ describe('GET /allocations', () => {
 describe('POST /allocations', () => {
   it('creates a draft nobody has been credited by yet', async () => {
     const agent = await AllocationCampaignFixture.signUpAgent(context);
-    const employer = (
-      await AllocationCampaignFixture.seedEmployer(context, agent.id)
-    ).employer;
+    const employer = (await AllocationCampaignFixture.seedEmployer(context))
+      .employer;
 
     const response = await api(context.app)
       .post(apiPath('/allocations'))
@@ -133,9 +131,8 @@ describe('POST /allocations', () => {
 
   it('refuses an amount with more than two decimals, or none at all', async () => {
     const agent = await AllocationCampaignFixture.signUpAgent(context);
-    const employer = (
-      await AllocationCampaignFixture.seedEmployer(context, agent.id)
-    ).employer;
+    const employer = (await AllocationCampaignFixture.seedEmployer(context))
+      .employer;
     const post = (amount: unknown) =>
       api(context.app)
         .post(apiPath('/allocations'))
@@ -152,7 +149,7 @@ describe('GET /allocations/:id', () => {
   it('splits the wallets of the employer into beneficiaries and excluded', async () => {
     const agent = await AllocationCampaignFixture.signUpAgent(context);
     const employer = (
-      await AllocationCampaignFixture.seedEmployer(context, agent.id, {
+      await AllocationCampaignFixture.seedEmployer(context, {
         active: 3,
         disabled: 2,
       })
@@ -181,7 +178,7 @@ describe('GET /allocations/:id', () => {
   it('credits nobody, and totals nothing, when every wallet is suspended', async () => {
     const agent = await AllocationCampaignFixture.signUpAgent(context);
     const employer = (
-      await AllocationCampaignFixture.seedEmployer(context, agent.id, {
+      await AllocationCampaignFixture.seedEmployer(context, {
         active: 0,
         disabled: 2,
       })
@@ -217,7 +214,7 @@ describe('PATCH /allocations/:id', () => {
   it('amends a draft and answers with the refreshed total', async () => {
     const agent = await AllocationCampaignFixture.signUpAgent(context);
     const employer = (
-      await AllocationCampaignFixture.seedEmployer(context, agent.id, {
+      await AllocationCampaignFixture.seedEmployer(context, {
         active: 3,
         disabled: 0,
       })
@@ -245,9 +242,8 @@ describe('PATCH /allocations/:id', () => {
 
   it('answers 409 on an applied allocation, and changes nothing', async () => {
     const agent = await AllocationCampaignFixture.signUpAgent(context);
-    const employer = (
-      await AllocationCampaignFixture.seedEmployer(context, agent.id)
-    ).employer;
+    const employer = (await AllocationCampaignFixture.seedEmployer(context))
+      .employer;
     const allocation = await AllocationFixture.create(
       context.dataSource,
       employer.id,

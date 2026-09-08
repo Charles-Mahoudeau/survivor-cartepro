@@ -118,6 +118,15 @@ export class WalletService {
     return this.walletEntryRepo.findCreditedWalletIds(allocationId);
   }
 
+  /** Spendable wallets per employer, keyed by employer, in one read. */
+  async countActiveByEmployer(
+    employerIds: string[],
+  ): Promise<Map<string, number>> {
+    const rows = await this.walletRepo.countActiveByEmployerIds(employerIds);
+
+    return new Map(rows.map((row) => [row.employerId, Number(row.count)]));
+  }
+
   /**
    * Credits every active wallet of an employer inside the caller transaction,
    * by writing one movement per wallet and moving each balance by the same

@@ -20,6 +20,7 @@ import {
   PARTNERS,
   PAYMENT_HOURS,
   QR_CODE_SHARE,
+  REVIEWING_AGENT,
   SEED_RANDOM_SEED,
   SEED_REFERENCE_DATE,
   SHORT_CODE_ALPHABET,
@@ -115,7 +116,6 @@ export interface PlannedAllocation {
 
 export interface PlannedEmployer {
   id: string;
-  ownerId: string;
   name: string;
   siren: string;
   createdAt: Date;
@@ -375,13 +375,13 @@ export function generateSeedPlan(): SeedPlan {
     };
   });
 
+  const agentId = accountIdByEmail.get(REVIEWING_AGENT.email)!;
+
   const employers: PlannedEmployer[] = EMPLOYERS.map((seed) => {
-    const ownerId = addAccount(seed.owner);
     const createdAt = new Date(seed.createdAt);
     const id = mint.at(createdAt);
     return {
       id,
-      ownerId,
       name: seed.name,
       siren: seed.siren,
       createdAt,
@@ -392,7 +392,7 @@ export function generateSeedPlan(): SeedPlan {
           employerId: id,
           label: allocation.label,
           amountCents: allocation.amountCents,
-          createdById: ownerId,
+          createdById: agentId,
           createdAt: at,
         };
       }),

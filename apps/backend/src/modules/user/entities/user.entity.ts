@@ -11,7 +11,6 @@ import {
 import { Account } from './account.entity';
 import { Session } from './session.entity';
 import { Allocation } from '@/modules/allocations/entities/allocation.entity';
-import { Employer } from '@/modules/employers/entities/employer.entity';
 import { Partner } from '@/modules/partners/core/entities/partner.entity';
 import { Application } from '@/modules/partners/applications/entities/application.entity';
 import { Wallet } from '@/modules/wallets/entities/wallet.entity';
@@ -56,9 +55,6 @@ export class User {
 
   @OneToMany(() => Account, (account) => account.user)
   accounts: Relation<Account[]>;
-
-  @OneToOne(() => Employer, (employer) => employer.owner)
-  employer: Relation<Employer> | null;
 
   @OneToOne(() => Partner, (partner) => partner.owner)
   partner: Relation<Partner> | null;
