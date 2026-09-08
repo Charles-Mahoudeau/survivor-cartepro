@@ -75,7 +75,7 @@ export interface PlannedAccount {
   createdAt: Date;
 }
 
-export interface PlannedReview {
+export interface PlannedApplication {
   id: string;
   partnerId: string;
   fromStatus: PartnerStatus;
@@ -102,7 +102,7 @@ export interface PlannedPartner {
   longitude: number;
   createdAt: Date;
   activeSince: Date | null;
-  reviews: PlannedReview[];
+  applications: PlannedApplication[];
 }
 
 export interface PlannedAllocation {
@@ -330,26 +330,28 @@ export function generateSeedPlan(): SeedPlan {
     const ownerId = addAccount(seed.owner);
     const createdAt = new Date(seed.submittedAt);
     const id = mint.at(createdAt);
-    const reviews: PlannedReview[] = seed.decisions.map((decision) => {
-      const decidedAt = new Date(decision.decidedAt);
-      const decidedById = accountIdByEmail.get(decision.decidedByEmail);
-      if (decidedById === undefined) {
-        throw new Error(
-          `Jeu de données incohérent : agent inconnu ${decision.decidedByEmail}`,
-        );
-      }
-      return {
-        id: mint.at(decidedAt),
-        partnerId: id,
-        fromStatus: decision.fromStatus,
-        toStatus: decision.toStatus,
-        reason: decision.reason,
-        decidedById,
-        createdAt: decidedAt,
-      };
-    });
-    const activation = reviews.find(
-      (review) => review.toStatus === PartnerStatus.ACTIVE,
+    const applications: PlannedApplication[] = seed.decisions.map(
+      (decision) => {
+        const decidedAt = new Date(decision.decidedAt);
+        const decidedById = accountIdByEmail.get(decision.decidedByEmail);
+        if (decidedById === undefined) {
+          throw new Error(
+            `Jeu de données incohérent : agent inconnu ${decision.decidedByEmail}`,
+          );
+        }
+        return {
+          id: mint.at(decidedAt),
+          partnerId: id,
+          fromStatus: decision.fromStatus,
+          toStatus: decision.toStatus,
+          reason: decision.reason,
+          decidedById,
+          createdAt: decidedAt,
+        };
+      },
+    );
+    const activation = applications.find(
+      (application) => application.toStatus === PartnerStatus.ACTIVE,
     );
     return {
       id,
@@ -371,7 +373,7 @@ export function generateSeedPlan(): SeedPlan {
         seed.status === PartnerStatus.ACTIVE && activation
           ? activation.createdAt
           : null,
-      reviews,
+      applications,
     };
   });
 

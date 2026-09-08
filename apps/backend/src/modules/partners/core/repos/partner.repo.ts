@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import type { EntityManager } from 'typeorm';
 import { Repository } from 'typeorm';
-import { decodeCursor } from '@/common/pagination';
+import { decodeCursor, type PaginationQueryDto } from '@/common/pagination';
 import { Partner } from '@/modules/partners/core/entities/partner.entity';
 import { PartnerStatus } from '@/modules/partners/core/enums/partner-status.enum';
 import type { ListPartnersQueryDto } from '@/modules/partners/core/dto';
@@ -22,6 +23,42 @@ export class PartnerRepo {
     return this.partners.findOne({
       where: { id, status: PartnerStatus.ACTIVE },
       relations: { categories: true },
+    });
+  }
+
+  findByIdWithRelations(
+    id: string,
+    manager?: EntityManager,
+  ): Promise<Partner | null> {
+    const repo = manager ? manager.getRepository(Partner) : this.partners;
+    return repo.findOne({
+      where: { id },
+      relations: { owner: true, categories: true },
+    });
+  }
+
+  async activateIfPending(
+    id: string,
+    manager?: EntityManager,
+  ): Promise<boolean> {
+    const repo = manager ? manager.getRepository(Partner) : this.partners;
+    const result = await repo
+      .createQueryBuilder()
+      .update(Partner)
+      .set({ status: PartnerStatus.ACTIVE })
+      .where('id = :id AND status = :pending', {
+        id,
+        pending: PartnerStatus.PENDING,
+      })
+      .execute();
+
+    return result.affected === 1;
+  }
+
+  findByOwnerId(ownerId: string): Promise<Partner | null> {
+    return this.partners.findOne({
+      where: { owner: { id: ownerId } },
+      relations: { owner: true, categories: true },
     });
   }
 
@@ -62,6 +99,25 @@ export class PartnerRepo {
           search,
         },
       );
+    }
+
+    return builder.getMany();
+  }
+
+  findPageByStatus(
+    status: PartnerStatus,
+    pagination: PaginationQueryDto,
+  ): Promise<Partner[]> {
+    const builder = this.partners
+      .createQueryBuilder('partner')
+      .where('partner.status = :status', { status })
+      .orderBy('partner.id', 'DESC')
+      .take(pagination.limit + 1);
+
+    if (pagination.cursor) {
+      builder.andWhere('partner.id < :cursor', {
+        cursor: decodeCursor(pagination.cursor),
+      });
     }
 
     return builder.getMany();
