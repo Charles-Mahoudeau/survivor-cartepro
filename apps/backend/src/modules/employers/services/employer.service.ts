@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ERROR_CODES } from '@/common/constants/error-codes.constant';
+import { isUniqueViolation } from '@/common/unique-violation';
 import {
   InvalidCursorError,
   paginate,
@@ -14,7 +15,6 @@ import {
 import { WalletService } from '@/modules/wallets';
 import { Employer } from '../entities/employer.entity';
 import { EmployerRepo } from '../repos/employer.repo';
-import { isUniqueViolation } from './helpers/unique-violation.helper';
 import type {
   CreateEmployerDto,
   EmployerResponseDto,
