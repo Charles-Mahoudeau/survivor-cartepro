@@ -13,17 +13,21 @@ export class PaymentTokenService {
     private readonly paymentTokenSource: PaymentTokenSource,
   ) {}
 
-  issue(userId: string): PaymentTokenResponseDto {
+  async issue(userId: string): Promise<PaymentTokenResponseDto> {
     return plainToInstance(
       PaymentTokenResponseDto,
-      this.paymentTokenSource.issue(userId),
+      await this.paymentTokenSource.issue(userId),
     );
   }
 
-  getCurrent(userId: string): PaymentTokenResponseDto {
+  async getCurrent(userId: string): Promise<PaymentTokenResponseDto> {
     return plainToInstance(
       PaymentTokenResponseDto,
-      this.paymentTokenSource.getCurrent(userId),
+      await this.paymentTokenSource.getCurrent(userId),
     );
+  }
+
+  async revokeCurrent(userId: string): Promise<void> {
+    return this.paymentTokenSource.revokeCurrent(userId);
   }
 }

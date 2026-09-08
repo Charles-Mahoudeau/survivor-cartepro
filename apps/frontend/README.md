@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# @tickettout/frontend
 
-## Getting Started
+Application web du dispositif Ticket Tout.
 
-First, run the development server:
+## Stack
+
+|           |                                  |
+| --------- | -------------------------------- |
+| Runtime   | Bun 1.3                          |
+| Framework | Next.js 16                       |
+| UI        | React 19, DSFR, shadcn/ui        |
+| Styles    | Tailwind 4, Sass                 |
+| Tests     | `bun test`                       |
+| Polices   | Marianne par le DSFR, Geist Mono |
+
+## Démarrer
+
+`bun run dev` depuis la racine démarre la base, l'API et le web ensemble. Le web
+répond alors sur http://localhost:3000.
+
+Pour ne lancer que cette application, sans base ni API :
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun run --filter '@tickettout/frontend' dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Les écrans qui appellent l'API échouent tant qu'elle ne tourne pas.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Compiler et servir
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+bun run --filter '@tickettout/frontend' build
+bun run --filter '@tickettout/frontend' start
+```
 
-## Learn More
+`start` sert le résultat de `build` : il échoue s'il n'a pas été lancé avant.
+Le port reste 3000, réglable par `FRONTEND_PORT`.
 
-To learn more about Next.js, take a look at the following resources:
+Depuis la racine, `bun run build` compile toutes les applications ; `bun run start`
+les sert toutes, la base comprise.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Commande                          | Effet                                                |
+| --------------------------------- | ---------------------------------------------------- |
+| `bun run dev`                     | Serveur de développement.                            |
+| `bun run build`                   | Compilation de production.                           |
+| `bun run start`                   | Sert la compilation. Exige un `build` préalable.     |
+| `bun run typegen`                 | Types de routes générés par Next dans `.next/types`. |
+| `bun run typecheck`               | `typegen` puis `tsc --noEmit`.                       |
+| `bun run lint` / `lint:check`     | ESLint, avec ou sans correction automatique.         |
+| `bun run format` / `format:check` | Prettier, avec ou sans écriture.                     |
+| `bun run test`                    | Tests unitaires.                                     |
+| `bun run test:watch`              | Tests en mode surveillance.                          |
+| `bun run test:cov`                | Tests avec la couverture.                            |
 
-## Deploy on Vercel
+Les cinq tâches vérifiées par la CI — `format:check`, `lint:check`, `typecheck`,
+`test`, `build`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`typecheck` lance `typegen` d'abord parce que `LayoutProps`, `PageProps` et les
+autres types de routes sont générés par Next dans `.next/types`, absent d'un
+dépôt fraîchement cloné.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Docker
+
+Le `Dockerfile` du paquet produit une image autonome à partir de la sortie
+`standalone` de Next. Il est construit par `docker-compose.yaml` à la racine.

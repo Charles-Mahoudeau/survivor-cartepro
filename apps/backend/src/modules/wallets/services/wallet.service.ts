@@ -17,6 +17,7 @@ import {
 } from '@/common/period';
 import { ERROR_CODES } from '@/common/constants/error-codes.constant';
 import { WalletEntry } from '../entities/wallet-entry.entity';
+import type { Wallet } from '../entities/wallet.entity';
 import { WalletEntryRepo } from '../repos/wallet-entry.repo';
 import { WalletRepo } from '../repos/wallet.repo';
 import type { ListMyWalletEntriesQueryDto } from '../validators/list-my-wallet-entries-query.dto';
@@ -29,6 +30,17 @@ export class WalletService {
     private readonly walletRepo: WalletRepo,
     private readonly walletEntryRepo: WalletEntryRepo,
   ) {}
+
+  /** Used by payment-token issuance to check status and balance without the full DTO. */
+  async findSummaryByUserId(
+    userId: string,
+  ): Promise<Pick<Wallet, 'id' | 'status' | 'balance'>> {
+    const wallet = await this.walletRepo.findSummaryByUserId(userId);
+    if (!wallet) {
+      throw new NotFoundException(ERROR_CODES.WALLET_NOT_FOUND);
+    }
+    return wallet;
+  }
 
   async getMine(userId: string): Promise<WalletResponseDto> {
     const wallet = await this.walletRepo.findByUserId(userId);
