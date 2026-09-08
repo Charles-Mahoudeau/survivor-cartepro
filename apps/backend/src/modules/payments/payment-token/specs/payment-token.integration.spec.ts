@@ -306,6 +306,10 @@ describe('DELETE /me/payment-tokens/current', () => {
       context.app,
       'payment-token-revoke-no-wallet@tickettout.test',
     );
+    // Sign-up opens one automatically; remove it to exercise this path.
+    await context.dataSource
+      .getRepository(Wallet)
+      .delete({ user: { id: employee.id } });
 
     const response = await revokeCurrentToken(employee.cookie);
 
