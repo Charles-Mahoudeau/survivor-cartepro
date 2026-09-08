@@ -32,7 +32,7 @@ export class PartnerRepo {
   findByOwnerId(ownerId: string): Promise<Partner | null> {
     return this.partners.findOne({
       where: { owner: { id: ownerId } },
-      relations: { categories: true, applications: true },
+      relations: { owner: true, categories: true, applications: true },
       order: { applications: { createdAt: 'DESC' } },
     });
   }
