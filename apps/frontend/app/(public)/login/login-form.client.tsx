@@ -88,7 +88,7 @@ export function LoginForm() {
           autoComplete="current-password"
         />
 
-        <Button type="submit" size="lg" disabled={busy} className="mt-2">
+        <Button type="submit" size="lg" disabled={busy} className="mt-2 w-full">
           {busy ? signIn.submitting : signIn.submit}
         </Button>
       </form>

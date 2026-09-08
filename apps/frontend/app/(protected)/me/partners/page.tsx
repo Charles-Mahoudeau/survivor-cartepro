@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
-import { PageHeader } from '@/components/composites/page-header';
 import { ME_CONTENT } from '@/content/me';
 import { SITE_CONTENT } from '@/content/site';
 import { listPartnerCategoriesHook, listPartnersHook } from '@/hooks/api';
@@ -23,15 +22,11 @@ function first(value: string | string[] | undefined): string {
 
 export default function Page({ searchParams }: PageProps<'/me/partners'>) {
   return (
-    <div className="page-enter">
-      <PageHeader
-        title={ME_CONTENT.partners.title}
-        subtitle={ME_CONTENT.partners.subtitle}
-      />
+    <section className="col-span-12 lg:col-span-8">
       <Suspense fallback={<PartnersSkeleton />}>
         <Catalogue searchParams={searchParams} />
       </Suspense>
-    </div>
+    </section>
   );
 }
 

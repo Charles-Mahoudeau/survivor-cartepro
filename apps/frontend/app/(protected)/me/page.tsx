@@ -1,4 +1,4 @@
-import { RiArrowRightLine, RiMapPin2Line } from '@remixicon/react';
+import { RiHistoryLine, RiStoreLine } from '@remixicon/react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -7,7 +7,6 @@ import { Card } from '@/components/composites/card';
 import { DateTexte } from '@/components/composites/date-texte';
 import { Montant } from '@/components/composites/montant';
 import { MouvementLigne } from '@/components/composites/mouvement-ligne';
-import { PageHeader } from '@/components/composites/page-header';
 import { Button } from '@/components/ui/button';
 import { ME_CONTENT } from '@/content/me';
 import { SITE_CONTENT } from '@/content/site';
@@ -15,94 +14,83 @@ import { getMyWalletHook, listMyWalletEntriesHook } from '@/hooks/api';
 
 import { BalanceSkeleton, MovementsSkeleton } from './skeletons';
 
-const RECENT_MOVEMENTS_LIMIT = 4;
+const RECENT_MOVEMENTS_LIMIT = 5;
 
 export const metadata: Metadata = {
   title: `${ME_CONTENT.wallet.title} — ${SITE_CONTENT.title}`,
 };
 
 export default function Page() {
-  const { wallet } = ME_CONTENT;
-
   return (
-    <div className="page-enter">
-      <PageHeader title={wallet.title} subtitle={wallet.subtitle} />
+    <>
+      <section className="col-span-12 lg:col-span-8">
+        <Suspense fallback={<BalanceSkeleton />}>
+          <Balance />
+        </Suspense>
+      </section>
 
-      <Suspense fallback={<BalanceSkeleton />}>
-        <BalanceCard />
-      </Suspense>
-
-      <div className="mb-8">
-        <Button asChild variant="outline" size="lg">
-          <Link href="/me/partners">
-            <RiMapPin2Line data-icon="inline-start" />
-            {wallet.findPartner}
-          </Link>
-        </Button>
-      </div>
-
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="font-display text-sm font-semibold text-[color:var(--foreground)]">
-          {wallet.recentMovements}
+      <section className="col-span-12 lg:col-span-8">
+        <h2 className="text-muted-foreground mb-2 px-3 text-xs font-medium">
+          {ME_CONTENT.wallet.recentMovements}
         </h2>
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/me/history">
-            {wallet.seeAll}
-            <RiArrowRightLine data-icon="inline-end" />
-          </Link>
-        </Button>
-      </div>
-
-      <Suspense fallback={<MovementsSkeleton />}>
-        <RecentMovements />
-      </Suspense>
-
-      <div className="mt-4 rounded-[var(--radius-md)] border-l-2 border-[color:var(--primary)] bg-[color:var(--secondary)] p-4">
-        <p className="text-xs text-[color:var(--muted-foreground)]">
-          <span className="font-display font-semibold text-[color:var(--primary)]">
-            {wallet.note}
-          </span>{' '}
-          {wallet.noteBody}
-        </p>
-      </div>
-    </div>
+        <Suspense fallback={<MovementsSkeleton />}>
+          <RecentMovements />
+        </Suspense>
+      </section>
+    </>
   );
 }
 
 /** Never cached: a stale balance shown in 48px is a functional defect. */
-async function BalanceCard() {
+async function Balance() {
   const wallet = await getMyWalletHook();
   const readAt = new Date().toISOString();
 
   return (
-    <Card className="mb-6 border-l-4 border-l-[color:var(--primary)] p-6">
-      <p className="text-sm font-medium text-[color:var(--muted-foreground)]">
-        {ME_CONTENT.wallet.balance}
-      </p>
+    <Card className="p-6 md:p-8">
       {wallet ? (
         <>
-          <p className="mt-1 font-display text-4xl font-bold text-[color:var(--primary)] md:text-5xl">
-            <Montant amount={wallet.balance} currency={wallet.currency} />
+          <p className="text-4xl font-semibold tracking-tight md:text-5xl">
+            <Montant
+              amount={wallet.balance}
+              currency={wallet.currency}
+              mention={false}
+            />
           </p>
-          <p className="mt-1 text-xs text-[color:var(--muted-foreground)]">
+          <p className="text-muted-foreground mt-1 text-sm">
+            {ME_CONTENT.wallet.balance} · {ME_CONTENT.simulation}
+          </p>
+          <p className="text-muted-foreground mt-1 text-xs">
             {ME_CONTENT.wallet.updatedAt}{' '}
             <DateTexte iso={readAt} format="jour" /> à{' '}
             <DateTexte iso={readAt} format="heure" />
           </p>
           {wallet.status === 'disabled' ? (
-            <p
-              role="status"
-              className="mt-4 text-sm text-[color:var(--warning)]"
-            >
+            <p role="status" className="text-warning mt-4 text-sm">
               {ME_CONTENT.wallet.disabled}
             </p>
           ) : null}
         </>
       ) : (
-        <p className="mt-1 text-sm text-[color:var(--muted-foreground)]">
+        <p className="text-muted-foreground text-sm">
           {ME_CONTENT.wallet.noWallet}
         </p>
       )}
+
+      <div className="mt-6 flex flex-wrap gap-2">
+        <Button asChild size="lg">
+          <Link href="/me/partners">
+            <RiStoreLine data-icon="inline-start" />
+            {ME_CONTENT.wallet.findPartner}
+          </Link>
+        </Button>
+        <Button asChild variant="secondary" size="lg">
+          <Link href="/me/history">
+            <RiHistoryLine data-icon="inline-start" />
+            {ME_CONTENT.history.title}
+          </Link>
+        </Button>
+      </div>
     </Card>
   );
 }
@@ -113,8 +101,8 @@ async function RecentMovements() {
 
   if (entries.length === 0) {
     return (
-      <Card className="p-6">
-        <p className="text-sm text-[color:var(--muted-foreground)]">
+      <Card className="px-3 py-6">
+        <p className="text-muted-foreground text-sm">
           {ME_CONTENT.wallet.noMovement}
         </p>
       </Card>
@@ -122,15 +110,10 @@ async function RecentMovements() {
   }
 
   return (
-    <Card>
+    <Card className="p-2">
       <ul>
-        {entries.map((entry, index) => (
-          <MouvementLigne
-            key={entry.id}
-            entry={entry}
-            last={index === entries.length - 1}
-            variant="compact"
-          />
+        {entries.map((entry) => (
+          <MouvementLigne key={entry.id} entry={entry} variant="compact" />
         ))}
       </ul>
     </Card>

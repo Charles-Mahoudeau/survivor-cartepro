@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
-import { PageHeader } from '@/components/composites/page-header';
 import { ME_CONTENT } from '@/content/me';
 import { SITE_CONTENT } from '@/content/site';
 import { listMyWalletEntriesHook } from '@/hooks/api';
@@ -15,15 +14,11 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <div className="page-enter">
-      <PageHeader
-        title={ME_CONTENT.history.title}
-        subtitle={ME_CONTENT.history.subtitle}
-      />
+    <section className="col-span-12 lg:col-span-8">
       <Suspense fallback={<MovementsSkeleton rows={6} />}>
         <History />
       </Suspense>
-    </div>
+    </section>
   );
 }
 

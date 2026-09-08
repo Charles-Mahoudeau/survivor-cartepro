@@ -17,11 +17,11 @@ export interface LayoutBreadcrumbPath {
   badge?: ReactNode;
 }
 
-/** The top bar of a space: sidebar toggle, then the trail to the current page. */
+/** The trail to the current page: it names the page, so no page repeats it. */
 export function LayoutBreadcrumb({ path }: { path: LayoutBreadcrumbPath[] }) {
   return (
-    <header className="bg-background sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b">
-      <div className="flex items-center gap-2 px-4">
+    <header className="flex h-16 shrink-0 items-center gap-2">
+      <div className="mx-auto flex w-full max-w-6xl items-center gap-2 px-4 lg:px-6">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
         <Breadcrumb>

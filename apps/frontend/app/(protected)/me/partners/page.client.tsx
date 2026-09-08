@@ -6,6 +6,7 @@ import { useAction } from 'next-safe-action/hooks';
 import { useEffect, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 
+import { Card } from '@/components/composites/card';
 import { CartePartenaire } from '@/components/composites/carte-partenaire';
 import { Button } from '@/components/ui/button';
 import { Chip } from '@/components/ui/chip';
@@ -153,18 +154,21 @@ export default function PartnersPageClient({
         {ME_CONTENT.partners.results(partners.length)}
       </p>
 
-      <div className="space-y-2">
-        {partners.length === 0 ? (
-          <div className="py-12 text-center">
-            <p className="text-sm text-[color:var(--muted-foreground)]">
-              {ME_CONTENT.partners.empty}
-            </p>
-          </div>
-        ) : null}
-        {partners.map((partner) => (
-          <CartePartenaire key={partner.id} partner={partner} />
-        ))}
-      </div>
+      {partners.length === 0 ? (
+        <Card className="px-3 py-6">
+          <p className="text-muted-foreground text-sm">
+            {ME_CONTENT.partners.empty}
+          </p>
+        </Card>
+      ) : (
+        <Card className="p-2">
+          <ul>
+            {partners.map((partner) => (
+              <CartePartenaire key={partner.id} partner={partner} />
+            ))}
+          </ul>
+        </Card>
+      )}
 
       {nextCursor ? (
         <div className="mt-6 text-center">

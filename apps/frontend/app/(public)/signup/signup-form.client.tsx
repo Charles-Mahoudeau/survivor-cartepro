@@ -102,7 +102,7 @@ export function SignUpForm() {
           minLength={MIN_PASSWORD_LENGTH}
         />
 
-        <Button type="submit" size="lg" disabled={busy} className="mt-2">
+        <Button type="submit" size="lg" disabled={busy} className="mt-2 w-full">
           {busy ? signUp.submitting : signUp.submit}
         </Button>
       </form>

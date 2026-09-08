@@ -6,11 +6,9 @@ import { ROLES } from '@/lib/auth/constants';
 import { RoleGate } from '@/lib/auth/role-gate';
 
 /**
- * The employee shell. Sidebar and breadcrumb are parallel routes, so they paint
- * with the layout while the page streams its own skeletons. The role gate reads
- * the session behind its own boundary, beside the page rather than around it,
- * and redirects a wrong role as soon as the session resolves. The API enforces
- * the role on every read regardless.
+ * Sidebar and breadcrumb are parallel routes, so the shell paints while the
+ * page streams. The role gate reads the session behind its own boundary,
+ * beside the page rather than around it; the API enforces the role anyway.
  */
 export default function Layout({
   children,
@@ -20,15 +18,20 @@ export default function Layout({
   return (
     <SidebarProvider>
       {sidebar}
-      <SidebarInset>
+      <SidebarInset className="md:peer-data-[variant=inset]:shadow-none">
         {breadcrumb}
-        <BandeauSimulation />
-        <main id="contenu" className="min-w-0 flex-1 px-4 py-6 lg:px-8 lg:py-8">
+        <div
+          id="contenu"
+          className="mx-auto grid w-full max-w-6xl grid-cols-12 gap-x-6 gap-y-8 px-4 pb-10 lg:px-6"
+        >
+          <div className="col-span-12">
+            <BandeauSimulation />
+          </div>
           <Suspense fallback={null}>
             <RoleGate role={ROLES.EMPLOYEE} />
           </Suspense>
           {children}
-        </main>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );
