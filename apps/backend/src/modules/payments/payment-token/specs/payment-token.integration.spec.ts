@@ -27,6 +27,10 @@ const getCurrentToken = (cookie: string[]) =>
   api(context.app)
     .get(apiPath('/me/payment-tokens/current'))
     .set('Cookie', cookie);
+const revokeCurrentToken = (cookie: string[]) =>
+  api(context.app)
+    .delete(apiPath('/me/payment-tokens/current'))
+    .set('Cookie', cookie);
 
 beforeAll(async () => {
   context = await createTestApp();
@@ -239,6 +243,88 @@ describe('GET /me/payment-tokens/current', () => {
     await grantRole(context, account.id, ROLES.PARTNER);
 
     const response = await getCurrentToken(account.cookie);
+
+    expect(response.status).toBe(403);
+    expect(bodyOf(response)).toEqual(
+      expect.objectContaining({ message: ERROR_CODES.FORBIDDEN_ROLE }),
+    );
+  });
+});
+
+describe('DELETE /me/payment-tokens/current', () => {
+  it('revokes the live token so it can no longer be read as current', async () => {
+    const employee = await signUp(
+      context.app,
+      'payment-token-revoke-current@tickettout.test',
+    );
+    await createWallet(context.dataSource, employee.id, { balance: 10 });
+    const issued = bodyOf<PaymentTokenResponseDto>(
+      await issueToken(employee.cookie).expect(201),
+    );
+
+    const response = await revokeCurrentToken(employee.cookie);
+
+    expect(response.status).toBe(204);
+    expect(response.body).toEqual({});
+    await expect(
+      context.dataSource
+        .getRepository(PaymentToken)
+        .findOneBy({ id: issued.token }),
+    ).resolves.toMatchObject({ status: PaymentTokenStatus.REVOKED });
+    const afterRevoke = await getCurrentToken(employee.cookie);
+    expect(afterRevoke.status).toBe(404);
+  });
+
+  it('answers 404 when the wallet has no live token', async () => {
+    const employee = await signUp(
+      context.app,
+      'payment-token-revoke-none@tickettout.test',
+    );
+    await createWallet(context.dataSource, employee.id, { balance: 10 });
+
+    const response = await revokeCurrentToken(employee.cookie);
+
+    expect(response.status).toBe(404);
+    expect(bodyOf(response)).toEqual(
+      expect.objectContaining({
+        message: ERROR_CODES.PAYMENT_TOKEN_NOT_FOUND,
+      }),
+    );
+  });
+
+  it('answers 404 when the connected account has no wallet', async () => {
+    const employee = await signUp(
+      context.app,
+      'payment-token-revoke-no-wallet@tickettout.test',
+    );
+
+    const response = await revokeCurrentToken(employee.cookie);
+
+    expect(response.status).toBe(404);
+    expect(bodyOf(response)).toEqual(
+      expect.objectContaining({ message: ERROR_CODES.WALLET_NOT_FOUND }),
+    );
+  });
+
+  it('rejects an unauthenticated revoke request', async () => {
+    const response = await api(context.app).delete(
+      apiPath('/me/payment-tokens/current'),
+    );
+
+    expect(response.status).toBe(401);
+    expect(bodyOf(response)).toEqual(
+      expect.objectContaining({ message: ERROR_CODES.UNAUTHENTICATED }),
+    );
+  });
+
+  it('rejects a non-employee revoke request', async () => {
+    const account = await signUp(
+      context.app,
+      'payment-token-partner-revoke@tickettout.test',
+    );
+    await grantRole(context, account.id, ROLES.PARTNER);
+
+    const response = await revokeCurrentToken(account.cookie);
 
     expect(response.status).toBe(403);
     expect(bodyOf(response)).toEqual(
