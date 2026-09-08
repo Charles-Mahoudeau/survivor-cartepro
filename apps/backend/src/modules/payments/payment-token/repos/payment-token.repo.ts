@@ -18,6 +18,15 @@ export class PaymentTokenRepo {
     });
   }
 
+  async revokeLiveByWalletId(walletId: string): Promise<boolean> {
+    const result = await this.repo.update(
+      { wallet: { id: walletId }, status: PaymentTokenStatus.LIVE },
+      { status: PaymentTokenStatus.REVOKED },
+    );
+
+    return (result.affected ?? 0) > 0;
+  }
+
   /**
    * Revokes the wallet's previous live token and creates the new one in the
    * same transaction, so a reader never observes two live tokens at once.
