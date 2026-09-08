@@ -7,7 +7,11 @@ import {
 import { createAllocation } from '../../../../test/fixtures/allocation.fixture';
 import { createEmployer } from '../../../../test/fixtures/employer.fixture';
 import { createPayment } from '../../../../test/fixtures/payment.fixture';
-import { grantRole, signUp } from '../../../../test/fixtures/user.fixture';
+import {
+  createUser,
+  grantRole,
+  signUp,
+} from '../../../../test/fixtures/user.fixture';
 import {
   createWallet,
   createWalletEntry,
@@ -27,6 +31,8 @@ const listMyWalletEntries = (cookie: string[], qs = '') =>
   api(context.app)
     .get(apiPath(`/me/wallet/entries${qs}`))
     .set('Cookie', cookie);
+/** Postgres `unique_violation`, raised when a duplicate breaks a constraint. */
+const UNIQUE_VIOLATION = '23505';
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 const daysAgo = (days: number) => new Date(Date.now() - days * DAY_IN_MS);
 const isoDaysAgo = (days: number) => daysAgo(days).toISOString();
@@ -151,6 +157,74 @@ describe('wallet balance constraints', () => {
     await expect(
       createWallet(context.dataSource, account.id, { balance: -0.01 }),
     ).rejects.toThrow('CHK_wallet_balance_non_negative');
+  });
+});
+
+describe('one wallet per account', () => {
+  it('refuses a second wallet for an account that already holds one', async () => {
+    const account = await signUp(context.app, 'second-wallet@tickettout.test');
+
+    await expect(
+      context.dataSource.getRepository(Wallet).insert({
+        user: { id: account.id },
+      }),
+    ).rejects.toMatchObject({ code: UNIQUE_VIOLATION });
+
+    await expect(
+      context.dataSource
+        .getRepository(Wallet)
+        .countBy({ user: { id: account.id } }),
+    ).resolves.toBe(1);
+  });
+
+  it('refuses a second wallet even when it belongs to an employer', async () => {
+    const account = await signUp(
+      context.app,
+      'second-wallet-employer@tickettout.test',
+    );
+    const owner = await signUp(
+      context.app,
+      'second-wallet-owner@tickettout.test',
+    );
+    const employer = await createEmployer(context.dataSource, owner.id);
+
+    await expect(
+      context.dataSource.getRepository(Wallet).insert({
+        user: { id: account.id },
+        employer: { id: employer.id },
+        employeeRef: 'EMP-0001',
+      }),
+    ).rejects.toMatchObject({ code: UNIQUE_VIOLATION });
+  });
+
+  it('lets two employees of the same employer each hold their own', async () => {
+    const owner = await signUp(context.app, 'shared-employer@tickettout.test');
+    const employer = await createEmployer(context.dataSource, owner.id);
+    const first = await createUser(
+      context,
+      'Salariee une',
+      'holder-one@tickettout.test',
+    );
+    const second = await createUser(
+      context,
+      'Salarie deux',
+      'holder-two@tickettout.test',
+    );
+
+    await createWallet(context.dataSource, first.id, {
+      employer: { id: employer.id },
+      employeeRef: 'EMP-0001',
+    });
+    await createWallet(context.dataSource, second.id, {
+      employer: { id: employer.id },
+      employeeRef: 'EMP-0002',
+    });
+
+    await expect(
+      context.dataSource
+        .getRepository(Wallet)
+        .countBy({ employer: { id: employer.id } }),
+    ).resolves.toBe(2);
   });
 });
 

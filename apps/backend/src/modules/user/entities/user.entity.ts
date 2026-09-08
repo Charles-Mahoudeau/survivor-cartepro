@@ -63,8 +63,8 @@ export class User {
   @OneToOne(() => Partner, (partner) => partner.owner)
   partner: Relation<Partner> | null;
 
-  @OneToMany(() => Wallet, (wallet) => wallet.user)
-  wallets: Relation<Wallet[]>;
+  @OneToOne(() => Wallet, (wallet) => wallet.user)
+  wallet: Relation<Wallet> | null;
 
   @OneToMany(() => Application, (application) => application.decidedBy)
   decidedApplications: Relation<Application[]>;

@@ -7,6 +7,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   UpdateDateColumn,
 } from 'typeorm';
 import type { Relation } from 'typeorm';
@@ -19,26 +20,17 @@ import { WalletEntry } from '@/modules/wallets/entities/wallet-entry.entity';
 import { WalletStatus } from '@/modules/wallets/enums/wallet-status.enum';
 
 @Entity()
-@Index('IDX_wallet_user_id', ['user'])
 @Index('IDX_wallet_employer_id', ['employer'])
-@Index('IDX_wallet_user_employer', ['user', 'employer'], {
-  unique: true,
-  where: '"employer_id" IS NOT NULL',
-})
 @Index('IDX_wallet_employer_employee_ref', ['employer', 'employeeRef'], {
   unique: true,
   where: '"employer_id" IS NOT NULL AND "employee_ref" IS NOT NULL',
-})
-@Index('IDX_wallet_user_no_employer', ['user'], {
-  unique: true,
-  where: '"employer_id" IS NULL',
 })
 @Check('CHK_wallet_balance_non_negative', 'balance >= 0')
 export class Wallet {
   @PrimaryGeneratedUuidV7Column()
   id: string;
 
-  @ManyToOne(() => User, (user) => user.wallets, { nullable: false })
+  @OneToOne(() => User, (user) => user.wallet, { nullable: false })
   @JoinColumn({ name: 'user_id' })
   user: Relation<User>;
 
