@@ -14,7 +14,7 @@ import { WalletStatus } from '@/modules/wallets/enums/wallet-status.enum';
 export async function createWallet(
   dataSource: DataSource,
   userId: string,
-  overrides: Partial<Wallet> = {},
+  overrides: DeepPartial<Wallet> = {},
 ): Promise<Wallet> {
   const repo = dataSource.getRepository(Wallet);
   if (overrides.employer === undefined) {

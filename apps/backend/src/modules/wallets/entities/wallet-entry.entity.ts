@@ -19,6 +19,10 @@ import { WalletEntryKind } from '@/modules/wallets/enums/wallet-entry-kind.enum'
 @Index('IDX_wallet_entry_wallet_id', ['wallet'])
 @Index('IDX_wallet_entry_payment_id', ['payment'])
 @Index('IDX_wallet_entry_allocation_id', ['allocation'])
+@Index('IDX_wallet_entry_allocation_wallet', ['allocation', 'wallet'], {
+  unique: true,
+  where: '"allocation_id" IS NOT NULL',
+})
 @Check('CHK_wallet_entry_amount_positive', 'amount > 0')
 export class WalletEntry {
   @PrimaryGeneratedUuidV7Column()

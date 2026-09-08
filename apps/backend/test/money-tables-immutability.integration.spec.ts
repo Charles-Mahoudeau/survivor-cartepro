@@ -1,4 +1,5 @@
 import { Allocation } from '@/modules/allocations/entities/allocation.entity';
+import { AllocationStatus } from '@/modules/allocations/enums/allocation-status.enum';
 import { Payment } from '@/modules/payments/core/entities/payment.entity';
 import { WalletEntry } from '@/modules/wallets/entities/wallet-entry.entity';
 import {
@@ -74,7 +75,7 @@ describe('money tables immutability', () => {
   });
 
   it('rejects direct SQL updates and keeps every row unchanged', async () => {
-    const { payment, allocation, walletEntry } = await createMoneyRows();
+    const { payment, walletEntry } = await createMoneyRows();
 
     await expect(
       context.dataSource.query(
@@ -88,12 +89,6 @@ describe('money tables immutability', () => {
         [walletEntry.id],
       ),
     ).rejects.toThrow('Immutable table');
-    await expect(
-      context.dataSource.query(
-        'UPDATE "allocation" SET "amount" = "amount" + 1 WHERE "id" = $1',
-        [allocation.id],
-      ),
-    ).rejects.toThrow('Immutable table');
 
     await expect(
       context.dataSource.getRepository(Payment).findOneBy({ id: payment.id }),
@@ -103,11 +98,6 @@ describe('money tables immutability', () => {
         .getRepository(WalletEntry)
         .findOneBy({ id: walletEntry.id }),
     ).resolves.toMatchObject({ id: walletEntry.id, amount: '10.00' });
-    await expect(
-      context.dataSource
-        .getRepository(Allocation)
-        .findOneBy({ id: allocation.id }),
-    ).resolves.toMatchObject({ id: allocation.id, amount: '50.00' });
   });
 
   it('rejects direct SQL deletes and keeps every row present', async () => {
@@ -158,5 +148,79 @@ describe('money tables immutability', () => {
     await expect(
       repository.findOneBy({ id: payment.id }),
     ).resolves.toMatchObject({ id: payment.id, amount: '10.00' });
+  });
+});
+
+describe('allocation lifecycle', () => {
+  async function createDraftAllocation(): Promise<Allocation> {
+    const account = await signUp(
+      context.app,
+      `allocation-lifecycle-${Date.now()}@tickettout.test`,
+    );
+    const employer = await createEmployer(context.dataSource, account.id);
+    return createAllocation(context.dataSource, employer.id, account.id);
+  }
+
+  it('lets a draft be edited, then applied once', async () => {
+    const allocation = await createDraftAllocation();
+    const repository = context.dataSource.getRepository(Allocation);
+    const appliedAt = new Date();
+
+    await expect(
+      repository.update({ id: allocation.id }, { label: 'Prime de rentrée' }),
+    ).resolves.toBeDefined();
+    await expect(
+      repository.update(
+        { id: allocation.id },
+        { status: AllocationStatus.APPLIED, appliedAt },
+      ),
+    ).resolves.toBeDefined();
+
+    await expect(
+      repository.findOneBy({ id: allocation.id }),
+    ).resolves.toMatchObject({
+      label: 'Prime de rentrée',
+      status: AllocationStatus.APPLIED,
+      appliedAt,
+    });
+  });
+
+  it('freezes an allocation once it is applied', async () => {
+    const allocation = await createDraftAllocation();
+    const repository = context.dataSource.getRepository(Allocation);
+    await repository.update(
+      { id: allocation.id },
+      { status: AllocationStatus.APPLIED, appliedAt: new Date() },
+    );
+
+    await expect(
+      repository.update({ id: allocation.id }, { amount: 999 }),
+    ).rejects.toThrow('Immutable table');
+    await expect(
+      repository.update(
+        { id: allocation.id },
+        { status: AllocationStatus.DRAFT, appliedAt: null },
+      ),
+    ).rejects.toThrow('Immutable table');
+    await expect(repository.delete({ id: allocation.id })).rejects.toThrow(
+      'Immutable table',
+    );
+
+    await expect(
+      repository.findOneBy({ id: allocation.id }),
+    ).resolves.toMatchObject({
+      amount: '50.00',
+      status: AllocationStatus.APPLIED,
+    });
+  });
+
+  it('refuses an applied allocation carrying no application date', async () => {
+    const allocation = await createDraftAllocation();
+
+    await expect(
+      context.dataSource
+        .getRepository(Allocation)
+        .update({ id: allocation.id }, { status: AllocationStatus.APPLIED }),
+    ).rejects.toThrow('CHK_allocation_applied_at_matches_status');
   });
 });
