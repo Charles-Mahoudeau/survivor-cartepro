@@ -29,13 +29,16 @@ const getMyApplication = (cookie?: string[]) => {
   return cookie ? req.set('Cookie', cookie) : req;
 };
 
-const approveApplication = (
+const decideApplication = (
   id: string,
-  body: Record<string, unknown> = { reason: 'Dossier complet et vérifié' },
+  body: Record<string, unknown> = {
+    decision: 'approved',
+    reason: 'Dossier complet et vérifié',
+  },
   cookie?: string[],
 ) => {
   const req = api(context.app)
-    .post(apiPath(`/partners/applications/${id}/approve`))
+    .post(apiPath(`/partners/applications/${id}/decision`))
     .send(body);
   return cookie ? req.set('Cookie', cookie) : req;
 };
@@ -368,7 +371,7 @@ describe('GET /partners/applications/me', () => {
   });
 });
 
-describe('POST /partners/applications/:id/approve', () => {
+describe('POST /partners/applications/:id/decision', () => {
   it('approves a pending application and activates the partner', async () => {
     const admin = await signUpAdmin();
     const owner = await signUp(context.app, 'approve-owner@tickettout.test');
@@ -376,9 +379,9 @@ describe('POST /partners/applications/:id/approve', () => {
       status: PartnerStatus.PENDING,
     });
 
-    const response = await approveApplication(
+    const response = await decideApplication(
       partner.id,
-      { reason: 'Dossier complet et vérifié' },
+      { decision: 'approved', reason: 'Dossier complet et vérifié' },
       admin.cookie,
     ).expect(201);
     const body = bodyOf<ApplicationDetailBody>(response);
@@ -400,17 +403,71 @@ describe('POST /partners/applications/:id/approve', () => {
     expect(decision?.decidedBy.id).toBe(admin.id);
   });
 
+  it('refuses a pending application without activating the partner', async () => {
+    const admin = await signUpAdmin();
+    const owner = await signUp(context.app, 'refuse-owner@tickettout.test');
+    const partner = await PartnerFixture.create(context.dataSource, owner.id, {
+      status: PartnerStatus.PENDING,
+    });
+
+    const response = await decideApplication(
+      partner.id,
+      { decision: 'refused', reason: 'Dossier incomplet' },
+      admin.cookie,
+    ).expect(201);
+    const body = bodyOf<ApplicationDetailBody>(response);
+
+    expect(body.status).toBe(PartnerStatus.REFUSED);
+
+    const decision = await context.dataSource
+      .getRepository(Application)
+      .findOne({
+        where: { partner: { id: partner.id } },
+        relations: { partner: true, decidedBy: true },
+      });
+
+    expect(decision).toMatchObject({
+      fromStatus: PartnerStatus.PENDING,
+      toStatus: PartnerStatus.REFUSED,
+      reason: 'Dossier incomplet',
+    });
+    expect(decision?.decidedBy.id).toBe(admin.id);
+  });
+
   it('rejects a missing reason with 400', async () => {
     const admin = await signUpAdmin();
     const owner = await signUp(
       context.app,
-      'approve-no-reason@tickettout.test',
+      'decision-no-reason@tickettout.test',
     );
     const partner = await PartnerFixture.create(context.dataSource, owner.id, {
       status: PartnerStatus.PENDING,
     });
 
-    const response = await approveApplication(partner.id, {}, admin.cookie);
+    const response = await decideApplication(
+      partner.id,
+      { decision: 'approved' },
+      admin.cookie,
+    );
+
+    expect(response.status).toBe(400);
+  });
+
+  it('rejects a missing or invalid decision with 400', async () => {
+    const admin = await signUpAdmin();
+    const owner = await signUp(
+      context.app,
+      'decision-no-decision@tickettout.test',
+    );
+    const partner = await PartnerFixture.create(context.dataSource, owner.id, {
+      status: PartnerStatus.PENDING,
+    });
+
+    const response = await decideApplication(
+      partner.id,
+      { decision: 'maybe', reason: 'Dossier complet et vérifié' },
+      admin.cookie,
+    );
 
     expect(response.status).toBe(400);
   });
@@ -418,7 +475,7 @@ describe('POST /partners/applications/:id/approve', () => {
   it('returns 404 for an unknown id', async () => {
     const admin = await signUpAdmin();
 
-    const response = await approveApplication(
+    const response = await decideApplication(
       '00000000-0000-7000-8000-000000000000',
       undefined,
       admin.cookie,
@@ -428,12 +485,12 @@ describe('POST /partners/applications/:id/approve', () => {
   });
 
   it.each([PartnerStatus.ACTIVE, PartnerStatus.REFUSED, PartnerStatus.BANNED])(
-    'rejects approving an already-%s partner with 409',
+    'rejects deciding an already-%s partner with 409',
     async (status) => {
       const admin = await signUpAdmin();
       const owner = await signUp(
         context.app,
-        `approve-${status}-owner@tickettout.test`,
+        `decision-${status}-owner@tickettout.test`,
       );
       const partner = await PartnerFixture.create(
         context.dataSource,
@@ -441,7 +498,7 @@ describe('POST /partners/applications/:id/approve', () => {
         { status },
       );
 
-      const response = await approveApplication(
+      const response = await decideApplication(
         partner.id,
         undefined,
         admin.cookie,
@@ -454,19 +511,19 @@ describe('POST /partners/applications/:id/approve', () => {
     },
   );
 
-  it('lets only one of two concurrent approvals succeed', async () => {
+  it('lets only one of two concurrent decisions succeed', async () => {
     const admin = await signUpAdmin();
     const owner = await signUp(
       context.app,
-      'approve-concurrent-owner@tickettout.test',
+      'decision-concurrent-owner@tickettout.test',
     );
     const partner = await PartnerFixture.create(context.dataSource, owner.id, {
       status: PartnerStatus.PENDING,
     });
 
     const [first, second] = await Promise.all([
-      approveApplication(partner.id, undefined, admin.cookie),
-      approveApplication(partner.id, undefined, admin.cookie),
+      decideApplication(partner.id, undefined, admin.cookie),
+      decideApplication(partner.id, undefined, admin.cookie),
     ]);
 
     expect([first.status, second.status].sort()).toEqual([201, 409]);
@@ -477,7 +534,7 @@ describe('POST /partners/applications/:id/approve', () => {
     async (role) => {
       const owner = await signUp(
         context.app,
-        `approve-forbidden-owner-${role}@tickettout.test`,
+        `decision-forbidden-owner-${role}@tickettout.test`,
       );
       const partner = await PartnerFixture.create(
         context.dataSource,
@@ -486,11 +543,11 @@ describe('POST /partners/applications/:id/approve', () => {
       );
       const user = await signUp(
         context.app,
-        `approve-caller-${role}@tickettout.test`,
+        `decision-caller-${role}@tickettout.test`,
       );
       await grantRole(context, user.id, role);
 
-      const response = await approveApplication(
+      const response = await decideApplication(
         partner.id,
         undefined,
         user.cookie,
@@ -506,13 +563,13 @@ describe('POST /partners/applications/:id/approve', () => {
   it('rejects a request with no session', async () => {
     const owner = await signUp(
       context.app,
-      'approve-anon-owner@tickettout.test',
+      'decision-anon-owner@tickettout.test',
     );
     const partner = await PartnerFixture.create(context.dataSource, owner.id, {
       status: PartnerStatus.PENDING,
     });
 
-    await approveApplication(partner.id).expect(401);
+    await decideApplication(partner.id).expect(401);
   });
 });
 
@@ -549,9 +606,9 @@ describe('partner_review immutability', () => {
     const partner = await PartnerFixture.create(context.dataSource, owner.id, {
       status: PartnerStatus.PENDING,
     });
-    await approveApplication(
+    await decideApplication(
       partner.id,
-      { reason: 'Dossier complet et vérifié' },
+      { decision: 'approved', reason: 'Dossier complet et vérifié' },
       admin.cookie,
     ).expect(201);
     const applications = context.dataSource.getRepository(Application);
@@ -575,9 +632,9 @@ describe('partner_review immutability', () => {
     const partner = await PartnerFixture.create(context.dataSource, owner.id, {
       status: PartnerStatus.PENDING,
     });
-    await approveApplication(
+    await decideApplication(
       partner.id,
-      { reason: 'Dossier complet et vérifié' },
+      { decision: 'approved', reason: 'Dossier complet et vérifié' },
       admin.cookie,
     ).expect(201);
     const applications = context.dataSource.getRepository(Application);

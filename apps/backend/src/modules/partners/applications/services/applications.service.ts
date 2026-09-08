@@ -13,7 +13,9 @@ import {
   ListApplicationsQueryDto,
   ApplicationDetailResponseDto,
   ApplicationResponseDto,
+  DecideApplicationDto,
 } from '@/modules/partners/applications/dto';
+import { ApplicationDecision } from '@/modules/partners/applications/enums';
 
 @Injectable()
 export class ApplicationsService {
@@ -44,26 +46,34 @@ export class ApplicationsService {
     return this.toDetailResponse(partner);
   }
 
-  async approve(
+  async decide(
     id: string,
-    reason: string,
+    dto: DecideApplicationDto,
     decidedById: string,
   ): Promise<ApplicationDetailResponseDto> {
+    const toStatus =
+      dto.decision === ApplicationDecision.APPROVED
+        ? PartnerStatus.ACTIVE
+        : PartnerStatus.REFUSED;
+
     const partner = await this.dataSource.transaction(async (manager) => {
-      const activated = await this.partnerService.activate(id, manager);
+      const decided =
+        dto.decision === ApplicationDecision.APPROVED
+          ? await this.partnerService.activate(id, manager)
+          : await this.partnerService.refuse(id, manager);
 
       await this.applicationRepo.create(
         {
-          partner: activated,
+          partner: decided,
           fromStatus: PartnerStatus.PENDING,
-          toStatus: PartnerStatus.ACTIVE,
-          reason,
+          toStatus,
+          reason: dto.reason,
           decidedById,
         },
         manager,
       );
 
-      return activated;
+      return decided;
     });
 
     return this.toDetailResponse(partner);

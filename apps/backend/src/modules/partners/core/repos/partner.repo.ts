@@ -53,15 +53,16 @@ export class PartnerRepo {
     });
   }
 
-  async activateIfPending(
+  async transitionIfPending(
     id: string,
+    toStatus: PartnerStatus,
     manager?: EntityManager,
   ): Promise<boolean> {
     const repo = manager ? manager.getRepository(Partner) : this.partners;
     const result = await repo
       .createQueryBuilder()
       .update(Partner)
-      .set({ status: PartnerStatus.ACTIVE })
+      .set({ status: toStatus })
       .where('id = :id AND status = :pending', {
         id,
         pending: PartnerStatus.PENDING,

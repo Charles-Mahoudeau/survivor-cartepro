@@ -13,12 +13,12 @@ import { Roles } from '@/common/decorators/roles.decorator';
 import { ROLES } from '@/config/auth/auth.constants';
 import type { AuthUser } from '@/config/auth/auth';
 import {
-  ApproveApplicationDto,
+  DecideApplicationDto,
   ListApplicationsQueryDto,
 } from '@/modules/partners/applications/dto';
 import { ApplicationsService } from '@/modules/partners/applications/services';
 import {
-  ApproveApplicationDoc,
+  DecideApplicationDoc,
   GetMyApplicationDoc,
   GetApplicationDoc,
   ListApplicationsDoc,
@@ -51,14 +51,14 @@ export class ApplicationsController {
     return this.applicationsService.getById(id);
   }
 
-  @Post(':id/approve')
+  @Post(':id/decision')
   @Roles(ROLES.ADMIN)
-  @ApproveApplicationDoc()
-  approve(
+  @DecideApplicationDoc()
+  decide(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
-    @Body() dto: ApproveApplicationDto,
+    @Body() dto: DecideApplicationDto,
     @CurrentUser() user: AuthUser,
   ) {
-    return this.applicationsService.approve(id, dto.reason, user.id);
+    return this.applicationsService.decide(id, dto, user.id);
   }
 }

@@ -302,6 +302,18 @@ export class PartnerService {
   }
 
   async activate(id: string, manager?: EntityManager): Promise<Partner> {
+    return this.transitionFromPending(id, PartnerStatus.ACTIVE, manager);
+  }
+
+  async refuse(id: string, manager?: EntityManager): Promise<Partner> {
+    return this.transitionFromPending(id, PartnerStatus.REFUSED, manager);
+  }
+
+  private async transitionFromPending(
+    id: string,
+    toStatus: PartnerStatus,
+    manager?: EntityManager,
+  ): Promise<Partner> {
     const partner = await this.partnerRepo.findByIdWithRelations(id, manager);
 
     if (!partner) {
@@ -312,16 +324,21 @@ export class PartnerService {
       throw new ConflictException(ERROR_CODES.PARTNER_NOT_PENDING);
     }
 
-    const activated = await this.partnerRepo.activateIfPending(id, manager);
+    const transitioned = await this.partnerRepo.transitionIfPending(
+      id,
+      toStatus,
+      manager,
+    );
 
-    if (!activated) {
+    if (!transitioned) {
       throw new ConflictException(ERROR_CODES.PARTNER_NOT_PENDING);
     }
 
-    partner.status = PartnerStatus.ACTIVE;
+    partner.status = toStatus;
 
     return partner;
   }
+
   private toPublicResponse(
     partner: NonNullable<Awaited<ReturnType<PartnerRepo['findActiveById']>>>,
   ): PartnerResponseDto {
