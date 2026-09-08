@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import type { EntityManager } from 'typeorm';
 import { Repository, LessThan, MoreThan } from 'typeorm';
 import { PaymentToken } from '../../core/entities';
 import { PaymentTokenStatus } from '../../core/enums';
@@ -19,6 +20,13 @@ export class PaymentTokenRepo {
         status: PaymentTokenStatus.LIVE,
         expiresAt: MoreThan(new Date()),
       },
+    });
+  }
+
+  findLatestByWalletId(walletId: string): Promise<PaymentToken | null> {
+    return this.repo.findOne({
+      where: { wallet: { id: walletId } },
+      order: { createdAt: 'DESC' },
     });
   }
 
@@ -62,6 +70,49 @@ export class PaymentTokenRepo {
     });
 
     return token;
+  }
+
+  findLatestByShortCode(shortCode: string): Promise<PaymentToken | null> {
+    return this.repo.findOne({
+      where: { shortCode },
+      order: { createdAt: 'DESC' },
+      relations: { wallet: true },
+    });
+  }
+
+  /**
+   * Re-reads a token under a lock held until the transaction ends, so the
+   * collection service verifies its live/expiry state against the row
+   * nothing else can be changing underneath it right now.
+   */
+  lockById(manager: EntityManager, id: string): Promise<PaymentToken | null> {
+    return manager
+      .createQueryBuilder(PaymentToken, 'token')
+      .select(['token.id', 'token.status', 'token.expiresAt'])
+      .innerJoin('token.wallet', 'wallet')
+      .addSelect(['wallet.id'])
+      .where('token.id = :id', { id })
+      .setLock('pessimistic_write', undefined, ['token'])
+      .getOne();
+  }
+
+  /**
+   * Flips a live token to consumed. The `status = live` guard is redundant
+   * with the caller already holding it locked, kept as self-documentation of
+   * the only legal transition.
+   */
+  async markConsumed(
+    manager: EntityManager,
+    id: string,
+    consumedAt: Date,
+  ): Promise<boolean> {
+    const result = await manager.update(
+      PaymentToken,
+      { id, status: PaymentTokenStatus.LIVE },
+      { status: PaymentTokenStatus.CONSUMED, consumedAt },
+    );
+
+    return (result.affected ?? 0) > 0;
   }
 
   async updateExpiredTokens(): Promise<void> {

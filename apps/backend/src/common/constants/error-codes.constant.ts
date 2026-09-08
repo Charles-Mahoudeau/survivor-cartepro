@@ -40,6 +40,20 @@ export const ERROR_CODES = {
   ALLOCATION_NOT_FOUND: 'ALLOCATION_NOT_FOUND',
   /** The allocation has already been applied and can no longer change. */
   ALLOCATION_ALREADY_APPLIED: 'ALLOCATION_ALREADY_APPLIED',
+  /** The scanned QR or the short code does not resolve to any live payment token. */
+  PAYMENT_TOKEN_INVALID: 'PAYMENT_TOKEN_INVALID',
+  /** A newer payment token has since been issued for the same wallet. */
+  PAYMENT_TOKEN_REVOKED: 'PAYMENT_TOKEN_REVOKED',
+  /** The token is consumed but carries no payment — an invariant violation, never expected. */
+  PAYMENT_TOKEN_CONSUMED: 'PAYMENT_TOKEN_CONSUMED',
+  /** The token was already consumed by a collection for a different partner or amount. */
+  PAYMENT_TOKEN_ALREADY_CLAIMED: 'PAYMENT_TOKEN_ALREADY_CLAIMED',
+  /** The payment token's validity window has passed. */
+  PAYMENT_TOKEN_EXPIRED: 'PAYMENT_TOKEN_EXPIRED',
+  /** The wallet balance cannot absorb this debit, even within the overdraft limit. */
+  INSUFFICIENT_BALANCE: 'INSUFFICIENT_BALANCE',
+  /** The partner is not active, so it cannot collect a payment. */
+  PARTNER_NOT_ACTIVE: 'PARTNER_NOT_ACTIVE',
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];

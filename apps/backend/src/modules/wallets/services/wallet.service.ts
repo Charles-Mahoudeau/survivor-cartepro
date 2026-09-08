@@ -1,9 +1,11 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { isDebitAllowed } from './helpers';
 import {
   InvalidCursorError,
   paginate,
@@ -29,6 +31,7 @@ import type {
   AllocationCredit,
   AllocationCreditOutcome,
   EmployerWallet,
+  PaymentDebit,
 } from '../wallets.contract';
 import type { ListMyWalletEntriesQueryDto } from '../validators/list-my-wallet-entries-query.dto';
 import type { WalletEntryResponseDto } from '../validators/wallet-entry.dto';
@@ -169,6 +172,53 @@ export class WalletService {
       credited: credited.map((wallet) => toEmployerWallet(wallet)),
       excluded: excluded.map((wallet) => toEmployerWallet(wallet)),
     };
+  }
+
+  /**
+   * Debits one wallet for a payment inside the caller transaction: locks the
+   * wallet, refuses a debit past the overdraft limit, then writes the entry
+   * and moves the balance together. Never called outside a transaction — a
+   * debit with no matching payment row is exactly the state this guards
+   * against.
+   */
+  async debitForPayment(
+    manager: EntityManager,
+    { walletId, amount, paymentId }: PaymentDebit,
+  ): Promise<void> {
+    const wallet = await this.walletRepo.lockById(manager, walletId);
+    if (!wallet) {
+      throw new NotFoundException(ERROR_CODES.WALLET_NOT_FOUND);
+    }
+    if (wallet.status !== WalletStatus.ACTIVE) {
+      throw new ForbiddenException(ERROR_CODES.ACCOUNT_BANNED);
+    }
+
+    const balance = Number(wallet.balance);
+    const normalizedAmount = Number(toEuros(toCents(amount)));
+
+    if (!isDebitAllowed(balance, normalizedAmount)) {
+      throw new UnprocessableEntityException({
+        code: ERROR_CODES.INSUFFICIENT_BALANCE,
+        balance: toEuros(toCents(balance)),
+        amount: toEuros(toCents(normalizedAmount)),
+      });
+    }
+
+    const balanceAfter = Number(
+      toEuros(toCents(balance) - toCents(normalizedAmount)),
+    );
+
+    await this.walletEntryRepo.insertAll(manager, [
+      {
+        wallet: { id: walletId },
+        direction: WalletEntryDirection.DEBIT,
+        amount: normalizedAmount,
+        balanceAfter,
+        kind: WalletEntryKind.PAYMENT_SENT,
+        payment: { id: paymentId },
+      },
+    ]);
+    await this.walletRepo.debitById(manager, walletId, normalizedAmount);
   }
 
   private readPeriod(query: PeriodQueryDto): Period {

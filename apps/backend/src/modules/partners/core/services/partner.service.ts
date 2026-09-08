@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -130,6 +131,15 @@ export class PartnerService {
     }
 
     return this.toPublicResponse(partner);
+  }
+
+  /** Used before collecting a payment: the caller only needs the refusal, not the row. */
+  async assertActive(id: string): Promise<void> {
+    const partner = await this.partnerRepo.findActiveById(id);
+
+    if (!partner) {
+      throw new ForbiddenException(ERROR_CODES.PARTNER_NOT_ACTIVE);
+    }
   }
 
   async getProfileByOwnerId(

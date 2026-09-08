@@ -84,6 +84,37 @@ export class WalletRepo {
       .execute();
   }
 
+  /**
+   * Reads a single wallet under a lock held until the transaction ends, so a
+   * concurrent debit on the same wallet queues behind this one instead of
+   * racing its balance check.
+   */
+  lockById(
+    manager: EntityManager,
+    id: string,
+  ): Promise<Pick<Wallet, 'id' | 'balance' | 'status'> | null> {
+    return manager
+      .createQueryBuilder(Wallet, 'wallet')
+      .select(['wallet.id', 'wallet.balance', 'wallet.status'])
+      .where('wallet.id = :id', { id })
+      .setLock('pessimistic_write')
+      .getOne();
+  }
+
+  debitById(
+    manager: EntityManager,
+    walletId: string,
+    amount: number,
+  ): Promise<unknown> {
+    return manager
+      .createQueryBuilder()
+      .update(Wallet)
+      .set({ balance: () => 'balance - :amount' })
+      .where('id = :walletId', { walletId })
+      .setParameter('amount', amount)
+      .execute();
+  }
+
   findByEmployerId(employerId: string): Promise<Wallet[]> {
     return this.repo.find({
       where: { employer: { id: employerId } },
