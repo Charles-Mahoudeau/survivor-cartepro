@@ -1,6 +1,6 @@
 # @tickettout/backend
 
-API NestJS du dispositif Ticket Tout.
+API NestJS du dispositif CartePro.
 
 ## Stack
 

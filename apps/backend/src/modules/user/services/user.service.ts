@@ -35,4 +35,9 @@ export class UserService {
   setRole(id: string, role: Role): Promise<boolean> {
     return this.userRepo.setRole(id, role);
   }
+
+  /** Used to undo a registration whose wallet could not be created. */
+  remove(id: string): Promise<void> {
+    return this.userRepo.deleteById(id);
+  }
 }

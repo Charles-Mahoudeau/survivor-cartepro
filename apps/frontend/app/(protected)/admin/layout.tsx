@@ -1,15 +1,25 @@
 import { Suspense } from 'react';
 
+import { SpaceShell } from '@/components/composites/space-shell';
 import { ROLES } from '@/lib/auth/constants';
 import { RoleGate } from '@/lib/auth/role-gate';
 
-export default function Layout({ children }: LayoutProps<'/admin'>) {
+/**
+ * Sidebar and breadcrumb are slots of this segment, so a reload of any page
+ * below resolves them from here. The gate sits beside the page rather than
+ * around it, so the page streams while the session resolves.
+ */
+export default function Layout({
+  children,
+  sidebar,
+  breadcrumb,
+}: LayoutProps<'/admin'>) {
   return (
-    <>
+    <SpaceShell sidebar={sidebar} breadcrumb={breadcrumb}>
       <Suspense fallback={null}>
         <RoleGate role={ROLES.ADMIN} />
       </Suspense>
       {children}
-    </>
+    </SpaceShell>
   );
 }

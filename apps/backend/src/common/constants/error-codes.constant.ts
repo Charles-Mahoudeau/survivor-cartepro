@@ -24,6 +24,8 @@ export const ERROR_CODES = {
   INVALID_PERIOD: 'INVALID_PERIOD',
   /** The partner application is not pending, so it cannot be decided again. */
   PARTNER_NOT_PENDING: 'PARTNER_NOT_PENDING',
+  /** The account was created, but its wallet could not be — registration is rolled back. */
+  WALLET_CREATION_FAILED: 'WALLET_CREATION_FAILED',
   /** The requested employer does not exist. */
   EMPLOYER_NOT_FOUND: 'EMPLOYER_NOT_FOUND',
   /** The requested allocation does not exist. */
