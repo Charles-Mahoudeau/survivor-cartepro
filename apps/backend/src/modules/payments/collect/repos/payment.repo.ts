@@ -32,12 +32,19 @@ export class PaymentRepo {
     });
   }
 
-  /** The payment a consumed token already produced — the source of a replay's response. */
+  /**
+   * The payment a consumed token already produced — the source of a replay's
+   * response. It carries its partner, which is what lets the caller tell its
+   * own replay from another till's payment.
+   */
   findByTokenId(
     paymentTokenId: string,
     manager?: EntityManager,
   ): Promise<Payment | null> {
     const repo = manager ? manager.getRepository(Payment) : this.repo;
-    return repo.findOne({ where: { paymentToken: { id: paymentTokenId } } });
+    return repo.findOne({
+      where: { paymentToken: { id: paymentTokenId } },
+      relations: { partner: true },
+    });
   }
 }
