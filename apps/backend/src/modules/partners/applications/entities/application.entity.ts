@@ -1,4 +1,5 @@
 import {
+  Check,
   Column,
   CreateDateColumn,
   Entity,
@@ -16,6 +17,7 @@ import { PartnerStatus } from '@/modules/partners/core/enums/partner-status.enum
 // pure class rename (no destructive DROP/CREATE emitted by db:generate).
 @Entity('partner_review')
 @Index('IDX_partner_application_partner_id', ['partner'])
+@Check('CHK_partner_review_reason_not_blank', 'length(btrim(reason)) > 0')
 export class Application {
   @PrimaryGeneratedUuidV7Column()
   id: string;

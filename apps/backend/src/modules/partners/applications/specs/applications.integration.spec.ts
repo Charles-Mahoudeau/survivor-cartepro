@@ -515,3 +515,78 @@ describe('POST /partners/applications/:id/approve', () => {
     await approveApplication(partner.id).expect(401);
   });
 });
+
+describe('partner_review immutability', () => {
+  it('rejects a blank reason at the database level', async () => {
+    const admin = await signUpAdmin();
+    const owner = await signUp(
+      context.app,
+      'immutable-blank-owner@tickettout.test',
+    );
+    const partner = await PartnerFixture.create(context.dataSource, owner.id, {
+      status: PartnerStatus.PENDING,
+    });
+    const applications = context.dataSource.getRepository(Application);
+    const entry = applications.create({
+      partner: { id: partner.id },
+      fromStatus: PartnerStatus.PENDING,
+      toStatus: PartnerStatus.ACTIVE,
+      reason: '   ',
+      decidedBy: { id: admin.id },
+    });
+
+    await expect(applications.save(entry)).rejects.toThrow(
+      /violates check constraint "CHK_partner_review_reason_not_blank"/,
+    );
+  });
+
+  it('rejects updating an existing decision at the database level', async () => {
+    const admin = await signUpAdmin();
+    const owner = await signUp(
+      context.app,
+      'immutable-update-owner@tickettout.test',
+    );
+    const partner = await PartnerFixture.create(context.dataSource, owner.id, {
+      status: PartnerStatus.PENDING,
+    });
+    await approveApplication(
+      partner.id,
+      { reason: 'Dossier complet et vérifié' },
+      admin.cookie,
+    ).expect(201);
+    const applications = context.dataSource.getRepository(Application);
+    const decision = await applications.findOneOrFail({
+      where: { partner: { id: partner.id } },
+    });
+
+    await expect(
+      applications.update({ id: decision.id }, { reason: 'mutated' }),
+    ).rejects.toThrow(
+      /Immutable table "partner_review" cannot be mutated with UPDATE/,
+    );
+  });
+
+  it('rejects deleting an existing decision at the database level', async () => {
+    const admin = await signUpAdmin();
+    const owner = await signUp(
+      context.app,
+      'immutable-delete-owner@tickettout.test',
+    );
+    const partner = await PartnerFixture.create(context.dataSource, owner.id, {
+      status: PartnerStatus.PENDING,
+    });
+    await approveApplication(
+      partner.id,
+      { reason: 'Dossier complet et vérifié' },
+      admin.cookie,
+    ).expect(201);
+    const applications = context.dataSource.getRepository(Application);
+    const decision = await applications.findOneOrFail({
+      where: { partner: { id: partner.id } },
+    });
+
+    await expect(applications.delete({ id: decision.id })).rejects.toThrow(
+      /Immutable table "partner_review" cannot be mutated with DELETE/,
+    );
+  });
+});
