@@ -4,8 +4,8 @@ import { Card } from '@/components/composites/card';
 import { SITE_CONTENT } from '@/content/site';
 
 /**
- * One column, one focal point: the card. Nothing else on the screen competes
- * with it, so the eye lands on the form rather than on the chrome.
+ * One column, one focal point: the card. The product name is already in the
+ * heading of the card, so nothing above it repeats it.
  */
 export function AuthShell({
   titre,
@@ -19,12 +19,8 @@ export function AuthShell({
   return (
     <main
       id="contenu"
-      className="mx-auto flex w-full max-w-[26rem] flex-1 flex-col justify-center gap-8 px-4 py-12"
+      className="mx-auto flex w-full max-w-[26rem] flex-1 flex-col justify-center gap-6 px-4 py-12"
     >
-      <p className="text-center text-lg font-semibold tracking-tight">
-        {SITE_CONTENT.brand}
-      </p>
-
       <Card className="p-6 md:p-8">
         <h1 className="text-xl font-semibold tracking-tight">{titre}</h1>
         <p className="text-muted-foreground mt-1 mb-8 text-sm">{sousTitre}</p>
