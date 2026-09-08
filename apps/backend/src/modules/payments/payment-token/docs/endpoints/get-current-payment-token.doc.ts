@@ -2,8 +2,10 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import {
   ForbiddenRoleDoc,
+  PaymentTokenNotFoundDoc,
   PaymentTokenResponseDoc,
   UnauthenticatedDoc,
+  WalletNotFoundDoc,
 } from '../commons';
 
 export const GetCurrentPaymentTokenDoc = () => {
@@ -12,5 +14,7 @@ export const GetCurrentPaymentTokenDoc = () => {
     PaymentTokenResponseDoc(200),
     UnauthenticatedDoc(),
     ForbiddenRoleDoc(),
+    WalletNotFoundDoc(),
+    PaymentTokenNotFoundDoc(),
   );
 };

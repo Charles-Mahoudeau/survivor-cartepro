@@ -16,14 +16,14 @@ export class PaymentTokenController {
   @Post()
   @Roles(ROLES.EMPLOYEE)
   @CreatePaymentTokenDoc()
-  issue(@CurrentUser() user: AuthUser): PaymentTokenResponseDto {
+  issue(@CurrentUser() user: AuthUser): Promise<PaymentTokenResponseDto> {
     return this.paymentTokenService.issue(user.id);
   }
 
   @Get('current')
   @Roles(ROLES.EMPLOYEE)
   @GetCurrentPaymentTokenDoc()
-  getCurrent(@CurrentUser() user: AuthUser): PaymentTokenResponseDto {
+  getCurrent(@CurrentUser() user: AuthUser): Promise<PaymentTokenResponseDto> {
     return this.paymentTokenService.getCurrent(user.id);
   }
 }
