@@ -8,11 +8,10 @@ import {
   ApplicationValidationErrorsDoc,
 } from '../commons';
 
-export const ApproveApplicationDoc = () => {
+export const DecideApplicationDoc = () => {
   return applyDecorators(
     ApiOperation({
-      summary:
-        'Approve a partner application and activate the partner (admin only)',
+      summary: 'Approve or refuse a partner application (admin only)',
     }),
     ApplicationDetailResponseDoc(201),
     ApplicationValidationErrorsDoc(),
