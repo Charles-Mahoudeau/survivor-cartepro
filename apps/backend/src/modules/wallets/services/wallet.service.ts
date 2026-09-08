@@ -5,7 +5,7 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { isDebitAllowed } from './helpers/wallet-overdraft.helper';
+import { isDebitAllowed } from './helpers';
 import {
   InvalidCursorError,
   paginate,
