@@ -50,7 +50,7 @@ export function trustedOrigins(): string[] {
  * until it expired, and this plugin set exists to ban accounts and change roles.
  */
 export const authOptions = {
-  appName: 'Ticket Tout',
+  appName: 'CartePro',
   basePath: AUTH_BASE_PATH,
   baseURL: process.env.BETTER_AUTH_URL,
   secret: process.env.BETTER_AUTH_SECRET,

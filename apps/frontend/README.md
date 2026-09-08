@@ -1,17 +1,17 @@
 # @tickettout/frontend
 
-Application web du dispositif Ticket Tout.
+Application web du dispositif CartePro.
 
 ## Stack
 
-|           |                                  |
-| --------- | -------------------------------- |
-| Runtime   | Bun 1.3                          |
-| Framework | Next.js 16                       |
-| UI        | React 19, DSFR, shadcn/ui        |
-| Styles    | Tailwind 4, Sass                 |
-| Tests     | `bun test`                       |
-| Polices   | Marianne par le DSFR, Geist Mono |
+|           |                        |
+| --------- | ---------------------- |
+| Runtime   | Bun 1.3                |
+| Framework | Next.js 16             |
+| UI        | React 19, shadcn/ui    |
+| Styles    | Tailwind 4             |
+| Tests     | `bun test`             |
+| Polices   | Geist Sans, Geist Mono |
 
 ## Démarrer
 

@@ -1,6 +1,6 @@
 /** Every label of the employee space, in one greppable place. */
 export const ME_CONTENT = {
-  brand: 'Ticket Tout',
+  brand: 'CartePro',
   roleLabel: 'Salarié·e',
   nav: {
     wallet: 'Mon compte',
@@ -17,7 +17,7 @@ export const ME_CONTENT = {
   simulation: '(simulation)',
   wallet: {
     title: 'Mon portefeuille',
-    subtitle: 'Vos avantages Ticket Tout',
+    subtitle: 'Vos avantages CartePro',
     balance: 'Solde disponible',
     updatedAt: 'Mis à jour le',
     findPartner: 'Partenaires',
@@ -30,7 +30,7 @@ export const ME_CONTENT = {
       'Votre portefeuille est désactivé. Contactez votre employeur ou l’administration du dispositif.',
     note: 'Note :',
     noteBody:
-      'Votre employeur crédite votre portefeuille Ticket Tout. Les montants affichés sont des simulations sans valeur monétaire réelle.',
+      'Votre employeur crédite votre portefeuille CartePro. Les montants affichés sont des simulations sans valeur monétaire réelle.',
   },
   history: {
     title: 'Historique',
@@ -47,7 +47,7 @@ export const ME_CONTENT = {
   },
   partners: {
     title: 'Partenaires',
-    subtitle: 'Établissements acceptant Ticket Tout',
+    subtitle: 'Établissements acceptant CartePro',
     searchPlaceholder: 'Rechercher un commerce, une ville…',
     searchLabel: 'Rechercher un partenaire',
     allCategories: 'Tous',

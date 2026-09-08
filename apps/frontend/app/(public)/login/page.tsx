@@ -3,11 +3,11 @@ import { Suspense } from 'react';
 
 import { AuthShell } from '@/components/composites/auth-shell';
 import { AUTH_CONTENT } from '@/content/auth';
-import { StartDsfrOnHydration } from '@/lib/dsfr';
+import { SITE_CONTENT } from '@/content/site';
 import { LoginForm } from './login-form.client';
 
 export const metadata: Metadata = {
-  title: 'Connexion — Ticket Tout (simulation)',
+  title: `Connexion — ${SITE_CONTENT.title}`,
 };
 
 export default function LoginPage() {
@@ -16,7 +16,6 @@ export default function LoginPage() {
       titre={AUTH_CONTENT.signIn.title}
       sousTitre={AUTH_CONTENT.signIn.subtitle}
     >
-      <StartDsfrOnHydration />
       <Suspense fallback={null}>
         <LoginForm />
       </Suspense>

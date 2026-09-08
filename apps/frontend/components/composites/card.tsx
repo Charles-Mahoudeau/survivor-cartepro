@@ -1,20 +1,14 @@
 import type { ReactNode } from 'react';
 
+import { cn } from '@/lib/utils';
+
+/** A plain white surface: no outline, no shadow, no tint. */
 export function Card({
   children,
-  className = '',
-  onClick,
+  className,
 }: {
   children: ReactNode;
   className?: string;
-  onClick?: () => void;
 }) {
-  return (
-    <div
-      onClick={onClick}
-      className={`bg-[color:var(--card)] border border-[color:var(--border)] rounded-[var(--radius)] ${className}`}
-    >
-      {children}
-    </div>
-  );
+  return <div className={cn('bg-card rounded-2xl', className)}>{children}</div>;
 }

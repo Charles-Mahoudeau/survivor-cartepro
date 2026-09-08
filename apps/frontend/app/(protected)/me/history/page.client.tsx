@@ -1,40 +1,20 @@
 'use client';
 
-import { Button } from '@codegouvfr/react-dsfr/Button';
 import { useAction } from 'next-safe-action/hooks';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { Card } from '@/components/composites/card';
-import { formatDate } from '@/components/composites/date-texte';
 import { MouvementLigne } from '@/components/composites/mouvement-ligne';
+import { Button } from '@/components/ui/button';
 import { ME_CONTENT } from '@/content/me';
-import type {
-  WalletEntry,
-  WalletEntryPage,
-} from '@/lib/api/schemas/backend/wallet-entry';
+import type { WalletEntryPage } from '@/lib/api/schemas/backend/wallet-entry';
 
 import { loadMoreWalletEntriesAction } from './actions/load-more.action';
+import { groupByDay } from './group-by-day';
 
 interface HistoryPageClientProps {
   initialPage: WalletEntryPage;
-}
-
-/** Groups entries by calendar day, most recent day first, order preserved. */
-export function groupByDay(
-  entries: WalletEntry[],
-): Array<[string, WalletEntry[]]> {
-  const groups = new Map<string, WalletEntry[]>();
-  for (const entry of entries) {
-    const day = formatDate(entry.createdAt);
-    const bucket = groups.get(day);
-    if (bucket) {
-      bucket.push(entry);
-    } else {
-      groups.set(day, [entry]);
-    }
-  }
-  return Array.from(groups.entries());
 }
 
 export default function HistoryPageClient({
@@ -55,8 +35,8 @@ export default function HistoryPageClient({
 
   if (entries.length === 0) {
     return (
-      <Card className="p-6">
-        <p className="font-serif text-sm text-[color:var(--muted-foreground)]">
+      <Card className="px-3 py-6">
+        <p className="text-muted-foreground text-sm">
           {ME_CONTENT.history.empty}
         </p>
       </Card>
@@ -65,19 +45,18 @@ export default function HistoryPageClient({
 
   return (
     <>
-      <div className="space-y-5">
+      <div className="space-y-6">
         {groupByDay(entries).map(([day, dayEntries]) => (
           <section key={day}>
-            <h2 className="fr-text--xs fr-mb-1w px-1 font-display font-medium uppercase tracking-wider text-[color:var(--muted-foreground)]">
+            <h2 className="text-muted-foreground mb-2 px-3 text-xs font-medium">
               {day}
             </h2>
-            <Card>
+            <Card className="p-2">
               <ul>
-                {dayEntries.map((entry, index) => (
+                {dayEntries.map((entry) => (
                   <MouvementLigne
                     key={entry.id}
                     entry={entry}
-                    last={index === dayEntries.length - 1}
                     variant="detail"
                   />
                 ))}
@@ -91,7 +70,8 @@ export default function HistoryPageClient({
         <div className="mt-6 text-center">
           <Button
             type="button"
-            priority="secondary"
+            variant="outline"
+            size="lg"
             onClick={() => execute({ cursor: nextCursor })}
             disabled={isPending}
           >
