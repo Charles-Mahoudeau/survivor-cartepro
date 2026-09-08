@@ -15,7 +15,6 @@ import {
 import { api, apiPath, bodyOf } from '../../../../test/http';
 import { ROLES } from '@/config/auth/auth.constants';
 import { PartnerFixture } from '../../partners/core/specs/partner.fixture';
-import { WALLET_OVERDRAFT_LIMIT } from '../constants';
 import { Wallet } from '../entities/wallet.entity';
 import { WalletEntryDirection } from '@/modules/wallets/enums';
 import { WalletEntryKind } from '@/modules/wallets/enums';
@@ -130,33 +129,28 @@ describe('GET /me/wallet', () => {
 });
 
 describe('wallet balance constraints', () => {
-  it('accepts a balance at the overdraft limit', async () => {
-    const account = await signUp(
-      context.app,
-      'overdraft-limit@tickettout.test',
-    );
+  it('accepts a balance of exactly zero', async () => {
+    const account = await signUp(context.app, 'balance-zero@tickettout.test');
     const wallet = await createWallet(context.dataSource, account.id, {
-      balance: -WALLET_OVERDRAFT_LIMIT,
+      balance: 0,
     });
 
     const persistedWallet = await context.dataSource
       .getRepository(Wallet)
       .findOneBy({ id: wallet.id });
 
-    expect(persistedWallet?.balance).toBe((-WALLET_OVERDRAFT_LIMIT).toFixed(2));
+    expect(persistedWallet?.balance).toBe((0).toFixed(2));
   });
 
-  it('rejects a balance below the overdraft limit', async () => {
+  it('rejects a negative balance', async () => {
     const account = await signUp(
       context.app,
-      'overdraft-limit-exceeded@tickettout.test',
+      'balance-negative@tickettout.test',
     );
 
     await expect(
-      createWallet(context.dataSource, account.id, {
-        balance: -WALLET_OVERDRAFT_LIMIT - 0.01,
-      }),
-    ).rejects.toThrow('CHK_wallet_balance_within_overdraft');
+      createWallet(context.dataSource, account.id, { balance: -0.01 }),
+    ).rejects.toThrow('CHK_wallet_balance_non_negative');
   });
 });
 

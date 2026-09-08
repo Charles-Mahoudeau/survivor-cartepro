@@ -433,7 +433,7 @@ try {
   console.log(
     chalk.gray('├─ Soldes : ') +
       chalk.white(
-        `${summary.zeroBalances} à zéro, ${summary.lowBalances} sous 5 €, ${summary.negativeBalances} en découvert · min ${formatEuros(summary.minBalanceCents)} · max ${formatEuros(summary.maxBalanceCents)}`,
+        `${summary.zeroBalances} à zéro, ${summary.lowBalances} sous 5 € · min ${formatEuros(summary.minBalanceCents)} · max ${formatEuros(summary.maxBalanceCents)}`,
       ),
   );
   console.log(

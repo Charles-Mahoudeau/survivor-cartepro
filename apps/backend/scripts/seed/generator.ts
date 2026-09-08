@@ -3,8 +3,7 @@ import { ROLES } from '../../src/config/auth/auth.constants';
 import { CaptureMode } from '../../src/modules/payments/core/enums/capture-mode.enum';
 import { PaymentStatus } from '../../src/modules/payments/core/enums/payment-status.enum';
 import { PartnerStatus } from '../../src/modules/partners/core/enums/partner-status.enum';
-import { WALLET_OVERDRAFT_LIMIT } from '../../src/modules/wallets/constants';
-import { isDebitAllowed } from '../../src/modules/wallets/services/helpers/wallet-overdraft.helper';
+import { isDebitAllowed } from '../../src/modules/wallets/services/helpers/wallet-debit.helper';
 import {
   ADMINS,
   AMOUNT_RANGES_CENTS,
@@ -185,7 +184,6 @@ export interface SeedSummary {
   refusedTransactions: number;
   zeroBalances: number;
   lowBalances: number;
-  negativeBalances: number;
   minBalanceCents: number;
   maxBalanceCents: number;
   partnersByCategory: Map<string, number>;
@@ -646,7 +644,6 @@ export function generateSeedPlan(): SeedPlan {
     lowBalances: finalBalances.filter(
       (balance) => balance > 0 && balance < LOW_BALANCE_CEILING_CENTS,
     ).length,
-    negativeBalances: finalBalances.filter((balance) => balance < 0).length,
     minBalanceCents: Math.min(...finalBalances),
     maxBalanceCents: Math.max(...finalBalances),
     partnersByCategory: countBy(
@@ -674,8 +671,8 @@ export function generateSeedPlan(): SeedPlan {
     `${summary.lowBalances} soldes sous 5 € au lieu d'au moins ${LOW_BALANCE_EMPLOYEES}`,
   );
   assertPlan(
-    summary.minBalanceCents >= -WALLET_OVERDRAFT_LIMIT * CENTS_PER_EURO,
-    `un solde passe sous le découvert autorisé : ${summary.minBalanceCents} centimes`,
+    summary.minBalanceCents >= 0,
+    `un solde devient négatif : ${summary.minBalanceCents} centimes`,
   );
   for (const payment of payments) {
     const partner = mustFind(
