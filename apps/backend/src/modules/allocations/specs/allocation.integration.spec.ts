@@ -4,13 +4,11 @@ import {
   resetDatabase,
   type TestApp,
 } from '../../../../test/app';
-import { createAllocation } from '../../../../test/fixtures/allocation.fixture';
-import { createEmployer } from '../../../../test/fixtures/employer.fixture';
 import { signUp } from '../../../../test/fixtures/user.fixture';
 import { api, apiPath, bodyOf } from '../../../../test/http';
 import { AllocationExclusionReason } from '../enums/allocation-exclusion-reason.enum';
 import { AllocationStatus } from '../enums/allocation-status.enum';
-import { seedEmployerWithWallets, signUpAgent } from './allocation.fixture';
+import { AllocationFixture } from './allocation.fixture';
 
 let context: TestApp;
 
@@ -51,15 +49,16 @@ beforeEach(async () => {
 
 describe('GET /allocations', () => {
   it('lists the allocations, most recent first', async () => {
-    const agent = await signUpAgent(context);
-    const employer = await createEmployer(context.dataSource, agent.id);
-    const first = await createAllocation(
+    const agent = await AllocationFixture.signUpAgent(context);
+    const employer = (await AllocationFixture.seedEmployer(context, agent.id))
+      .employer;
+    const first = await AllocationFixture.create(
       context.dataSource,
       employer.id,
       agent.id,
       { label: 'Rentrée' },
     );
-    const second = await createAllocation(
+    const second = await AllocationFixture.create(
       context.dataSource,
       employer.id,
       agent.id,
@@ -95,8 +94,9 @@ describe('GET /allocations', () => {
 
 describe('POST /allocations', () => {
   it('creates a draft nobody has been credited by yet', async () => {
-    const agent = await signUpAgent(context);
-    const employer = await createEmployer(context.dataSource, agent.id);
+    const agent = await AllocationFixture.signUpAgent(context);
+    const employer = (await AllocationFixture.seedEmployer(context, agent.id))
+      .employer;
 
     const response = await api(context.app)
       .post(apiPath('/allocations'))
@@ -115,7 +115,7 @@ describe('POST /allocations', () => {
   });
 
   it('refuses an employer that does not exist', async () => {
-    const agent = await signUpAgent(context);
+    const agent = await AllocationFixture.signUpAgent(context);
 
     await api(context.app)
       .post(apiPath('/allocations'))
@@ -129,8 +129,9 @@ describe('POST /allocations', () => {
   });
 
   it('refuses an amount with more than two decimals, or none at all', async () => {
-    const agent = await signUpAgent(context);
-    const employer = await createEmployer(context.dataSource, agent.id);
+    const agent = await AllocationFixture.signUpAgent(context);
+    const employer = (await AllocationFixture.seedEmployer(context, agent.id))
+      .employer;
     const post = (amount: unknown) =>
       api(context.app)
         .post(apiPath('/allocations'))
@@ -145,14 +146,14 @@ describe('POST /allocations', () => {
 
 describe('GET /allocations/:id', () => {
   it('splits the wallets of the employer into beneficiaries and excluded', async () => {
-    const agent = await signUpAgent(context);
+    const agent = await AllocationFixture.signUpAgent(context);
     const employer = (
-      await seedEmployerWithWallets(context, agent.id, {
+      await AllocationFixture.seedEmployer(context, agent.id, {
         active: 3,
         disabled: 2,
       })
     ).employer;
-    const allocation = await createAllocation(
+    const allocation = await AllocationFixture.create(
       context.dataSource,
       employer.id,
       agent.id,
@@ -174,14 +175,14 @@ describe('GET /allocations/:id', () => {
   });
 
   it('credits nobody, and totals nothing, when every wallet is suspended', async () => {
-    const agent = await signUpAgent(context);
+    const agent = await AllocationFixture.signUpAgent(context);
     const employer = (
-      await seedEmployerWithWallets(context, agent.id, {
+      await AllocationFixture.seedEmployer(context, agent.id, {
         active: 0,
         disabled: 2,
       })
     ).employer;
-    const allocation = await createAllocation(
+    const allocation = await AllocationFixture.create(
       context.dataSource,
       employer.id,
       agent.id,
@@ -199,7 +200,7 @@ describe('GET /allocations/:id', () => {
   });
 
   it('answers 404 on an allocation that does not exist', async () => {
-    const agent = await signUpAgent(context);
+    const agent = await AllocationFixture.signUpAgent(context);
 
     await getAllocation(
       agent.cookie,
@@ -210,14 +211,14 @@ describe('GET /allocations/:id', () => {
 
 describe('PATCH /allocations/:id', () => {
   it('amends a draft and answers with the refreshed total', async () => {
-    const agent = await signUpAgent(context);
+    const agent = await AllocationFixture.signUpAgent(context);
     const employer = (
-      await seedEmployerWithWallets(context, agent.id, {
+      await AllocationFixture.seedEmployer(context, agent.id, {
         active: 3,
         disabled: 0,
       })
     ).employer;
-    const allocation = await createAllocation(
+    const allocation = await AllocationFixture.create(
       context.dataSource,
       employer.id,
       agent.id,
@@ -239,9 +240,10 @@ describe('PATCH /allocations/:id', () => {
   });
 
   it('answers 409 on an applied allocation, and changes nothing', async () => {
-    const agent = await signUpAgent(context);
-    const employer = await createEmployer(context.dataSource, agent.id);
-    const allocation = await createAllocation(
+    const agent = await AllocationFixture.signUpAgent(context);
+    const employer = (await AllocationFixture.seedEmployer(context, agent.id))
+      .employer;
+    const allocation = await AllocationFixture.create(
       context.dataSource,
       employer.id,
       agent.id,

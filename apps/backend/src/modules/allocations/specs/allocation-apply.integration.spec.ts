@@ -7,18 +7,12 @@ import {
   resetDatabase,
   type TestApp,
 } from '../../../../test/app';
-import { createAllocation } from '../../../../test/fixtures/allocation.fixture';
 import { signUp } from '../../../../test/fixtures/user.fixture';
 import { createWalletEntry } from '../../../../test/fixtures/wallet.fixture';
 import { api, apiPath, bodyOf } from '../../../../test/http';
 import { Allocation } from '../entities/allocation.entity';
 import { AllocationStatus } from '../enums/allocation-status.enum';
-import {
-  readWallets,
-  seedEmployerWithWallets,
-  signUpAgent,
-  waitForLockWaiter,
-} from './allocation.fixture';
+import { AllocationFixture } from './allocation.fixture';
 
 const ACTIVE_WALLETS = 42;
 const SUSPENDED_WALLETS = 2;
@@ -40,13 +34,13 @@ const applyAllocation = (cookie: string[], id: string) =>
     .set('Cookie', cookie);
 
 async function seedCampaign() {
-  const agent = await signUpAgent(context);
-  const { employer, active, disabled } = await seedEmployerWithWallets(
+  const agent = await AllocationFixture.signUpAgent(context);
+  const { employer, active, disabled } = await AllocationFixture.seedEmployer(
     context,
     agent.id,
     { active: ACTIVE_WALLETS, disabled: SUSPENDED_WALLETS },
   );
-  const allocation = await createAllocation(
+  const allocation = await AllocationFixture.create(
     context.dataSource,
     employer.id,
     agent.id,
@@ -63,7 +57,7 @@ function countEntries(allocationId: string): Promise<number> {
 }
 
 function readBalances(walletIds: string[]): Promise<Wallet[]> {
-  return readWallets(context, walletIds);
+  return AllocationFixture.readWallets(context, walletIds);
 }
 
 beforeAll(async () => {
@@ -197,7 +191,7 @@ describe('POST /allocations/:id/apply', () => {
     const applying = applyAllocation(agent.cookie, allocation.id).then(
       (response) => response,
     );
-    await waitForLockWaiter(context);
+    await AllocationFixture.waitForLockWaiter(context);
     await runner.query(
       'UPDATE "allocation" SET "amount" = 120 WHERE "id" = $1',
       [allocation.id],
