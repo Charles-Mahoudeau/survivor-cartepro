@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   RiCheckboxCircleLine,
@@ -6,8 +6,8 @@ import {
   RiErrorWarningLine,
   RiInformationLine,
   RiLoader4Line,
-} from "@remixicon/react";
-import { Toaster as Sonner, type ToasterProps } from "sonner";
+} from '@remixicon/react';
+import { Toaster as Sonner, type ToasterProps } from 'sonner';
 
 function Toaster({ ...props }: ToasterProps) {
   return (
@@ -22,19 +22,19 @@ function Toaster({ ...props }: ToasterProps) {
       }}
       toastOptions={{
         classNames: {
-          toast: "font-display text-sm",
-          description: "font-serif",
+          toast: 'font-display text-sm',
+          description: 'font-serif',
         },
       }}
       style={
         {
-          "--normal-bg": "var(--card)",
-          "--normal-text": "var(--foreground)",
-          "--normal-border": "var(--border)",
-          "--error-bg": "var(--card)",
-          "--error-text": "var(--destructive)",
-          "--error-border": "var(--destructive)",
-          "--border-radius": "var(--radius)",
+          '--normal-bg': 'var(--card)',
+          '--normal-text': 'var(--foreground)',
+          '--normal-border': 'var(--border)',
+          '--error-bg': 'var(--card)',
+          '--error-text': 'var(--destructive)',
+          '--error-border': 'var(--destructive)',
+          '--border-radius': 'var(--radius)',
         } as React.CSSProperties
       }
       {...props}

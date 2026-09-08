@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+    # `ready_for_review` is not a default type: without it, marking a pull
+    # request ready would trigger nothing, since the jobs skip drafts.
+    types: [opened, synchronize, reopened, ready_for_review]
 
 # A new push cancels the run still going for the commit it replaced. Every
 # task runs to completion so one review shows every failure.
@@ -16,6 +19,7 @@ jobs:
   verify:
     name: ${{ matrix.task }}
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     timeout-minutes: 10
     permissions:
       contents: read
@@ -38,3 +42,31 @@ jobs:
 
       - name: Run ${{ matrix.task }}
         run: bun run ${{ matrix.task }}
+
+  # Compiling must not reach out: a build that fetches anything makes production
+  # images depend on a third party being up. Installing dependencies still does.
+  web-build-offline:
+    name: build:web (offline)
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # Loopback is brought back up on purpose: Turbopack talks to its own workers
+      # over it, so cutting that too would fail the build for the wrong reason.
+      - name: Build the web app without a network
+        run: |
+          sudo env "PATH=$PATH" unshare --net -- \
+            sh -c 'ip link set lo up && exec bun --filter=@tickettout/frontend run build'

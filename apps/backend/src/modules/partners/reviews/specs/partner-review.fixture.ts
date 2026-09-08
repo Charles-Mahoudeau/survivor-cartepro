@@ -1,5 +1,5 @@
 import type { DataSource, DeepPartial } from 'typeorm';
-import { PartnerReview } from '@/modules/partners/reviews/entities/partner-review.entity';
+import { Application } from '@/modules/partners/applications/entities/application.entity';
 import { PartnerStatus } from '@/modules/partners/core/enums/partner-status.enum';
 
 export class PartnerReviewFixture {
@@ -7,9 +7,9 @@ export class PartnerReviewFixture {
     dataSource: DataSource,
     partnerId: string,
     decidedById: string,
-    overrides: DeepPartial<PartnerReview> = {},
-  ): Promise<PartnerReview> {
-    const review = dataSource.getRepository(PartnerReview).create({
+    overrides: DeepPartial<Application> = {},
+  ): Promise<Application> {
+    const review = dataSource.getRepository(Application).create({
       partner: { id: partnerId },
       decidedBy: { id: decidedById },
       fromStatus: PartnerStatus.PENDING,
@@ -18,6 +18,6 @@ export class PartnerReviewFixture {
       ...overrides,
     });
 
-    return dataSource.getRepository(PartnerReview).save(review);
+    return dataSource.getRepository(Application).save(review);
   }
 }

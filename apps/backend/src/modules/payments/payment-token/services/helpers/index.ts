@@ -1,1 +1,2 @@
-export * from './static-payment-token.service';
+export * from './short-code.helper';
+export * from './signed-payment-token.service';

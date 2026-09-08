@@ -6,8 +6,15 @@ export interface PaymentTokenPayload {
 }
 
 export interface PaymentTokenSource {
-  issue(userId: string): PaymentTokenPayload;
-  getCurrent(userId: string): PaymentTokenPayload;
+  issue(userId: string): Promise<PaymentTokenPayload>;
+  getCurrent(userId: string): Promise<PaymentTokenPayload>;
 }
 
 export const PAYMENT_TOKEN_SOURCE = Symbol('PAYMENT_TOKEN_SOURCE');
+
+export interface PaymentTokenClaims {
+  userId: string;
+  walletId: string;
+  expiresAt: string;
+  version: number;
+}

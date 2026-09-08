@@ -10,7 +10,7 @@ import { Employer } from '../src/modules/employers/entities/employer.entity';
 import { PartnerCategory } from '../src/modules/partners/categories/entities/partner-category.entity';
 import { Partner } from '../src/modules/partners/core/entities/partner.entity';
 import { PartnerStatus } from '../src/modules/partners/core/enums/partner-status.enum';
-import { PartnerReview } from '../src/modules/partners/reviews/entities/partner-review.entity';
+import { Application } from '../src/modules/partners/applications/entities/application.entity';
 import { Payment } from '../src/modules/payments/core/entities/payment.entity';
 import { PaymentToken } from '../src/modules/payments/core/entities/payment-token.entity';
 import { PaymentStatus } from '../src/modules/payments/core/enums/payment-status.enum';
@@ -223,15 +223,15 @@ async function writePlan(
       .relation(Partner, 'categories')
       .of(partner.id)
       .add(partner.categorySlugs);
-    for (const review of partner.reviews) {
-      await manager.insert(PartnerReview, {
-        id: review.id,
-        partner: { id: review.partnerId },
-        fromStatus: review.fromStatus,
-        toStatus: review.toStatus,
-        reason: review.reason,
-        decidedBy: { id: review.decidedById },
-        createdAt: review.createdAt,
+    for (const application of partner.applications) {
+      await manager.insert(Application, {
+        id: application.id,
+        partner: { id: application.partnerId },
+        fromStatus: application.fromStatus,
+        toStatus: application.toStatus,
+        reason: application.reason,
+        decidedBy: { id: application.decidedById },
+        createdAt: application.createdAt,
       });
     }
   }

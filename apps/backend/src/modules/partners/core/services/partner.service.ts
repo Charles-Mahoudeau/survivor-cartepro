@@ -1,13 +1,16 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
+import type { EntityManager } from 'typeorm';
 import {
   InvalidCursorError,
   paginate,
   type CursorPage,
+  type PaginationQueryDto,
 } from '@/common/pagination';
 import { ERROR_CODES } from '@/common/constants/error-codes.constant';
 import {
@@ -18,6 +21,7 @@ import {
 } from '@/modules/partners/core/dto';
 import { PartnerRepo } from '@/modules/partners/core/repos';
 import type { Partner } from '@/modules/partners/core/entities/partner.entity';
+import { PartnerStatus } from '@/modules/partners/core/enums/partner-status.enum';
 
 @Injectable()
 export class PartnerService {
@@ -135,7 +139,7 @@ export class PartnerService {
   }
 
   private toProfileResponse(partner: Partner): PartnerProfileResponseDto {
-    const latestReview = partner.reviews?.[0] ?? null;
+    const latestApplication = partner.applications?.[0] ?? null;
 
     return plainToInstance(
       PartnerProfileResponseDto,
@@ -155,11 +159,11 @@ export class PartnerService {
           slug,
           displayName,
         })),
-        lastDecision: latestReview
+        lastDecision: latestApplication
           ? {
-              reason: latestReview.reason,
-              toStatus: latestReview.toStatus,
-              createdAt: latestReview.createdAt,
+              reason: latestApplication.reason,
+              toStatus: latestApplication.toStatus,
+              createdAt: latestApplication.createdAt,
             }
           : null,
       },
@@ -167,6 +171,64 @@ export class PartnerService {
     );
   }
 
+  async listByStatus(
+    status: PartnerStatus,
+    pagination: PaginationQueryDto,
+  ): Promise<CursorPage<Partner>> {
+    let partners: Partner[];
+    try {
+      partners = await this.partnerRepo.findPageByStatus(status, pagination);
+    } catch (error) {
+      if (error instanceof InvalidCursorError) {
+        throw new BadRequestException(error.message);
+      }
+      throw error;
+    }
+
+    return paginate<Partner>(partners, pagination.limit);
+  }
+
+  async findForReview(id: string): Promise<Partner> {
+    const partner = await this.partnerRepo.findByIdWithRelations(id);
+
+    if (!partner) {
+      throw new NotFoundException(ERROR_CODES.PARTNER_NOT_FOUND);
+    }
+
+    return partner;
+  }
+
+  async findMineForReview(ownerId: string): Promise<Partner> {
+    const partner = await this.partnerRepo.findByOwnerId(ownerId);
+
+    if (!partner) {
+      throw new NotFoundException(ERROR_CODES.PARTNER_NOT_FOUND);
+    }
+
+    return partner;
+  }
+
+  async activate(id: string, manager?: EntityManager): Promise<Partner> {
+    const partner = await this.partnerRepo.findByIdWithRelations(id, manager);
+
+    if (!partner) {
+      throw new NotFoundException(ERROR_CODES.PARTNER_NOT_FOUND);
+    }
+
+    if (partner.status !== PartnerStatus.PENDING) {
+      throw new ConflictException(ERROR_CODES.PARTNER_NOT_PENDING);
+    }
+
+    const activated = await this.partnerRepo.activateIfPending(id, manager);
+
+    if (!activated) {
+      throw new ConflictException(ERROR_CODES.PARTNER_NOT_PENDING);
+    }
+
+    partner.status = PartnerStatus.ACTIVE;
+
+    return partner;
+  }
   private toPublicResponse(
     partner: NonNullable<Awaited<ReturnType<PartnerRepo['findActiveById']>>>,
   ): PartnerResponseDto {

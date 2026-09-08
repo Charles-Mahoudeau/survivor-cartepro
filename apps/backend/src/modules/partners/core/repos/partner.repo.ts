@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import type { EntityManager } from 'typeorm';
 import { In, Repository } from 'typeorm';
-import { decodeCursor } from '@/common/pagination';
+import { decodeCursor, type PaginationQueryDto } from '@/common/pagination';
 import { Partner } from '@/modules/partners/core/entities/partner.entity';
 import { PartnerCategory } from '@/modules/partners/categories/entities/partner-category.entity';
 import { PartnerStatus } from '@/modules/partners/core/enums/partner-status.enum';
@@ -31,16 +32,45 @@ export class PartnerRepo {
   findByOwnerId(ownerId: string): Promise<Partner | null> {
     return this.partners.findOne({
       where: { owner: { id: ownerId } },
-      relations: { categories: true, reviews: true },
-      order: { reviews: { createdAt: 'DESC' } },
+      relations: { categories: true, applications: true },
+      order: { applications: { createdAt: 'DESC' } },
     });
+  }
+
+  findByIdWithRelations(
+    id: string,
+    manager?: EntityManager,
+  ): Promise<Partner | null> {
+    const repo = manager ? manager.getRepository(Partner) : this.partners;
+    return repo.findOne({
+      where: { id },
+      relations: { owner: true, categories: true },
+    });
+  }
+
+  async activateIfPending(
+    id: string,
+    manager?: EntityManager,
+  ): Promise<boolean> {
+    const repo = manager ? manager.getRepository(Partner) : this.partners;
+    const result = await repo
+      .createQueryBuilder()
+      .update(Partner)
+      .set({ status: PartnerStatus.ACTIVE })
+      .where('id = :id AND status = :pending', {
+        id,
+        pending: PartnerStatus.PENDING,
+      })
+      .execute();
+
+    return result.affected === 1;
   }
 
   findByIdWithDetails(id: string): Promise<Partner | null> {
     return this.partners.findOne({
       where: { id },
-      relations: { categories: true, reviews: true },
-      order: { reviews: { createdAt: 'DESC' } },
+      relations: { categories: true, applications: true },
+      order: { applications: { createdAt: 'DESC' } },
     });
   }
 
@@ -54,7 +84,6 @@ export class PartnerRepo {
   savePartner(partner: Partner): Promise<Partner> {
     return this.partners.save(partner);
   }
-
   findActivePage(query: ListPartnersQueryDto): Promise<Partner[]> {
     const builder = this.partners
       .createQueryBuilder('partner')
@@ -92,6 +121,25 @@ export class PartnerRepo {
           search,
         },
       );
+    }
+
+    return builder.getMany();
+  }
+
+  findPageByStatus(
+    status: PartnerStatus,
+    pagination: PaginationQueryDto,
+  ): Promise<Partner[]> {
+    const builder = this.partners
+      .createQueryBuilder('partner')
+      .where('partner.status = :status', { status })
+      .orderBy('partner.id', 'DESC')
+      .take(pagination.limit + 1);
+
+    if (pagination.cursor) {
+      builder.andWhere('partner.id < :cursor', {
+        cursor: decodeCursor(pagination.cursor),
+      });
     }
 
     return builder.getMany();
