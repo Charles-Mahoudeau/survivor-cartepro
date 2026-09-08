@@ -1,4 +1,4 @@
-import { Global, Module } from '@nestjs/common';
+import { Global, Module, type OnApplicationBootstrap } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Audit } from '@/modules/audit/entities';
@@ -12,6 +12,9 @@ import { AuditInterceptor } from '@/modules/audit/interceptors';
  * `TypeOrmModule.forFeature`) when Nest runs it against a route declared in
  * any other module — mirrors `AuthModule`'s own global guards for the same
  * reason.
+ *
+ * `OnApplicationBootstrap` writes the chain's origin entry on every boot; see
+ * `AuditService.ensureChainOrigin` for why that is a no-op past the first one.
  */
 @Global()
 @Module({
@@ -23,4 +26,10 @@ import { AuditInterceptor } from '@/modules/audit/interceptors';
   ],
   exports: [AuditService],
 })
-export class AuditModule {}
+export class AuditModule implements OnApplicationBootstrap {
+  constructor(private readonly auditService: AuditService) {}
+
+  async onApplicationBootstrap(): Promise<void> {
+    await this.auditService.ensureChainOrigin();
+  }
+}
