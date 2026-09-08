@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import chalk from 'chalk';
 import { DataSource, type EntityManager } from 'typeorm';
 import { auth, authOptions } from '../src/config/auth/auth';
+import { registerAuthProvisioning } from '../src/config/auth/auth-provisioning';
 import { buildDataSourceOptions } from '../src/config/database/data-source';
 import { Allocation } from '../src/modules/allocations/entities/allocation.entity';
 import { Employer } from '../src/modules/employers/entities/employer.entity';
@@ -19,10 +20,15 @@ import { TRANSACTIONS_CSV_FILENAME } from '../src/modules/payments/transactions/
 import { TransactionRepo } from '../src/modules/payments/transactions/repos/transaction.repo';
 import { TransactionService } from '../src/modules/payments/transactions/services/transaction.service';
 import { User } from '../src/modules/user/entities';
+import { UserRepo } from '../src/modules/user/repos/user.repo';
+import { UserService } from '../src/modules/user/services/user.service';
 import { Wallet } from '../src/modules/wallets/entities/wallet.entity';
 import { WalletEntry } from '../src/modules/wallets/entities/wallet-entry.entity';
 import { WalletEntryDirection } from '../src/modules/wallets/enums/wallet-entry-direction.enum';
 import { WalletEntryKind } from '../src/modules/wallets/enums/wallet-entry-kind.enum';
+import { WalletEntryRepo } from '../src/modules/wallets/repos/wallet-entry.repo';
+import { WalletRepo } from '../src/modules/wallets/repos/wallet.repo';
+import { WalletService } from '../src/modules/wallets/services/wallet.service';
 import { truncateAll } from '../test/db/truncate';
 import { connect, describeConnection, fail } from './db-common';
 import {
@@ -257,6 +263,15 @@ async function writePlan(
     }
   }
 
+  /**
+   * `createAccount` triggers the same wallet-provisioning hook the real app
+   * runs on sign-up, so every account above already has an empty personal
+   * wallet. Discarding them here keeps this plan's ids and timestamps as the
+   * only ones that exist, so nothing downstream (the events below, id by id)
+   * needs to know about the auto-created rows.
+   */
+  await manager.createQueryBuilder().delete().from(Wallet).execute();
+
   for (const wallet of plan.wallets) {
     await manager.insert(Wallet, {
       id: wallet.id,
@@ -315,6 +330,19 @@ const plan = generateSeedPlan();
 
 try {
   await connect(dataSource);
+
+  /**
+   * No Nest container here, so the same bridge `bootstrap.ts` uses for the
+   * real app is wired by hand — `createAccount` below goes through Better
+   * Auth's own API, which fires the same wallet-provisioning hook.
+   */
+  registerAuthProvisioning({
+    walletService: new WalletService(
+      new WalletRepo(dataSource.getRepository(Wallet)),
+      new WalletEntryRepo(dataSource.getRepository(WalletEntry)),
+    ),
+    userService: new UserService(new UserRepo(dataSource.getRepository(User))),
+  });
 
   const existingUsers = await dataSource.getRepository(User).count();
   if (existingUsers > 0 && !reset) {

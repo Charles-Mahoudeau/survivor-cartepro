@@ -100,6 +100,10 @@ describe('GET /me/wallet', () => {
       context.app,
       'sansportefeuille@tickettout.test',
     );
+    // Sign-up opens one automatically; remove it to exercise this path.
+    await context.dataSource
+      .getRepository(Wallet)
+      .delete({ user: { id: account.id } });
 
     const response = await getMyWallet(account.cookie).expect(404);
 
@@ -277,6 +281,10 @@ describe('GET /me/wallet/entries', () => {
       context.app,
       'entries-sans-portefeuille@tickettout.test',
     );
+    // Sign-up opens one automatically; remove it to exercise this path.
+    await context.dataSource
+      .getRepository(Wallet)
+      .delete({ user: { id: account.id } });
 
     const response = await listMyWalletEntries(account.cookie).expect(404);
 

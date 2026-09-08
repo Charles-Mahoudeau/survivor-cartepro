@@ -30,6 +30,10 @@ import { WalletStatus } from '@/modules/wallets/enums/wallet-status.enum';
   unique: true,
   where: '"employer_id" IS NOT NULL AND "employee_ref" IS NOT NULL',
 })
+@Index('IDX_wallet_user_no_employer', ['user'], {
+  unique: true,
+  where: '"employer_id" IS NULL',
+})
 @Check(
   'CHK_wallet_balance_within_overdraft',
   `balance >= -${WALLET_OVERDRAFT_LIMIT}`,

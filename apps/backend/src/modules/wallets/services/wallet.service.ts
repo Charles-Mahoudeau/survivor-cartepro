@@ -31,6 +31,11 @@ export class WalletService {
     private readonly walletEntryRepo: WalletEntryRepo,
   ) {}
 
+  /** Called once per account, right after it is created — see `config/auth`. */
+  createDefault(userId: string): Promise<Wallet> {
+    return this.walletRepo.create(userId);
+  }
+
   /** Used by payment-token issuance to check status and balance without the full DTO. */
   async findSummaryByUserId(
     userId: string,

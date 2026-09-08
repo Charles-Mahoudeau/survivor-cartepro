@@ -45,4 +45,9 @@ export class UserRepo {
     const result = await this.users.update({ id }, { role });
     return (result.affected ?? 0) > 0;
   }
+
+  /** Cascades to `session` and `account` through their own foreign keys. */
+  async deleteById(id: string): Promise<void> {
+    await this.users.delete(id);
+  }
 }
