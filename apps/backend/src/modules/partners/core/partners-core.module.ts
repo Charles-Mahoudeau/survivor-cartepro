@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserModule } from '@/modules/user';
 import { PartnerCategory } from '@/modules/partners/categories/entities/partner-category.entity';
 import { Partner } from '@/modules/partners/core/entities/partner.entity';
 import { PartnerCategoriesModule } from '@/modules/partners/categories/partner-categories.module';
@@ -9,6 +10,7 @@ import { PartnerController } from '@/modules/partners/core/controllers';
 
 @Module({
   imports: [
+    UserModule,
     PartnerCategoriesModule,
     TypeOrmModule.forFeature([Partner, PartnerCategory]),
   ],
