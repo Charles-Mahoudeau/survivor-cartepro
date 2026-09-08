@@ -13,7 +13,8 @@ export interface NewWalletEntry {
   amount: number;
   balanceAfter: number;
   kind: WalletEntryKind;
-  allocation: { id: string };
+  payment?: { id: string };
+  allocation?: { id: string };
 }
 
 @Injectable()

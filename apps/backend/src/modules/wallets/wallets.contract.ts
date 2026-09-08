@@ -20,3 +20,10 @@ export interface AllocationCreditOutcome {
   credited: EmployerWallet[];
   excluded: EmployerWallet[];
 }
+
+/** What a payment collection asks a wallet to give up. */
+export interface PaymentDebit {
+  walletId: string;
+  paymentId: string;
+  amount: number;
+}
