@@ -16,7 +16,6 @@ import { PaymentToken } from '@/modules/payments/core/entities/payment-token.ent
 import { Payment } from '@/modules/payments/core/entities/payment.entity';
 import { User } from '@/modules/user/entities/user.entity';
 import { WalletEntry } from '@/modules/wallets/entities/wallet-entry.entity';
-import { WALLET_OVERDRAFT_LIMIT } from '@/modules/wallets/constants';
 import { WalletStatus } from '@/modules/wallets/enums/wallet-status.enum';
 
 @Entity()
@@ -34,10 +33,7 @@ import { WalletStatus } from '@/modules/wallets/enums/wallet-status.enum';
   unique: true,
   where: '"employer_id" IS NULL',
 })
-@Check(
-  'CHK_wallet_balance_within_overdraft',
-  `balance >= -${WALLET_OVERDRAFT_LIMIT}`,
-)
+@Check('CHK_wallet_balance_non_negative', 'balance >= 0')
 export class Wallet {
   @PrimaryGeneratedUuidV7Column()
   id: string;
