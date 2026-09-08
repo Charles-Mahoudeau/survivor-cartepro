@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { EntityManager } from 'typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { decodeCursor, type PaginationQueryDto } from '@/common/pagination';
 import { Partner } from '@/modules/partners/core/entities/partner.entity';
+import { PartnerCategory } from '@/modules/partners/categories/entities/partner-category.entity';
 import { PartnerStatus } from '@/modules/partners/core/enums/partner-status.enum';
 import type { ListPartnersQueryDto } from '@/modules/partners/core/dto';
 
@@ -17,12 +18,22 @@ export class PartnerRepo {
   constructor(
     @InjectRepository(Partner)
     private readonly partners: Repository<Partner>,
+    @InjectRepository(PartnerCategory)
+    private readonly categories: Repository<PartnerCategory>,
   ) {}
 
   findActiveById(id: string): Promise<Partner | null> {
     return this.partners.findOne({
       where: { id, status: PartnerStatus.ACTIVE },
       relations: { categories: true },
+    });
+  }
+
+  findByOwnerId(ownerId: string): Promise<Partner | null> {
+    return this.partners.findOne({
+      where: { owner: { id: ownerId } },
+      relations: { categories: true, applications: true },
+      order: { applications: { createdAt: 'DESC' } },
     });
   }
 
@@ -55,13 +66,24 @@ export class PartnerRepo {
     return result.affected === 1;
   }
 
-  findByOwnerId(ownerId: string): Promise<Partner | null> {
+  findByIdWithDetails(id: string): Promise<Partner | null> {
     return this.partners.findOne({
-      where: { owner: { id: ownerId } },
-      relations: { owner: true, categories: true },
+      where: { id },
+      relations: { categories: true, applications: true },
+      order: { applications: { createdAt: 'DESC' } },
     });
   }
 
+  findCategoriesBySlugs(slugs: string[]): Promise<PartnerCategory[]> {
+    if (slugs.length === 0) {
+      return Promise.resolve([]);
+    }
+    return this.categories.findBy({ slug: In(slugs) });
+  }
+
+  savePartner(partner: Partner): Promise<Partner> {
+    return this.partners.save(partner);
+  }
   findActivePage(query: ListPartnersQueryDto): Promise<Partner[]> {
     const builder = this.partners
       .createQueryBuilder('partner')
