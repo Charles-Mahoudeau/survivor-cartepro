@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import type { EntityManager } from 'typeorm';
 import { In, Repository } from 'typeorm';
 import type { Role } from '@/config/auth/auth.constants';
 import { User } from '../entities';
@@ -40,9 +41,17 @@ export class UserRepo {
     return this.users.find({ where: { id: In(ids) } });
   }
 
-  /** Returns whether a row moved, so a caller can tell "no such account". */
-  async setRole(id: string, role: Role): Promise<boolean> {
-    const result = await this.users.update({ id }, { role });
+  /**
+   * Returns whether a row moved, so a caller can tell "no such account". Takes
+   * an optional manager so the write can join a caller-provided transaction.
+   */
+  async setRole(
+    id: string,
+    role: Role,
+    manager?: EntityManager,
+  ): Promise<boolean> {
+    const repo = manager ? manager.getRepository(User) : this.users;
+    const result = await repo.update({ id }, { role });
     return (result.affected ?? 0) > 0;
   }
 }
