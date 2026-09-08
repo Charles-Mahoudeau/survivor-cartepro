@@ -10,6 +10,7 @@ import { PaymentsModule } from '@/modules/payments/payments.module';
 import { UserModule } from '@/modules/user';
 import { WalletsModule } from '@/modules/wallets/wallets.module';
 import { PartnersModule } from '@/modules/partners';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { PartnersModule } from '@/modules/partners';
     PaymentsModule,
     AllocationsModule,
     HealthModule,
+    ScheduleModule.forRoot(),
   ],
 })
 export class AppModule {}
