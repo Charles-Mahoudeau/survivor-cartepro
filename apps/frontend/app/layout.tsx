@@ -1,15 +1,30 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { GeistMono } from 'geist/font/mono';
 import { GeistSans } from 'geist/font/sans';
 
 import './globals.css';
 import { SkipLink } from '@/components/composites/skip-link';
 import { Toaster } from '@/components/ui/sonner';
+import { PWA_THEME_COLOR } from '@/constants/pwa';
 import { SITE_CONTENT } from '@/content/site';
 
 export const metadata: Metadata = {
   title: SITE_CONTENT.title,
   description: SITE_CONTENT.description,
+  applicationName: SITE_CONTENT.brand,
+  appleWebApp: {
+    capable: true,
+    title: SITE_CONTENT.brand,
+    statusBarStyle: 'default',
+  },
+};
+
+/**
+ * No `maximumScale` and no `userScalable`: blocking zoom would fail the
+ * accessibility gate, in the installed app as much as in a tab.
+ */
+export const viewport: Viewport = {
+  themeColor: PWA_THEME_COLOR,
 };
 
 /**
