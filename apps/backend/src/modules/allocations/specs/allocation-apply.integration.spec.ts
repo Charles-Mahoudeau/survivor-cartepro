@@ -1,7 +1,6 @@
-import { ROLES } from '@/config/auth/auth.constants';
 import { WalletEntry } from '@/modules/wallets/entities/wallet-entry.entity';
 import { Wallet } from '@/modules/wallets/entities/wallet.entity';
-import { WalletEntryKind, WalletStatus } from '@/modules/wallets/enums';
+import { WalletEntryKind } from '@/modules/wallets/enums';
 import {
   closeTestApp,
   createTestApp,
@@ -9,26 +8,23 @@ import {
   type TestApp,
 } from '../../../../test/app';
 import { createAllocation } from '../../../../test/fixtures/allocation.fixture';
-import { createEmployer } from '../../../../test/fixtures/employer.fixture';
-import {
-  createUser,
-  grantRole,
-  signUp,
-} from '../../../../test/fixtures/user.fixture';
-import {
-  createWallet,
-  createWalletEntry,
-} from '../../../../test/fixtures/wallet.fixture';
+import { signUp } from '../../../../test/fixtures/user.fixture';
+import { createWalletEntry } from '../../../../test/fixtures/wallet.fixture';
 import { api, apiPath, bodyOf } from '../../../../test/http';
 import { Allocation } from '../entities/allocation.entity';
 import { AllocationStatus } from '../enums/allocation-status.enum';
+import {
+  readWallets,
+  seedEmployerWithWallets,
+  signUpAgent,
+  waitForLockWaiter,
+} from './allocation.fixture';
 
 const ACTIVE_WALLETS = 42;
 const SUSPENDED_WALLETS = 2;
 const AMOUNT = 90;
 
 let context: TestApp;
-let sequence = 0;
 
 interface AppliedBody {
   status: AllocationStatus;
@@ -44,32 +40,12 @@ const applyAllocation = (cookie: string[], id: string) =>
     .set('Cookie', cookie);
 
 async function seedCampaign() {
-  const agent = await signUp(
-    context.app,
-    `agent-${++sequence}-${Date.now()}@tickettout.test`,
+  const agent = await signUpAgent(context);
+  const { employer, active, disabled } = await seedEmployerWithWallets(
+    context,
+    agent.id,
+    { active: ACTIVE_WALLETS, disabled: SUSPENDED_WALLETS },
   );
-  await grantRole(context, agent.id, ROLES.ADMIN);
-
-  const employer = await createEmployer(context.dataSource, agent.id);
-  const active: Wallet[] = [];
-  const suspended: Wallet[] = [];
-
-  for (let index = 0; index < ACTIVE_WALLETS + SUSPENDED_WALLETS; index++) {
-    const holder = await createUser(
-      context,
-      `Porteur ${index}`,
-      `holder-${++sequence}-${Date.now()}@tickettout.test`,
-    );
-    const isActive = index < ACTIVE_WALLETS;
-    const wallet = await createWallet(context.dataSource, holder.id, {
-      employer: { id: employer.id },
-      employeeRef: `EMP-${index}`,
-      balance: 0,
-      status: isActive ? WalletStatus.ACTIVE : WalletStatus.DISABLED,
-    });
-    (isActive ? active : suspended).push(wallet);
-  }
-
   const allocation = await createAllocation(
     context.dataSource,
     employer.id,
@@ -77,7 +53,7 @@ async function seedCampaign() {
     { amount: AMOUNT },
   );
 
-  return { agent, employer, allocation, active, suspended };
+  return { agent, employer, allocation, active, suspended: disabled };
 }
 
 function countEntries(allocationId: string): Promise<number> {
@@ -86,30 +62,8 @@ function countEntries(allocationId: string): Promise<number> {
     .countBy({ allocation: { id: allocationId } });
 }
 
-/** Blocks until a backend is queued on a row lock, so no sleep has to guess. */
-async function waitForLockWaiter(timeoutMs = 5000): Promise<void> {
-  const deadline = Date.now() + timeoutMs;
-
-  while (Date.now() < deadline) {
-    const [{ waiting }] = await context.dataSource.query<{ waiting: number }[]>(
-      `SELECT count(*)::int AS waiting FROM pg_stat_activity
-       WHERE wait_event_type = 'Lock' AND state = 'active'`,
-    );
-
-    if (waiting > 0) {
-      return;
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 25));
-  }
-
-  throw new Error('no backend ever queued on the allocation row lock');
-}
-
 function readBalances(walletIds: string[]): Promise<Wallet[]> {
-  return context.dataSource
-    .getRepository(Wallet)
-    .find({ where: walletIds.map((id) => ({ id })) });
+  return readWallets(context, walletIds);
 }
 
 beforeAll(async () => {
@@ -243,7 +197,7 @@ describe('POST /allocations/:id/apply', () => {
     const applying = applyAllocation(agent.cookie, allocation.id).then(
       (response) => response,
     );
-    await waitForLockWaiter();
+    await waitForLockWaiter(context);
     await runner.query(
       'UPDATE "allocation" SET "amount" = 120 WHERE "id" = $1',
       [allocation.id],
