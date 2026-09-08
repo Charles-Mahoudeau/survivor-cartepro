@@ -7,11 +7,11 @@ function Input({ className, ...props }: React.ComponentProps<'input'>) {
     <input
       data-slot="input"
       className={cn(
-        'h-10 w-full rounded-[var(--radius-md)] border border-border bg-card px-3 text-sm text-foreground outline-none transition-colors',
+        'bg-muted h-11 w-full rounded-xl px-3.5 text-sm outline-none transition-colors',
         'placeholder:text-muted-foreground',
-        'focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30',
+        'focus-visible:ring-ring/30 focus-visible:ring-3',
         'disabled:pointer-events-none disabled:opacity-50',
-        'aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-3 aria-[invalid=true]:ring-destructive/20',
+        'aria-[invalid=true]:ring-destructive/30 aria-[invalid=true]:ring-3',
         className,
       )}
       {...props}

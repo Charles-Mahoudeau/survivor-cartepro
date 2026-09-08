@@ -6,9 +6,9 @@ import { cn } from '@/lib/utils';
 export type AlertSeverity = 'error' | 'info' | 'warning';
 
 const TONES: Record<AlertSeverity, string> = {
-  error: 'border-destructive/40 bg-coral-light text-coral-dark',
-  info: 'border-primary/30 bg-secondary text-secondary-foreground',
-  warning: 'border-warning-border bg-warning-light text-warning',
+  error: 'bg-coral-light text-coral-dark',
+  info: 'bg-muted text-muted-foreground',
+  warning: 'bg-warning-light text-warning',
 };
 
 const ICONS: Record<AlertSeverity, typeof RiInformationLine> = {
@@ -33,15 +33,15 @@ export function Alert({
   return (
     <div
       className={cn(
-        'flex items-start gap-3 rounded-[var(--radius-md)] border px-4 py-3 text-sm',
+        'flex items-start gap-2 rounded-xl px-4 py-3 text-sm',
         TONES[severity],
         className,
       )}
     >
-      <Icon aria-hidden className="mt-0.5 size-4 shrink-0" />
+      <Icon aria-hidden className="mt-px size-4 shrink-0" />
       <div>
-        {title ? <p className="font-display font-semibold">{title}</p> : null}
-        <p className={cn(title && 'mt-0.5')}>{description}</p>
+        {title ? <p className="font-medium">{title}</p> : null}
+        <p>{description}</p>
       </div>
     </div>
   );

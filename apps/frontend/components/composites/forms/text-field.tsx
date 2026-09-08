@@ -41,17 +41,22 @@ export function TextField({
           {hint}
         </p>
       ) : null}
-      <div className="flex items-center gap-2">
+      <div className="relative">
         <Input
           id={id}
           aria-invalid={error ? true : undefined}
           aria-describedby={
             [hintId, errorId].filter(Boolean).join(' ') || undefined
           }
+          className={action ? 'pr-11' : undefined}
           {...input}
           {...registration}
         />
-        {action}
+        {action ? (
+          <div className="absolute inset-y-0 right-1.5 flex items-center">
+            {action}
+          </div>
+        ) : null}
       </div>
       {error ? (
         <p id={errorId} className="mt-1 text-xs text-destructive">

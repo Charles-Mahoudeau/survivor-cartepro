@@ -13,11 +13,11 @@ export function Chip({
       type="button"
       aria-pressed={pressed}
       className={cn(
-        'inline-flex h-8 items-center rounded-full border px-3 text-xs font-medium transition-colors',
-        'focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/30',
+        'inline-flex h-8 items-center rounded-full px-3 text-xs font-medium transition-colors',
+        'focus-visible:ring-ring/30 focus-visible:ring-3 focus-visible:outline-none',
         pressed
-          ? 'border-primary bg-primary text-primary-foreground'
-          : 'border-border bg-card text-muted-foreground hover:bg-muted',
+          ? 'bg-primary text-primary-foreground'
+          : 'bg-card text-muted-foreground hover:bg-muted',
         className,
       )}
       {...props}

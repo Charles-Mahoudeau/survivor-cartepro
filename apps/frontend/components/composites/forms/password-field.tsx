@@ -45,8 +45,8 @@ export function PasswordField({
       action={
         <Button
           type="button"
-          variant="outline"
-          size="icon-lg"
+          variant="ghost"
+          size="icon-sm"
           title={revealed ? hide : show}
           aria-label={revealed ? hide : show}
           aria-pressed={revealed}

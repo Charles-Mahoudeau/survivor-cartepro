@@ -6,18 +6,10 @@ import { SITE_CONTENT } from '@/content/site';
  */
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t border-border bg-card">
-      <div className="mx-auto w-full max-w-5xl px-4 py-6">
-        <p className="font-display text-sm font-bold tracking-tight text-primary">
-          {SITE_CONTENT.brand}
-        </p>
-        <p className="mt-1 max-w-2xl text-xs text-muted-foreground">
-          {SITE_CONTENT.footerDescription}
-        </p>
-        <p className="mt-3 border-t border-border pt-3 text-xs font-medium text-foreground">
-          {SITE_CONTENT.disclaimer}
-        </p>
-      </div>
+    <footer className="mt-auto px-4 py-6">
+      <p className="text-muted-foreground mx-auto w-full max-w-6xl text-xs">
+        {SITE_CONTENT.disclaimer}
+      </p>
     </footer>
   );
 }

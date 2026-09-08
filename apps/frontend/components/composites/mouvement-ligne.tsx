@@ -21,54 +21,35 @@ export function entryTitle(entry: WalletEntry): string {
   }
 }
 
-const CREDIT_BUBBLE =
-  'bg-[color:var(--emerald-light)] text-[color:var(--emerald-dark)]';
-const DEBIT_BUBBLE = 'bg-[color:var(--muted)] text-[color:var(--foreground)]';
-
 interface MouvementLigneProps {
   entry: WalletEntry;
-  last: boolean;
-  /** `compact` is the dashboard row, `detail` the history row. */
+  /** `compact` is the account row, `detail` the history row. */
   variant: 'compact' | 'detail';
 }
 
-export function MouvementLigne({ entry, last, variant }: MouvementLigneProps) {
+export function MouvementLigne({ entry, variant }: MouvementLigneProps) {
   const credit = entry.direction === 'credit';
-  const bubble = credit ? CREDIT_BUBBLE : DEBIT_BUBBLE;
 
   return (
-    <li
-      className={`flex items-center justify-between px-4 py-3.5 ${
-        last ? '' : 'border-b border-[color:var(--border)]'
-      }`}
-    >
-      <div className="flex items-center gap-3">
-        {variant === 'compact' ? (
-          <div
-            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs ${bubble}`}
-            aria-hidden="true"
-          >
-            {credit ? '+' : '−'}
-          </div>
-        ) : (
-          <div
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${bubble}`}
-            aria-hidden="true"
-          >
-            {credit ? (
-              <RiArrowDownLine aria-hidden className="size-4" />
-            ) : (
-              <RiArrowUpLine aria-hidden className="size-4" />
-            )}
-          </div>
-        )}
-        <div>
-          <div className="font-display text-sm font-medium text-[color:var(--foreground)]">
+    <li className="flex items-center justify-between gap-3 px-3 py-3">
+      <div className="flex min-w-0 items-center gap-3">
+        <span
+          aria-hidden
+          className="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-full"
+        >
+          {credit ? (
+            <RiArrowDownLine className="size-4" />
+          ) : (
+            <RiArrowUpLine className="size-4" />
+          )}
+        </span>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium">
             {entry.kind === 'allocation_received' && variant === 'compact'
               ? ME_CONTENT.history.allocationShort
               : entryTitle(entry)}
-          </div>
-          <div className="text-xs text-[color:var(--muted-foreground)]">
+          </p>
+          <p className="text-muted-foreground text-xs">
             {variant === 'compact' ? (
               <DateTexte iso={entry.createdAt} format="relatif" />
             ) : (
@@ -77,17 +58,15 @@ export function MouvementLigne({ entry, last, variant }: MouvementLigneProps) {
                 {credit ? ME_CONTENT.history.credit : ME_CONTENT.history.debit}
               </>
             )}
-          </div>
+          </p>
         </div>
       </div>
       <Montant
         amount={entry.amount}
         sign={entry.direction}
         mention={false}
-        className={`text-sm ${variant === 'compact' ? 'font-medium' : 'font-semibold'} ${
-          credit
-            ? 'text-[color:var(--emerald-dark)]'
-            : 'text-[color:var(--foreground)]'
+        className={`shrink-0 text-sm font-medium ${
+          credit ? 'text-emerald-dark' : 'text-foreground'
         }`}
       />
     </li>
