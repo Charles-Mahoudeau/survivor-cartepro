@@ -20,6 +20,8 @@ export const ERROR_CODES = {
   PAYMENT_TOKEN_NOT_FOUND: 'PAYMENT_TOKEN_NOT_FOUND',
   /** The requested partner does not exist or is not active. */
   PARTNER_NOT_FOUND: 'PARTNER_NOT_FOUND',
+  /** The requested period starts after it ends. */
+  INVALID_PERIOD: 'INVALID_PERIOD',
   /** The partner application is not pending, so it cannot be decided again. */
   PARTNER_NOT_PENDING: 'PARTNER_NOT_PENDING',
 } as const;
