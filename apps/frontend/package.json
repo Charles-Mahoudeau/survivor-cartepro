@@ -4,11 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "SW_PUBLIC_BUILD_ID=${SW_PUBLIC_BUILD_ID:-$(date +%s)} next build",
     "start": "next start",
     "lint": "eslint --fix",
     "typegen": "next typegen",
-    "typecheck": "bun run typegen && tsc --noEmit",
+    "typecheck": "bun run typegen && tsc --noEmit && tsc -p tsconfig.sw.json --noEmit",
     "lint:check": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx,css}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,css}\"",
@@ -39,14 +39,17 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@serwist/turbopack": "9.5.12",
     "@tailwindcss/postcss": "^4",
     "@types/bun": "^1.4.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "esbuild": "^0.28.2",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
     "prettier": "^3.9.6",
+    "serwist": "9.5.12",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
