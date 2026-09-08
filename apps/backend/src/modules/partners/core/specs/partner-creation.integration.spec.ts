@@ -8,10 +8,11 @@ import { ConflictException } from '@nestjs/common';
 import { grantRole, signUp } from '../../../../../test/fixtures/user.fixture';
 import { api, apiPath, bodyOf } from '../../../../../test/http';
 import { ROLES } from '@/config/auth/auth.constants';
-import { User } from '@/modules/user/entities';
+import { UserService } from '@/modules/user';
 import { Partner } from '@/modules/partners/core/entities/partner.entity';
 import { PartnerStatus } from '@/modules/partners/core/enums/partner-status.enum';
 import { PartnerService } from '@/modules/partners/core/services';
+import type { PartnerProfileResponseDto } from '@/modules/partners/core/dto';
 import { PartnerFixture } from '@/modules/partners/core/specs/partner.fixture';
 import { PartnerCategoryFixture } from '@/modules/partners/categories/specs/partner-category.fixture';
 
@@ -38,22 +39,6 @@ const createPartner = (
   return cookie ? req.set('Cookie', cookie) : req;
 };
 
-type PartnerCreateBody = {
-  id: string;
-  legalName: string;
-  tradeName: string;
-  siren: string;
-  businessPurpose: string;
-  status: string;
-  addressLine: string;
-  postalCode: string;
-  city: string;
-  latitude: number;
-  longitude: number;
-  categories: Array<{ slug: string; displayName: string }>;
-  lastDecision: unknown;
-};
-
 beforeAll(async () => {
   context = await createTestApp();
 });
@@ -75,7 +60,7 @@ describe('POST /partners', () => {
     });
 
     const response = await createPartner(VALID_BODY, user.cookie).expect(201);
-    const { id, ...body } = bodyOf<PartnerCreateBody>(response);
+    const { id, ...body } = bodyOf<PartnerProfileResponseDto>(response);
 
     expect(typeof id).toBe('string');
     expect(body).toEqual({
@@ -98,10 +83,8 @@ describe('POST /partners', () => {
       .findOne({ where: { owner: { id: user.id } } });
     expect(partner).toMatchObject({ id, status: PartnerStatus.PENDING });
 
-    const account = await context.dataSource
-      .getRepository(User)
-      .findOneOrFail({ where: { id: user.id } });
-    expect(account.role).toBe(ROLES.PARTNER);
+    const account = await context.app.get(UserService).findById(user.id);
+    expect(account?.role).toBe(ROLES.PARTNER);
   });
 
   it('rejects an already-partner account with 403', async () => {
@@ -163,10 +146,8 @@ describe('POST /partners', () => {
       .getRepository(Partner)
       .findOne({ where: { owner: { id: user.id } } });
     expect(partner).toBeNull();
-    const account = await context.dataSource
-      .getRepository(User)
-      .findOneOrFail({ where: { id: user.id } });
-    expect(account.role).toBe(ROLES.EMPLOYEE);
+    const account = await context.app.get(UserService).findById(user.id);
+    expect(account?.role).toBe(ROLES.EMPLOYEE);
   });
 
   it('rejects a SIREN with an invalid Luhn checksum with 400', async () => {
@@ -265,9 +246,7 @@ describe('POST /partners', () => {
       .find({ where: { owner: { id: user.id } } });
     expect(partners).toHaveLength(1);
 
-    const account = await context.dataSource
-      .getRepository(User)
-      .findOneOrFail({ where: { id: user.id } });
-    expect(account.role).toBe(ROLES.PARTNER);
+    const account = await context.app.get(UserService).findById(user.id);
+    expect(account?.role).toBe(ROLES.PARTNER);
   });
 });

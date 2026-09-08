@@ -4,9 +4,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
-import type { DataSource, EntityManager } from 'typeorm';
+import type { EntityManager } from 'typeorm';
 import { QueryFailedError } from 'typeorm';
 import {
   InvalidCursorError,
@@ -37,7 +36,6 @@ export class PartnerService {
   constructor(
     private readonly partnerRepo: PartnerRepo,
     private readonly userService: UserService,
-    @InjectDataSource() private readonly dataSource: DataSource,
   ) {}
 
   /**
@@ -67,7 +65,7 @@ export class PartnerService {
 
     let partner: Partner;
     try {
-      partner = await this.dataSource.transaction(async (manager) => {
+      partner = await this.partnerRepo.transaction(async (manager) => {
         const created = await this.partnerRepo.createPending(
           {
             owner: { id: ownerId },

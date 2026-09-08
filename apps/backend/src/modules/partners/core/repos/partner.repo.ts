@@ -22,6 +22,11 @@ export class PartnerRepo {
     private readonly categories: Repository<PartnerCategory>,
   ) {}
 
+  /** Starts a transaction on this repo's connection, for a caller in another module to join. */
+  transaction<T>(work: (manager: EntityManager) => Promise<T>): Promise<T> {
+    return this.partners.manager.transaction(work);
+  }
+
   findActiveById(id: string): Promise<Partner | null> {
     return this.partners.findOne({
       where: { id, status: PartnerStatus.ACTIVE },
