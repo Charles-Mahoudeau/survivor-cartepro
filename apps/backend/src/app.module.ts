@@ -10,6 +10,7 @@ import { PaymentsModule } from '@/modules/payments/payments.module';
 import { UserModule } from '@/modules/user';
 import { WalletsModule } from '@/modules/wallets/wallets.module';
 import { PartnersModule } from '@/modules/partners';
+import { AuditModule } from '@/modules/audit';
 import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
@@ -26,6 +27,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     WalletsModule,
     PaymentsModule,
     AllocationsModule,
+    AuditModule,
     HealthModule,
     ScheduleModule.forRoot(),
   ],

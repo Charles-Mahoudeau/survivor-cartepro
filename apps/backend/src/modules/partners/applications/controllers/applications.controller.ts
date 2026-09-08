@@ -12,10 +12,13 @@ import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { ROLES } from '@/config/auth/auth.constants';
 import type { AuthUser } from '@/config/auth/auth';
+import { Audited, AuditAction } from '@/modules/audit';
+import type { AuditResolverContext } from '@/modules/audit';
 import {
   DecideApplicationDto,
   ListApplicationsQueryDto,
 } from '@/modules/partners/applications/dto';
+import { ApplicationDecision } from '@/modules/partners/applications/enums';
 import { ApplicationsService } from '@/modules/partners/applications/services';
 import {
   DecideApplicationDoc,
@@ -23,6 +26,12 @@ import {
   GetApplicationDoc,
   ListApplicationsDoc,
 } from '@/modules/partners/applications/docs';
+
+/** The decision that came in on the request body, for `resolveAction`. */
+const resolveDecisionAction = ({ body }: AuditResolverContext): AuditAction =>
+  (body as DecideApplicationDto).decision === ApplicationDecision.APPROVED
+    ? AuditAction.PARTNER_APPROVED
+    : AuditAction.PARTNER_REFUSED;
 
 @ApiTags('Partner Applications')
 @Controller('partners/applications')
@@ -53,6 +62,9 @@ export class ApplicationsController {
 
   @Post(':id/decision')
   @Roles(ROLES.ADMIN)
+  @Audited(AuditAction.PARTNER_APPROVED, 'partner', {
+    resolveAction: resolveDecisionAction,
+  })
   @DecideApplicationDoc()
   decide(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
