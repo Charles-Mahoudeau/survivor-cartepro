@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
@@ -166,10 +167,13 @@ export class WalletService {
 
   /**
    * Debits one wallet for a payment inside the caller transaction: locks the
-   * wallet, refuses a debit past the overdraft limit, then writes the entry
-   * and moves the balance together. Never called outside a transaction — a
-   * debit with no matching payment row is exactly the state this guards
-   * against.
+   * wallet, refuses a suspended one or a debit past the overdraft limit, then
+   * writes the entry and moves the balance together. Never called outside a
+   * transaction — a debit with no matching payment row is exactly the state
+   * this guards against.
+   *
+   * The refusals name no figure. The caller here is the partner at the till,
+   * and a balance is the employee's to know.
    */
   async debitForPayment(
     manager: EntityManager,
@@ -179,14 +183,13 @@ export class WalletService {
     if (!wallet) {
       throw new NotFoundException(ERROR_CODES.WALLET_NOT_FOUND);
     }
+    if (wallet.status !== WalletStatus.ACTIVE) {
+      throw new ForbiddenException(ERROR_CODES.ACCOUNT_BANNED);
+    }
 
     const balance = Number(wallet.balance);
     if (!isDebitAllowed(balance, amount)) {
-      throw new UnprocessableEntityException({
-        code: ERROR_CODES.INSUFFICIENT_BALANCE,
-        balance: toEuros(toCents(balance)),
-        amount: toEuros(toCents(amount)),
-      });
+      throw new UnprocessableEntityException(ERROR_CODES.INSUFFICIENT_BALANCE);
     }
 
     const balanceAfter = Number(toEuros(toCents(balance) - toCents(amount)));
