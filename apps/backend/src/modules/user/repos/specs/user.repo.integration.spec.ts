@@ -6,6 +6,7 @@ import {
 } from '../../../../../test/app';
 import { signUp } from '../../../../../test/fixtures/user.fixture';
 import { ROLES } from '../../../../config/auth/auth.constants';
+import { Wallet } from '../../../wallets/entities/wallet.entity';
 import { User } from '../../entities';
 import { UserRepo } from '../user.repo';
 
@@ -118,6 +119,10 @@ describe('the constraints the schema carries', () => {
 
   it('closes the sessions of a deleted account', async () => {
     const account = await signUp(context.app, 'supprime@tickettout.test');
+    // Sign-up opens a wallet, which has its own foreign key to the account.
+    await context.dataSource
+      .getRepository(Wallet)
+      .delete({ user: { id: account.id } });
 
     await context.dataSource.getRepository(User).delete({ id: account.id });
 

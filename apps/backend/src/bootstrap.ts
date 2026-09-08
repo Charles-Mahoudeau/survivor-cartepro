@@ -14,6 +14,9 @@ import helmet from 'helmet';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { auth, trustedOrigins } from './config/auth/auth';
 import { AUTH_BASE_PATH } from './config/auth/auth.constants';
+import { registerAuthProvisioning } from './config/auth/auth-provisioning';
+import { UserService } from './modules/user/services/user.service';
+import { WalletService } from './modules/wallets/services/wallet.service';
 import { buildOpenApiDocument } from './swagger';
 
 /** Nest routes answer under this prefix; `/auth` and `/health` are outside it. */
@@ -47,6 +50,10 @@ export const TRUSTED_PROXIES = 'uniquelocal';
  * log, and Nest can own no route below `/auth`. The global prefix is a Nest
  * concern only, which is why `/auth` stays where the client expects it.
  *
+ * The provisioning bridge is registered first, since `auth`'s hooks — built at
+ * module load, before this function ever runs — read it back at request time
+ * to reach the real `WalletService`/`UserService`.
+ *
  * ClassSerializerInterceptor is what makes `@Exclude()` on an entity actually
  * remove the property from a response, so it is registered before the first
  * entity exists.
@@ -68,6 +75,11 @@ export async function configureApp(
 
   const httpServer = app.getHttpAdapter().getInstance() as Express;
   httpServer.set('trust proxy', TRUSTED_PROXIES);
+
+  registerAuthProvisioning({
+    walletService: app.get(WalletService),
+    userService: app.get(UserService),
+  });
 
   app.use(helmet({ contentSecurityPolicy: false }));
   app.enableCors({ origin: trustedOrigins(), credentials: true });

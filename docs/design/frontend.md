@@ -1,5 +1,13 @@
 # Spécification frontend — CartePro
 
+> **Retrait du 7 septembre 2026.** Les sections de ce document qui décrivent
+> l'adoption du Système de Design de l'État (DSFR), la typographie Marianne et
+> les primitives de couleur Bleu France sont **caduques** : le cabinet a demandé
+> le retrait du bloc-marque et de l'identité de l'État de toutes les interfaces.
+> Elles sont conservées telles quelles à titre d'historique, elles ne décrivent
+> plus le code. L'identité en vigueur est celle décrite dans
+> `apps/frontend/app/globals.css` et `apps/frontend/content/site.ts`.
+
 > **Sources** — cahier des charges `JEB/DNI/2026-002` §2 à §4 ; courrier de Florine
 > Pontaillac du 2026-09-01 09h41 ; backlog `US-01`…`US-22`
 > (`spec technique/backlog-cartepro.csv`, 159 issues Linear `EPI-5`…`EPI-163`) ;

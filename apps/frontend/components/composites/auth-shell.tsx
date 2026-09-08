@@ -1,8 +1,12 @@
 import type { ReactNode } from 'react';
 
-import { BandeauSimulation } from './simulation-banner';
-import { SiteHeader } from './site-header.client';
+import { Card } from '@/components/composites/card';
+import { SITE_CONTENT } from '@/content/site';
 
+/**
+ * One column, one focal point: the card. The product name is already in the
+ * heading of the card, so nothing above it repeats it.
+ */
 export function AuthShell({
   titre,
   sousTitre,
@@ -13,21 +17,23 @@ export function AuthShell({
   children: ReactNode;
 }) {
   return (
-    <>
-      <SiteHeader />
-      <BandeauSimulation />
+    <main
+      id="contenu"
+      className="mx-auto flex w-full max-w-[26rem] flex-1 flex-col justify-center gap-6 px-4 py-12"
+    >
+      <Card className="p-6 md:p-8">
+        <h1 className="text-xl font-semibold tracking-tight">{titre}</h1>
+        <p className="text-muted-foreground mt-1 mb-8 text-sm">{sousTitre}</p>
+        {children}
+      </Card>
 
-      <main id="contenu" className="fr-container fr-py-6w flex flex-1">
-        <div className="fr-grid-row fr-grid-row--center w-full">
-          <div className="fr-col-12 fr-col-sm-8 fr-col-md-6 fr-col-lg-5">
-            <h1 className="fr-h3 fr-mb-1w">{titre}</h1>
-            <p className="fr-text--sm fr-mb-4w text-[color:var(--muted-foreground)]">
-              {sousTitre}
-            </p>
-            {children}
-          </div>
-        </div>
-      </main>
-    </>
+      <p className="text-muted-foreground text-center text-xs">
+        {SITE_CONTENT.simulation.description}
+      </p>
+
+      <p className="text-muted-foreground mt-auto pt-8 text-center text-xs">
+        {SITE_CONTENT.disclaimer}
+      </p>
+    </main>
   );
 }

@@ -28,6 +28,9 @@ const listMyWalletEntries = (cookie: string[], qs = '') =>
   api(context.app)
     .get(apiPath(`/me/wallet/entries${qs}`))
     .set('Cookie', cookie);
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+const daysAgo = (days: number) => new Date(Date.now() - days * DAY_IN_MS);
+const isoDaysAgo = (days: number) => daysAgo(days).toISOString();
 
 beforeAll(async () => {
   context = await createTestApp();
@@ -97,6 +100,10 @@ describe('GET /me/wallet', () => {
       context.app,
       'sansportefeuille@tickettout.test',
     );
+    // Sign-up opens one automatically; remove it to exercise this path.
+    await context.dataSource
+      .getRepository(Wallet)
+      .delete({ user: { id: account.id } });
 
     const response = await getMyWallet(account.cookie).expect(404);
 
@@ -274,6 +281,10 @@ describe('GET /me/wallet/entries', () => {
       context.app,
       'entries-sans-portefeuille@tickettout.test',
     );
+    // Sign-up opens one automatically; remove it to exercise this path.
+    await context.dataSource
+      .getRepository(Wallet)
+      .delete({ user: { id: account.id } });
 
     const response = await listMyWalletEntries(account.cookie).expect(404);
 
@@ -299,5 +310,145 @@ describe('GET /me/wallet/entries', () => {
 
   it('refuses a request with no session', async () => {
     await api(context.app).get(apiPath('/me/wallet/entries')).expect(401);
+  });
+});
+
+describe('GET /me/wallet/entries period filter', () => {
+  it('reads the last thirty days when no bound is given', async () => {
+    const account = await signUp(context.app, 'periode-defaut@tickettout.test');
+    const wallet = await createWallet(context.dataSource, account.id);
+    await createWalletEntry(context.dataSource, wallet.id, {
+      amount: 1,
+      balanceAfter: 1,
+      createdAt: daysAgo(40),
+    });
+    const inside = await createWalletEntry(context.dataSource, wallet.id, {
+      amount: 2,
+      balanceAfter: 3,
+      createdAt: daysAgo(5),
+    });
+
+    const response = await listMyWalletEntries(account.cookie).expect(200);
+
+    expect(
+      bodyOf<{ items: Array<{ id: string }> }>(response).items.map(
+        (entry) => entry.id,
+      ),
+    ).toEqual([inside.id]);
+  });
+
+  it('returns only the entries inside explicit bounds', async () => {
+    const account = await signUp(context.app, 'periode-bornes@tickettout.test');
+    const wallet = await createWallet(context.dataSource, account.id);
+    await createWalletEntry(context.dataSource, wallet.id, {
+      amount: 1,
+      balanceAfter: 1,
+      createdAt: daysAgo(20),
+    });
+    const inside = await createWalletEntry(context.dataSource, wallet.id, {
+      amount: 2,
+      balanceAfter: 3,
+      createdAt: daysAgo(10),
+    });
+    await createWalletEntry(context.dataSource, wallet.id, {
+      amount: 3,
+      balanceAfter: 6,
+      createdAt: daysAgo(2),
+    });
+
+    const response = await listMyWalletEntries(
+      account.cookie,
+      `?from=${isoDaysAgo(15)}&to=${isoDaysAgo(5)}`,
+    ).expect(200);
+
+    expect(
+      bodyOf<{ items: Array<{ id: string }> }>(response).items.map(
+        (entry) => entry.id,
+      ),
+    ).toEqual([inside.id]);
+  });
+
+  it('keeps the period filter on the page the cursor points to', async () => {
+    const account = await signUp(
+      context.app,
+      'periode-curseur@tickettout.test',
+    );
+    const wallet = await createWallet(context.dataSource, account.id);
+    await createWalletEntry(context.dataSource, wallet.id, {
+      amount: 1,
+      balanceAfter: 1,
+      createdAt: daysAgo(40),
+    });
+    const first = await createWalletEntry(context.dataSource, wallet.id, {
+      amount: 2,
+      balanceAfter: 3,
+      createdAt: daysAgo(9),
+    });
+    const second = await createWalletEntry(context.dataSource, wallet.id, {
+      amount: 3,
+      balanceAfter: 6,
+      createdAt: daysAgo(8),
+    });
+    const third = await createWalletEntry(context.dataSource, wallet.id, {
+      amount: 4,
+      balanceAfter: 10,
+      createdAt: daysAgo(7),
+    });
+    const from = isoDaysAgo(10);
+
+    const firstPage = await listMyWalletEntries(
+      account.cookie,
+      `?from=${from}&limit=2`,
+    ).expect(200);
+    const firstBody = bodyOf<{
+      items: Array<{ id: string }>;
+      nextCursor: string | null;
+      hasMore: boolean;
+    }>(firstPage);
+
+    expect(firstBody.items.map((entry) => entry.id)).toEqual([
+      third.id,
+      second.id,
+    ]);
+    expect(firstBody.hasMore).toBe(true);
+
+    const secondPage = await listMyWalletEntries(
+      account.cookie,
+      `?from=${from}&limit=2&cursor=${firstBody.nextCursor}`,
+    ).expect(200);
+    const secondBody = bodyOf<{
+      items: Array<{ id: string }>;
+      hasMore: boolean;
+    }>(secondPage);
+
+    expect(secondBody.items.map((entry) => entry.id)).toEqual([first.id]);
+    expect(secondBody.hasMore).toBe(false);
+  });
+
+  it('answers 422 when the bounds are inverted', async () => {
+    const account = await signUp(
+      context.app,
+      'periode-inverse@tickettout.test',
+    );
+    await createWallet(context.dataSource, account.id);
+
+    const response = await listMyWalletEntries(
+      account.cookie,
+      `?from=${isoDaysAgo(1)}&to=${isoDaysAgo(10)}`,
+    ).expect(422);
+
+    expect(bodyOf<{ message: string }>(response).message).toBe(
+      'INVALID_PERIOD',
+    );
+  });
+
+  it('answers 400 when a bound is not an ISO 8601 date', async () => {
+    const account = await signUp(
+      context.app,
+      'periode-illisible@tickettout.test',
+    );
+    await createWallet(context.dataSource, account.id);
+
+    await listMyWalletEntries(account.cookie, '?from=01/03/2026').expect(400);
   });
 });

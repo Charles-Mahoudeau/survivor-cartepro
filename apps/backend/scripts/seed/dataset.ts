@@ -165,7 +165,7 @@ export interface SeedEmployer {
 /** The account the decision history of every instructed dossier points to. */
 export const REVIEWING_AGENT: SeedAccount = {
   name: 'Jean-Eudes Berlier',
-  email: 'jean-eudes.berlier@ministere.gouv.fr',
+  email: 'jean-eudes.berlier@cartepro.demo',
   role: ROLES.ADMIN,
   createdAt: '2026-04-01T08:00:00Z',
 };
@@ -173,7 +173,7 @@ export const REVIEWING_AGENT: SeedAccount = {
 /** The administration shortcut of the sign-in screen. */
 export const DEMO_ADMIN: SeedAccount = {
   name: 'Jean Leclerc',
-  email: 'jean.leclerc@ministere.gouv.fr',
+  email: 'jean.leclerc@cartepro.demo',
   role: ROLES.ADMIN,
   createdAt: '2026-04-01T08:05:00Z',
 };
@@ -447,7 +447,7 @@ export const PARTNERS: SeedPartner[] = [
     decisions: [
       activation(
         '2026-08-10T09:50:00Z',
-        'Artisan glacier immatriculé à la chambre de métiers. Vente en ligne et retrait sur place, les deux canaux acceptent le paiement Ticket Tout. Partenaire retenu pour le lancement.',
+        'Artisan glacier immatriculé à la chambre de métiers. Vente en ligne et retrait sur place, les deux canaux acceptent le paiement CartePro. Partenaire retenu pour le lancement.',
       ),
     ],
   },

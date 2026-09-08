@@ -2,18 +2,25 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import {
   InvalidCursorError,
   paginate,
   type CursorPage,
-  type PaginationQueryDto,
 } from '@/common/pagination';
+import {
+  InvalidPeriodError,
+  resolvePeriod,
+  type Period,
+  type PeriodQueryDto,
+} from '@/common/period';
 import { ERROR_CODES } from '@/common/constants/error-codes.constant';
 import { WalletEntry } from '../entities/wallet-entry.entity';
 import type { Wallet } from '../entities/wallet.entity';
 import { WalletEntryRepo } from '../repos/wallet-entry.repo';
 import { WalletRepo } from '../repos/wallet.repo';
+import type { ListMyWalletEntriesQueryDto } from '../validators/list-my-wallet-entries-query.dto';
 import type { WalletEntryResponseDto } from '../validators/wallet-entry.dto';
 import type { WalletResponseDto } from '../validators/wallet.dto';
 
@@ -23,6 +30,11 @@ export class WalletService {
     private readonly walletRepo: WalletRepo,
     private readonly walletEntryRepo: WalletEntryRepo,
   ) {}
+
+  /** Called once per account, right after it is created — see `config/auth`. */
+  createDefault(userId: string): Promise<Wallet> {
+    return this.walletRepo.create(userId);
+  }
 
   /** Used by payment-token issuance to check status and balance without the full DTO. */
   async findSummaryByUserId(
@@ -55,16 +67,22 @@ export class WalletService {
 
   async listMyEntries(
     userId: string,
-    query: PaginationQueryDto,
+    query: ListMyWalletEntriesQueryDto,
   ): Promise<CursorPage<WalletEntryResponseDto>> {
     const wallet = await this.walletRepo.findIdByUserId(userId);
     if (!wallet) {
       throw new NotFoundException(ERROR_CODES.WALLET_NOT_FOUND);
     }
 
+    const period = this.readPeriod(query);
+
     let rows: WalletEntry[];
     try {
-      rows = await this.walletEntryRepo.findPageForWallet(wallet.id, query);
+      rows = await this.walletEntryRepo.findPageForWallet(
+        wallet.id,
+        query,
+        period,
+      );
     } catch (error) {
       if (error instanceof InvalidCursorError) {
         throw new BadRequestException(error.message);
@@ -78,6 +96,17 @@ export class WalletService {
       ...page,
       items: page.items.map((entry) => this.toEntryResponse(entry)),
     };
+  }
+
+  private readPeriod(query: PeriodQueryDto): Period {
+    try {
+      return resolvePeriod(query);
+    } catch (error) {
+      if (error instanceof InvalidPeriodError) {
+        throw new UnprocessableEntityException(ERROR_CODES.INVALID_PERIOD);
+      }
+      throw error;
+    }
   }
 
   private toEntryResponse(entry: WalletEntry): WalletEntryResponseDto {

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, LessThan, MoreThan } from 'typeorm';
 import { PaymentToken } from '../../core/entities';
 import { PaymentTokenStatus } from '../../core/enums';
 import { generateUniqueShortCode } from '../services/helpers';
@@ -14,7 +14,11 @@ export class PaymentTokenRepo {
 
   findLiveByWalletId(walletId: string): Promise<PaymentToken | null> {
     return this.repo.findOne({
-      where: { wallet: { id: walletId }, status: PaymentTokenStatus.LIVE },
+      where: {
+        wallet: { id: walletId },
+        status: PaymentTokenStatus.LIVE,
+        expiresAt: MoreThan(new Date()),
+      },
     });
   }
 
@@ -58,5 +62,15 @@ export class PaymentTokenRepo {
     });
 
     return token;
+  }
+
+  async updateExpiredTokens(): Promise<void> {
+    await this.repo.update(
+      {
+        status: PaymentTokenStatus.LIVE,
+        expiresAt: LessThan(new Date()),
+      },
+      { status: PaymentTokenStatus.REVOKED },
+    );
   }
 }
