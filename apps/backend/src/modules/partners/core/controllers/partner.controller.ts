@@ -5,6 +5,7 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
+  Post,
   Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
@@ -14,6 +15,7 @@ import { Roles } from '@/common/decorators/roles.decorator';
 import { ROLES } from '@/config/auth/auth.constants';
 import type { AuthUser } from '@/config/auth/auth';
 import {
+  CreatePartnerDto,
   ListPartnersQueryDto,
   PartnerProfileResponseDto,
   PartnerResponseDto,
@@ -21,6 +23,7 @@ import {
 } from '@/modules/partners/core/dto';
 import { PartnerService } from '@/modules/partners/core/services';
 import {
+  CreatePartnerDoc,
   GetMyPartnerProfileDoc,
   GetPartnerDoc,
   GetPartnerProfileByIdDoc,
@@ -33,6 +36,16 @@ import {
 @Controller('partners')
 export class PartnerController {
   constructor(private readonly partnerService: PartnerService) {}
+
+  @Post()
+  @Roles(ROLES.EMPLOYEE)
+  @CreatePartnerDoc()
+  create(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: CreatePartnerDto,
+  ): Promise<PartnerProfileResponseDto> {
+    return this.partnerService.createForOwner(user.id, dto);
+  }
 
   @Get()
   @Public()

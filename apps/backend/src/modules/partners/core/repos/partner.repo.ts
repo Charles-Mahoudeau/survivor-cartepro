@@ -22,6 +22,11 @@ export class PartnerRepo {
     private readonly categories: Repository<PartnerCategory>,
   ) {}
 
+  /** Starts a transaction on this repo's connection, for a caller in another module to join. */
+  transaction<T>(work: (manager: EntityManager) => Promise<T>): Promise<T> {
+    return this.partners.manager.transaction(work);
+  }
+
   findActiveById(id: string): Promise<Partner | null> {
     return this.partners.findOne({
       where: { id, status: PartnerStatus.ACTIVE },
@@ -83,6 +88,32 @@ export class PartnerRepo {
 
   savePartner(partner: Partner): Promise<Partner> {
     return this.partners.save(partner);
+  }
+
+  /**
+   * Inserts a new dossier. `status` is hardcoded to `PENDING` regardless of
+   * what `data` carries — the create DTO never exposes the field, and this is
+   * the second, repo-level guarantee that a client can't inject another one.
+   */
+  createPending(
+    data: {
+      owner: { id: string };
+      legalName: string;
+      tradeName: string;
+      siren: string;
+      businessPurpose: string;
+      addressLine: string;
+      postalCode: string;
+      city: string;
+      latitude: number;
+      longitude: number;
+      categories: PartnerCategory[];
+    },
+    manager?: EntityManager,
+  ): Promise<Partner> {
+    const repo = manager ? manager.getRepository(Partner) : this.partners;
+    const partner = repo.create({ ...data, status: PartnerStatus.PENDING });
+    return repo.save(partner);
   }
   findActivePage(query: ListPartnersQueryDto): Promise<Partner[]> {
     const builder = this.partners
