@@ -143,6 +143,30 @@ describe('sign-up', () => {
   });
 });
 
+describe('wallet provisioning', () => {
+  it('opens exactly one wallet for the new account', async () => {
+    const { id } = await signUp(context.app, 'portefeuille@tickettout.test');
+
+    const rows: Array<{
+      balance: string;
+      currency: string;
+      status: string;
+      employer_id: string | null;
+    }> = await context.dataSource.query(
+      `SELECT balance, currency, status, employer_id FROM wallet WHERE user_id = $1`,
+      [id],
+    );
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      balance: '0.00',
+      currency: 'EUR',
+      status: 'active',
+      employer_id: null,
+    });
+  });
+});
+
 describe('roles', () => {
   it('gives a new account the employee role, and only that one', async () => {
     const { id } = await signUp(context.app, 'salarie@tickettout.test');

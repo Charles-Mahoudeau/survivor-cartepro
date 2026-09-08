@@ -2,6 +2,7 @@ import { ERROR_CODES } from '@/common/constants/error-codes.constant';
 import { ROLES } from '@/config/auth/auth.constants';
 import { PaymentToken } from '@/modules/payments/core/entities';
 import { PaymentTokenStatus } from '@/modules/payments/core/enums';
+import { Wallet } from '@/modules/wallets/entities/wallet.entity';
 import { WalletStatus } from '@/modules/wallets/enums';
 import {
   closeTestApp,
@@ -139,6 +140,10 @@ describe('POST /me/payment-tokens', () => {
       context.app,
       'payment-token-no-wallet@tickettout.test',
     );
+    // Sign-up opens one automatically; remove it to exercise this path.
+    await context.dataSource
+      .getRepository(Wallet)
+      .delete({ user: { id: employee.id } });
 
     const response = await issueToken(employee.cookie);
 
@@ -211,6 +216,10 @@ describe('GET /me/payment-tokens/current', () => {
       context.app,
       'payment-token-current-no-wallet@tickettout.test',
     );
+    // Sign-up opens one automatically; remove it to exercise this path.
+    await context.dataSource
+      .getRepository(Wallet)
+      .delete({ user: { id: employee.id } });
 
     const response = await getCurrentToken(employee.cookie);
 
