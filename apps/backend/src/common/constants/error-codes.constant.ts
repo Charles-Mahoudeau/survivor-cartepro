@@ -34,12 +34,8 @@ export const ERROR_CODES = {
   WALLET_CREATION_FAILED: 'WALLET_CREATION_FAILED',
   /** The requested employer does not exist. */
   EMPLOYER_NOT_FOUND: 'EMPLOYER_NOT_FOUND',
-  /** No account carries the identifier given as the employer owner. */
-  EMPLOYER_OWNER_NOT_FOUND: 'EMPLOYER_OWNER_NOT_FOUND',
   /** Another employer already registers this SIREN. */
   EMPLOYER_SIREN_ALREADY_USED: 'EMPLOYER_SIREN_ALREADY_USED',
-  /** The account already owns an employer, and it may own only one. */
-  EMPLOYER_OWNER_ALREADY_ASSIGNED: 'EMPLOYER_OWNER_ALREADY_ASSIGNED',
   /** The requested allocation does not exist. */
   ALLOCATION_NOT_FOUND: 'ALLOCATION_NOT_FOUND',
   /** The allocation has already been applied and can no longer change. */

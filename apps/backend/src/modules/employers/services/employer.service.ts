@@ -11,7 +11,6 @@ import {
   type CursorPage,
   type PaginationQueryDto,
 } from '@/common/pagination';
-import { UserService } from '@/modules/user';
 import { WalletService } from '@/modules/wallets';
 import { Employer } from '../entities/employer.entity';
 import { EmployerRepo } from '../repos/employer.repo';
@@ -25,7 +24,6 @@ import type {
 export class EmployerService {
   constructor(
     private readonly employerRepo: EmployerRepo,
-    private readonly userService: UserService,
     private readonly walletService: WalletService,
   ) {}
 
@@ -66,17 +64,10 @@ export class EmployerService {
   }
 
   async create(dto: CreateEmployerDto): Promise<EmployerResponseDto> {
-    const owner = await this.userService.findById(dto.ownerId);
-
-    if (!owner) {
-      throw new NotFoundException(ERROR_CODES.EMPLOYER_OWNER_NOT_FOUND);
-    }
-
-    await this.refuseIfConflicting(dto);
+    await this.refuseIfSirenTaken(dto.siren);
 
     try {
       const employer = await this.employerRepo.create({
-        ownerId: dto.ownerId,
         name: dto.name,
         siren: dto.siren,
       });
@@ -86,32 +77,21 @@ export class EmployerService {
       if (!isUniqueViolation(error)) {
         throw error;
       }
-      await this.refuseIfConflicting(dto);
+      await this.refuseIfSirenTaken(dto.siren);
       throw error;
     }
   }
 
   /**
-   * Answers 409 naming the rule that was broken, and returns quietly when
-   * none is. Reading before the insert covers the ordinary case; the same
+   * Answers 409 when the SIREN is already registered, and returns quietly
+   * otherwise. Reading before the insert covers the ordinary case; the same
    * read runs again on a unique violation, which is what turns a creation
    * that lost a race into the answer it would have had a moment earlier.
    */
-  private async refuseIfConflicting(dto: CreateEmployerDto): Promise<void> {
-    const conflicting = await this.employerRepo.findConflicting(
-      dto.siren,
-      dto.ownerId,
-    );
-
-    if (!conflicting) {
-      return;
+  private async refuseIfSirenTaken(siren: string): Promise<void> {
+    if (await this.employerRepo.findBySiren(siren)) {
+      throw new ConflictException(ERROR_CODES.EMPLOYER_SIREN_ALREADY_USED);
     }
-
-    throw new ConflictException(
-      conflicting.siren === dto.siren
-        ? ERROR_CODES.EMPLOYER_SIREN_ALREADY_USED
-        : ERROR_CODES.EMPLOYER_OWNER_ALREADY_ASSIGNED,
-    );
   }
 }
 
@@ -123,7 +103,6 @@ function toResponse(
     id: employer.id,
     name: employer.name,
     siren: employer.siren,
-    ownerId: employer.owner.id,
     activeWalletCount,
     createdAt: employer.createdAt,
   };

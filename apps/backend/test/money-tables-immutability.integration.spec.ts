@@ -36,7 +36,7 @@ async function createMoneyRows() {
   );
   const wallet = await createWallet(context.dataSource, account.id);
   const partner = await PartnerFixture.create(context.dataSource, account.id);
-  const employer = await createEmployer(context.dataSource, account.id);
+  const employer = await createEmployer(context.dataSource);
   const payment = await createPayment(
     context.dataSource,
     wallet.id,
@@ -157,7 +157,7 @@ describe('allocation lifecycle', () => {
       context.app,
       `allocation-lifecycle-${Date.now()}@tickettout.test`,
     );
-    const employer = await createEmployer(context.dataSource, account.id);
+    const employer = await createEmployer(context.dataSource);
     return createAllocation(context.dataSource, employer.id, account.id);
   }
 

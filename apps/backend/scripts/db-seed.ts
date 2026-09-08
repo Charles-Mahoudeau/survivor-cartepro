@@ -246,7 +246,6 @@ async function writePlan(
   for (const employer of plan.employers) {
     await manager.insert(Employer, {
       id: employer.id,
-      owner: { id: employer.ownerId },
       name: employer.name,
       siren: employer.siren,
       createdAt: employer.createdAt,

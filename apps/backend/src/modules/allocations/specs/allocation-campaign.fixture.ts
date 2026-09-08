@@ -44,7 +44,6 @@ export class AllocationCampaignFixture {
     const agent = await this.signUpAgent(context);
     const { employer, active, disabled } = await this.seedEmployer(
       context,
-      agent.id,
       mix,
     );
     const allocation = await AllocationFixture.create(
@@ -71,10 +70,9 @@ export class AllocationCampaignFixture {
    */
   static async seedEmployer(
     context: TestApp,
-    ownerId: string,
     { active, disabled }: WalletMix = { active: 0, disabled: 0 },
   ): Promise<{ employer: Employer; active: Wallet[]; disabled: Wallet[] }> {
-    const employer = await createEmployer(context.dataSource, ownerId);
+    const employer = await createEmployer(context.dataSource);
     const seeded = {
       employer,
       active: [] as Wallet[],

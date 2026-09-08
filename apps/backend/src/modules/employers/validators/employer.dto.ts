@@ -1,22 +1,9 @@
 import { ApiProperty, ApiSchema } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import {
-  IsString,
-  IsUUID,
-  Matches,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { IsString, Matches, MaxLength, MinLength } from 'class-validator';
 import { MAX_EMPLOYER_NAME_LENGTH, SIREN_PATTERN } from '../constants';
 
 export class CreateEmployerDto {
-  @ApiProperty({
-    format: 'uuid',
-    description: 'The account that will administer this employer.',
-  })
-  @IsUUID('7')
-  ownerId: string;
-
   @ApiProperty({ maxLength: MAX_EMPLOYER_NAME_LENGTH })
   @Transform(({ value }): unknown =>
     typeof value === 'string' ? value.trim() : value,
@@ -37,7 +24,6 @@ export class EmployerResponseDto {
   @ApiProperty() id: string;
   @ApiProperty() name: string;
   @ApiProperty() siren: string;
-  @ApiProperty() ownerId: string;
 
   @ApiProperty({
     description: 'Wallets an allocation targeting this employer would credit.',

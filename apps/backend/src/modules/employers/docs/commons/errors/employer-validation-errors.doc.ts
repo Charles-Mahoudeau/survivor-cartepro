@@ -3,8 +3,7 @@ import { ApiResponse } from '@nestjs/swagger';
 export const CreateEmployerValidationErrorsDoc = () => {
   return ApiResponse({
     status: 400,
-    description:
-      'Invalid owner identifier, name or SIREN. A SIREN is nine digits.',
+    description: 'Invalid name or SIREN. A SIREN is nine digits.',
   });
 };
 

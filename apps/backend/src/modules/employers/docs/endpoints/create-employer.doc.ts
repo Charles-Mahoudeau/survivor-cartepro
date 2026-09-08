@@ -4,7 +4,6 @@ import { ForbiddenRoleDoc, UnauthenticatedDoc } from '@/common/docs';
 import {
   CreateEmployerValidationErrorsDoc,
   EmployerConflictDoc,
-  EmployerOwnerNotFoundDoc,
   EmployerResponseDoc,
 } from '../commons';
 
@@ -13,15 +12,13 @@ export const CreateEmployerDoc = () => {
     ApiOperation({
       summary: 'Register an employer',
       description:
-        'Registers an employer under an existing account, which becomes the ' +
-        'one that administers it. A SIREN already registered, or an account ' +
-        'that already owns an employer, answers 409 — including when two ' +
-        'creations race each other. Partner registration answers the same ' +
+        'Registers an employer the administration can target with an ' +
+        'allocation. A SIREN already registered answers 409 — including when ' +
+        'two creations race each other. Partner registration answers the same ' +
         'code for the same class of refusal.',
     }),
     EmployerResponseDoc(),
     CreateEmployerValidationErrorsDoc(),
-    EmployerOwnerNotFoundDoc(),
     EmployerConflictDoc(),
     UnauthenticatedDoc(),
     ForbiddenRoleDoc(),

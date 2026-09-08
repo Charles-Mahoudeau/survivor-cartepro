@@ -199,15 +199,12 @@ describe('GET /me/wallet/entries', () => {
   it('carries the allocation label on a credit', async () => {
     const account = await signUp(context.app, 'credit@tickettout.test');
     const wallet = await createWallet(context.dataSource, account.id);
-    const employerOwner = await signUp(
-      context.app,
-      'credit-employer-owner@tickettout.test',
-    );
-    const employer = await createEmployer(context.dataSource, employerOwner.id);
+    const agent = await signUp(context.app, 'credit-agent@tickettout.test');
+    const employer = await createEmployer(context.dataSource);
     const allocation = await createAllocation(
       context.dataSource,
       employer.id,
-      employerOwner.id,
+      agent.id,
       { label: 'Titres-restaurant janvier' },
     );
     await createWalletEntry(context.dataSource, wallet.id, {
