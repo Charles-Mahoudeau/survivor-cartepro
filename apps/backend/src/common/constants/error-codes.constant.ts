@@ -46,8 +46,10 @@ export const ERROR_CODES = {
   PAYMENT_TOKEN_REVOKED: 'PAYMENT_TOKEN_REVOKED',
   /** The token is consumed but carries no payment — an invariant violation, never expected. */
   PAYMENT_TOKEN_CONSUMED: 'PAYMENT_TOKEN_CONSUMED',
-  /** The token was already consumed by a collection for a different partner or amount. */
-  PAYMENT_TOKEN_ALREADY_CLAIMED: 'PAYMENT_TOKEN_ALREADY_CLAIMED',
+  /** The token already paid someone else, or the same partner for another amount. */
+  PAYMENT_TOKEN_ALREADY_USED: 'PAYMENT_TOKEN_ALREADY_USED',
+  /** The request carries both a QR payload and a short code, or neither. */
+  PAYMENT_TOKEN_LOOKUP_INVALID: 'PAYMENT_TOKEN_LOOKUP_INVALID',
   /** The payment token's validity window has passed. */
   PAYMENT_TOKEN_EXPIRED: 'PAYMENT_TOKEN_EXPIRED',
   /** The wallet balance cannot absorb this debit, even within the overdraft limit. */

@@ -13,6 +13,8 @@ import { PaymentTokenService } from '@/modules/payments/payment-token/services/p
 import { WalletService } from '@/modules/wallets';
 import type { CollectInput, CollectResult } from '../collect.contract';
 import { PaymentRepo } from '../repos/payment.repo';
+import { readPaymentCredential } from './helpers';
+import type { CollectPaymentDto } from '../validators';
 
 @Injectable()
 export class CollectService {
@@ -25,12 +27,34 @@ export class CollectService {
   ) {}
 
   /**
+   * Collects for the partner the connected account owns. The partner identity
+   * comes from the session and the capture mode from which credential the body
+   * carried, so neither is a value a caller can choose.
+   */
+  async collectForOwner(
+    ownerId: string,
+    dto: CollectPaymentDto,
+  ): Promise<CollectResult> {
+    const partnerId = await this.partnerService.getActiveIdByOwnerId(ownerId);
+    const { lookup, captureMode } = readPaymentCredential(dto);
+
+    return this.collect({
+      lookup,
+      partnerId,
+      captureMode,
+      amount: dto.amount,
+      partnerReference: dto.partnerReference ?? null,
+    });
+  }
+
+  /**
    * Collects a payment for a partner: resolves the token (QR signature or
    * short code), then — in one transaction — re-verifies it under lock,
    * debits the wallet and records the payment. A mid-transaction failure
-   * leaves neither the token nor the balance touched. Replaying an
-   * already-consumed token returns the payment it already produced, without
-   * a second debit.
+   * leaves neither the token nor the balance touched. A partner replaying its
+   * own request for the same amount gets the payment it already produced,
+   * without a second debit; any other caller of a spent token is refused
+   * rather than handed a payment that is not theirs.
    */
   async collect(input: CollectInput): Promise<CollectResult> {
     const { tokenId } = await this.paymentTokenService.resolveLive(
@@ -52,13 +76,8 @@ export class CollectService {
             ERROR_CODES.PAYMENT_TOKEN_CONSUMED,
           );
         }
-        const sameRequest =
-          existing.partner.id === input.partnerId &&
-          Number(existing.amount) === input.amount;
-        if (!sameRequest) {
-          throw new ConflictException(
-            ERROR_CODES.PAYMENT_TOKEN_ALREADY_CLAIMED,
-          );
+        if (!this.replays(existing, input)) {
+          throw new ConflictException(ERROR_CODES.PAYMENT_TOKEN_ALREADY_USED);
         }
         return existing;
       }
@@ -87,6 +106,23 @@ export class CollectService {
     return this.toResult(payment);
   }
 
+  /**
+   * Whether the settled payment is the one this request is asking for again.
+   * Two tills can race the same live token; the loser must not be told the
+   * winner's payment is its own.
+   */
+  private replays(payment: Payment, input: CollectInput): boolean {
+    return (
+      payment.partner.id === input.partnerId &&
+      toCents(Number(payment.amount)) === toCents(input.amount)
+    );
+  }
+
+  /**
+   * A freshly saved row still holds the number that was inserted, while one
+   * read back holds the `numeric` Postgres returns. Formatting rather than
+   * stringifying is what keeps both paths answering `12.50`.
+   */
   private toResult(payment: Payment): CollectResult {
     return {
       paymentId: payment.id,
