@@ -11,3 +11,8 @@ export const SHORT_CODE_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
 /** Bounds the retry loop on a uniqueness collision among live tokens. */
 export const SHORT_CODE_MAX_ATTEMPTS = 5;
+
+/** The shape a typed short code must have, derived from the two constants above so they cannot drift. */
+export const SHORT_CODE_PATTERN = new RegExp(
+  `^[${SHORT_CODE_ALPHABET}]{${SHORT_CODE_LENGTH}}$`,
+);

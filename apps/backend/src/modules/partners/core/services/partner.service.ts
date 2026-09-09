@@ -124,6 +124,21 @@ export class PartnerService {
     return this.toPublicResponse(partner);
   }
 
+  /**
+   * The active partner the connected account owns. Collection reads the
+   * partner from the session through this, so the identity being paid is
+   * never one a request body could name.
+   */
+  async getActiveIdByOwnerId(ownerId: string): Promise<string> {
+    const partnerId = await this.partnerRepo.findActiveIdByOwnerId(ownerId);
+
+    if (!partnerId) {
+      throw new ForbiddenException(ERROR_CODES.PARTNER_NOT_ACTIVE);
+    }
+
+    return partnerId;
+  }
+
   /** Used before collecting a payment: the caller only needs the refusal, not the row. */
   async assertActive(id: string): Promise<void> {
     const partner = await this.partnerRepo.findActiveById(id);

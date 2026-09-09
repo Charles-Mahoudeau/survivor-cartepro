@@ -29,6 +29,16 @@ export async function createWallet(
   });
 }
 
+/** Suspends a wallet that already holds something a spec issued while it was active. */
+export async function suspendWallet(
+  dataSource: DataSource,
+  walletId: string,
+): Promise<void> {
+  await dataSource
+    .getRepository(Wallet)
+    .update({ id: walletId }, { status: WalletStatus.DISABLED });
+}
+
 export function createWalletEntry(
   dataSource: DataSource,
   walletId: string,

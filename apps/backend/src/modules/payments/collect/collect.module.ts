@@ -4,6 +4,7 @@ import { Payment } from '@/modules/payments/core/entities/payment.entity';
 import { PaymentTokenModule } from '@/modules/payments/payment-token/payment-token.module';
 import { PartnersCoreModule } from '@/modules/partners/core';
 import { WalletsModule } from '@/modules/wallets';
+import { CollectController } from './controllers';
 import { PaymentRepo } from './repos/payment.repo';
 import { CollectService } from './services/collect.service';
 
@@ -18,6 +19,7 @@ import { CollectService } from './services/collect.service';
     PartnersCoreModule,
     WalletsModule,
   ],
+  controllers: [CollectController],
   providers: [PaymentRepo, CollectService],
   exports: [CollectService],
 })

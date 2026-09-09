@@ -34,6 +34,16 @@ export class PartnerRepo {
     });
   }
 
+  /** The id alone, for a caller that needs to act as the partner rather than read it. */
+  async findActiveIdByOwnerId(ownerId: string): Promise<string | null> {
+    const partner = await this.partners.findOne({
+      where: { owner: { id: ownerId }, status: PartnerStatus.ACTIVE },
+      select: { id: true },
+    });
+
+    return partner?.id ?? null;
+  }
+
   findByOwnerId(ownerId: string): Promise<Partner | null> {
     return this.partners.findOne({
       where: { owner: { id: ownerId } },
