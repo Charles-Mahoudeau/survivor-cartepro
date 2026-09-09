@@ -1,10 +1,17 @@
-import type { DataSource } from 'typeorm';
+import { connectAsAdmin } from './admin-connection';
 
 /** TypeORM's history; truncating it would leave the next spec no schema. */
 const PROTECTED_TABLES = new Set(['migrations', 'typeorm_metadata']);
 
 /**
  * Empties every application table, keeping the migrated schema.
+ *
+ * Runs as the privileged role, not the application's own connection: the
+ * whole point of `audit_log`'s `REVOKE` is that the application role
+ * cannot clear it, so a purge that needs to actually work has to be a
+ * different, genuinely privileged role — "un utilisateur de test dédié et
+ * privilégié pour la purge", per the letter that asked for the REVOKE in
+ * the first place. Never the application role, ever, here or anywhere.
  *
  * Truncation and not a rollback, for a reason specific to this application:
  * Better Auth writes through its OWN pool. Fixtures built inside a TypeORM
@@ -15,23 +22,28 @@ const PROTECTED_TABLES = new Set(['migrations', 'typeorm_metadata']);
  * request comes from the same address, so a spec that signs in six times would
  * hand the next one a 429 of its own making.
  */
-export async function truncateAll(dataSource: DataSource): Promise<void> {
-  const rows: Array<{ tablename: string }> = await dataSource.query(
-    `SELECT tablename FROM pg_tables WHERE schemaname = 'public'`,
-  );
+export async function truncateAll(): Promise<void> {
+  const admin = await connectAsAdmin();
+  try {
+    const { rows } = await admin.query<{ tablename: string }>(
+      `SELECT tablename FROM pg_tables WHERE schemaname = 'public'`,
+    );
 
-  const tables = rows
-    .map((row) => row.tablename)
-    .filter((table) => !PROTECTED_TABLES.has(table))
-    .map((table) => `"${table}"`);
+    const tables = rows
+      .map((row) => row.tablename)
+      .filter((table) => !PROTECTED_TABLES.has(table))
+      .map((table) => `"${table}"`);
 
-  if (tables.length === 0) {
-    return;
+    if (tables.length === 0) {
+      return;
+    }
+
+    await admin.query(
+      `TRUNCATE TABLE ${tables.join(', ')} RESTART IDENTITY CASCADE`,
+    );
+  } finally {
+    await admin.end();
   }
-
-  await dataSource.query(
-    `TRUNCATE TABLE ${tables.join(', ')} RESTART IDENTITY CASCADE`,
-  );
 }
 
 /**
@@ -41,6 +53,11 @@ export async function truncateAll(dataSource: DataSource): Promise<void> {
  * sign-in limit allows, and it cannot reach for `truncateAll`: that would drop
  * the very account whose password it is getting wrong.
  */
-export async function truncateRateLimit(dataSource: DataSource): Promise<void> {
-  await dataSource.query(`TRUNCATE TABLE "rate_limit"`);
+export async function truncateRateLimit(): Promise<void> {
+  const admin = await connectAsAdmin();
+  try {
+    await admin.query(`TRUNCATE TABLE "rate_limit"`);
+  } finally {
+    await admin.end();
+  }
 }

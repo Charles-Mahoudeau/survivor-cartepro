@@ -22,8 +22,14 @@ const conn = JSON.parse(readFileSync(CONN_FILE, 'utf8')) as TestConnection;
 process.env.NODE_ENV = 'test';
 process.env.DATABASE_HOST = conn.host;
 process.env.DATABASE_PORT = String(conn.port);
-process.env.DATABASE_USER = conn.username;
-process.env.DATABASE_PASSWORD = conn.password;
+// The restricted role — what context.dataSource, and the running app under
+// test, actually connect as. DATABASE_ADMIN_USER is the separate, privileged
+// role: used only by the fixture purge and by specs that need a genuinely
+// privileged connection (see test/db/truncate.ts, test/db/admin-connection.ts).
+process.env.DATABASE_USER = conn.app.username;
+process.env.DATABASE_PASSWORD = conn.app.password;
+process.env.DATABASE_ADMIN_USER = conn.admin.username;
+process.env.DATABASE_ADMIN_PASSWORD = conn.admin.password;
 process.env.DATABASE_NAME = conn.database;
 process.env.DATABASE_LOGGING = 'false';
 

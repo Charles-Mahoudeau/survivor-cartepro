@@ -15,6 +15,18 @@ import {
 const IMAGE = 'postgres:18-alpine';
 
 /**
+ * The container's own bootstrap user becomes its superuser — this is the
+ * privileged/admin role, matching the identity `cartepro` has in real
+ * dev/prod deployment (see `ensure-application-role.ts`). The application
+ * role every spec's `context.dataSource` actually connects as is a
+ * separate, ordinary role, provisioned by `db-migrate.ts` below — fixed
+ * test-only credentials, since nothing outside this file needs to know
+ * them ahead of time.
+ */
+const APP_USERNAME = 'cartepro_app';
+const APP_PASSWORD = 'cartepro_app';
+
+/**
  * Runs once before the suite: starts an ephemeral Postgres, applies the real
  * migrations with the real script, and writes the connection for the workers.
  *
@@ -42,9 +54,12 @@ export default async function globalSetup(): Promise<void> {
   const conn: TestConnection = {
     host: container.getHost(),
     port: container.getPort(),
-    username: container.getUsername(),
-    password: container.getPassword(),
     database: container.getDatabase(),
+    admin: {
+      username: container.getUsername(),
+      password: container.getPassword(),
+    },
+    app: { username: APP_USERNAME, password: APP_PASSWORD },
   };
 
   console.log('🐘 [integration] applying migrations...');
@@ -57,8 +72,10 @@ export default async function globalSetup(): Promise<void> {
         NODE_ENV: 'test',
         DATABASE_HOST: conn.host,
         DATABASE_PORT: String(conn.port),
-        DATABASE_USER: conn.username,
-        DATABASE_PASSWORD: conn.password,
+        DATABASE_ADMIN_USER: conn.admin.username,
+        DATABASE_ADMIN_PASSWORD: conn.admin.password,
+        DATABASE_USER: conn.app.username,
+        DATABASE_PASSWORD: conn.app.password,
         DATABASE_NAME: conn.database,
         DATABASE_LOGGING: 'false',
       },

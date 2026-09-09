@@ -40,9 +40,13 @@ export async function createTestApp(): Promise<TestApp> {
   return { app, dataSource: app.get(DataSource) };
 }
 
-/** Call it in `beforeEach`, then build the fixtures the test needs. */
-export async function resetDatabase({ dataSource }: TestApp): Promise<void> {
-  await truncateAll(dataSource);
+/**
+ * Call it in `beforeEach`, then build the fixtures the test needs. Purges
+ * through its own privileged connection — see `truncateAll` — never through
+ * the application's own, deliberately restricted one.
+ */
+export async function resetDatabase(): Promise<void> {
+  await truncateAll();
 }
 
 /**

@@ -28,7 +28,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  await resetDatabase(context);
+  await resetDatabase();
 });
 
 describe('a route open to every role', () => {

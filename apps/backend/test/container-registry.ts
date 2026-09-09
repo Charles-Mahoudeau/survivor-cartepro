@@ -8,12 +8,25 @@ import type { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
  */
 export const CONN_FILE = join(process.cwd(), '.testcontainer.json');
 
+export interface RoleCredentials {
+  username: string;
+  password: string;
+}
+
+/**
+ * Two roles, mirroring the real deployment split (see
+ * `ensure-application-role.ts`): `admin` is the container's own bootstrap
+ * superuser, used only for migrations and for anything a spec needs a
+ * genuinely privileged connection for. `app` is what every spec's
+ * `context.dataSource` actually connects as — restricted, exactly like the
+ * running application in dev and prod.
+ */
 export interface TestConnection {
   host: string;
   port: number;
-  username: string;
-  password: string;
   database: string;
+  admin: RoleCredentials;
+  app: RoleCredentials;
 }
 
 let container: StartedPostgreSqlContainer | undefined;

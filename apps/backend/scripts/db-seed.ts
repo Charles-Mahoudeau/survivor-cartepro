@@ -375,7 +375,7 @@ try {
   }
 
   if (reset) {
-    await truncateAll(dataSource);
+    await truncateAll();
     console.log(chalk.gray('├─ Tables vidées'));
   }
 
