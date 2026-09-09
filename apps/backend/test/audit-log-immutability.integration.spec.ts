@@ -1,4 +1,4 @@
-import { Client } from 'pg';
+import type { Client } from 'pg';
 import { Audit } from '@/modules/audit/entities';
 import { AuditAction } from '@/modules/audit/enums/audit-action.enum';
 import { AuditService } from '@/modules/audit/services';
@@ -12,6 +12,7 @@ import {
   resetDatabase,
   type TestApp,
 } from './app';
+import { connectAsAdmin } from './db/admin-connection';
 
 let context: TestApp;
 
@@ -24,7 +25,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  await resetDatabase(context);
+  await resetDatabase();
 });
 
 async function readChain(): Promise<ChainEntry[]> {
@@ -71,68 +72,22 @@ async function seedThreeEntries(): Promise<void> {
 }
 
 /**
- * The role the migration's `REVOKE` names is the same one the ephemeral test
- * container bootstraps as *its* superuser (`PostgreSqlContainer` runs initdb
- * with that username), which bypasses every ACL check unconditionally and
- * would make the REVOKE look like it holds even if it were absent from the
- * migration entirely.
- *
- * This role has no such exemption: it inherits the application role's own
- * grants — the same `SELECT`/`INSERT` the REVOKE left untouched — through
- * plain membership, without ever touching the application role's superuser
- * bit (which nothing in this container could restore afterward, since it is
- * the only superuser that exists here).
+ * `context.dataSource` is the same restricted, non-superuser role the
+ * running application connects as in dev and prod (see
+ * `ensure-application-role.ts`) — the REVOKE the migration applies binds to
+ * exactly this connection, so these assertions run against it directly.
+ * No second role invented just to prove this.
  */
-const PROBE_ROLE = 'audit_log_probe_test_role';
-const PROBE_PASSWORD = 'audit-log-probe-password';
-
-async function connectAsProbe(): Promise<Client> {
-  const options = context.dataSource.options as {
-    host: string;
-    port: number;
-    database: string;
-  };
-  const client = new Client({
-    host: options.host,
-    port: options.port,
-    database: options.database,
-    user: PROBE_ROLE,
-    password: PROBE_PASSWORD,
-  });
-  await client.connect();
-  return client;
-}
-
 describe('audit_log REVOKE — the application role cannot tamper', () => {
-  let probe: Client;
-
-  beforeAll(async () => {
-    const applicationUser = (context.dataSource.options as { username: string })
-      .username;
-    await context.dataSource.query(`DROP ROLE IF EXISTS "${PROBE_ROLE}"`);
-    await context.dataSource.query(
-      `CREATE ROLE "${PROBE_ROLE}" LOGIN PASSWORD '${PROBE_PASSWORD}'`,
-    );
-    await context.dataSource.query(
-      `GRANT "${applicationUser}" TO "${PROBE_ROLE}"`,
-    );
-    probe = await connectAsProbe();
-  });
-
-  afterAll(async () => {
-    await probe.end();
-    await context.dataSource.query(`DROP ROLE IF EXISTS "${PROBE_ROLE}"`);
-  });
-
   it('rejects an UPDATE on an existing row', async () => {
     await seedThreeEntries();
     const [row] = await readChain();
 
     await expect(
-      probe.query('UPDATE "audit_log" SET "target_id" = $1 WHERE "id" = $2', [
-        'forged',
-        row.id,
-      ]),
+      context.dataSource.query(
+        'UPDATE "audit_log" SET "target_id" = $1 WHERE "id" = $2',
+        ['forged', row.id],
+      ),
     ).rejects.toMatchObject({ code: '42501' });
   });
 
@@ -141,7 +96,9 @@ describe('audit_log REVOKE — the application role cannot tamper', () => {
     const [row] = await readChain();
 
     await expect(
-      probe.query('DELETE FROM "audit_log" WHERE "id" = $1', [row.id]),
+      context.dataSource.query('DELETE FROM "audit_log" WHERE "id" = $1', [
+        row.id,
+      ]),
     ).rejects.toMatchObject({ code: '42501' });
   });
 
@@ -149,32 +106,46 @@ describe('audit_log REVOKE — the application role cannot tamper', () => {
     await seedThreeEntries();
 
     await expect(
-      probe.query('TRUNCATE TABLE "audit_log"'),
+      context.dataSource.query('TRUNCATE TABLE "audit_log"'),
     ).rejects.toMatchObject({ code: '42501' });
   });
 
   it('still allows the writes the interceptor itself needs', async () => {
+    await seedThreeEntries();
+
     await expect(
-      probe.query(
-        `INSERT INTO "audit_log"
-           ("id", "action", "target_type", "target_id", "payload", "ip", "previous_hash", "hash")
-         VALUES (uuidv7(), 'admin_action', 'probe', NULL, NULL, NULL, NULL, 'x')`,
-      ),
+      context.dataSource.query('SELECT * FROM "audit_log"'),
     ).resolves.toBeDefined();
-    await expect(
-      probe.query('SELECT * FROM "audit_log"'),
-    ).resolves.toBeDefined();
+    // INSERT is exercised by every other spec via AuditService.record —
+    // seedThreeEntries above already proved it works through this exact
+    // connection.
   });
 });
 
+/**
+ * Simulates the letter's demo script: "connecting as a privileged
+ * operator" — a genuinely separate, privileged connection, since
+ * `context.dataSource` can no longer perform the tampering it used to
+ * stand in for.
+ */
 describe('tamper detection via the hash chain', () => {
+  let admin: Client;
+
+  beforeAll(async () => {
+    admin = await connectAsAdmin();
+  });
+
+  afterAll(async () => {
+    await admin.end();
+  });
+
   it('names the exact row a privileged operator edited in place', async () => {
     await seedThreeEntries();
     const before = await readChain();
     expect(verifyChain(before).ok).toBe(true);
 
     const tamperedRow = before[1];
-    await context.dataSource.query(
+    await admin.query(
       'UPDATE "audit_log" SET "target_id" = $1 WHERE "id" = $2',
       ['forged-target', tamperedRow.id],
     );
@@ -194,7 +165,7 @@ describe('tamper detection via the hash chain', () => {
     expect(verifyChain(before).ok).toBe(true);
 
     const deletedRow = before[1];
-    await context.dataSource.query('DELETE FROM "audit_log" WHERE "id" = $1', [
+    await admin.query('DELETE FROM "audit_log" WHERE "id" = $1', [
       deletedRow.id,
     ]);
 
