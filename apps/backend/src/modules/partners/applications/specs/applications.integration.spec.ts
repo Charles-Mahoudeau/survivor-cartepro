@@ -88,7 +88,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  await resetDatabase(context);
+  await resetDatabase();
 });
 
 describe('GET /partners/applications', () => {

@@ -1,0 +1,82 @@
+import { AuditAction } from '@/modules/audit/enums/audit-action.enum';
+import type { AuditService } from '@/modules/audit/services/audit.service';
+
+const USER_TARGET_TYPE = 'user';
+
+/** Better Auth's own `/admin/set-role` endpoint path, unprefixed by `AUTH_BASE_PATH`. */
+const SET_ROLE_PATH = '/admin/set-role';
+const BAN_PATHS = new Set(['/admin/ban-user', '/admin/unban-user']);
+
+export function auditAccountCreated(
+  auditService: AuditService,
+  userId: string,
+): Promise<void> {
+  return auditService.record({
+    action: AuditAction.ACCOUNT_CREATED,
+    targetType: USER_TARGET_TYPE,
+    targetId: userId,
+    actorId: null,
+    actorRole: null,
+    payload: null,
+    ip: null,
+  });
+}
+
+export interface UserUpdateAuditContext {
+  /** The Better Auth endpoint that triggered the write, e.g. `/admin/set-role`. */
+  path: string | null;
+  /** The signed-in caller, if any — the same account for a self-service update. */
+  actorId: string | null;
+  actorRole: string | null;
+}
+
+/**
+ * Pure on purpose, so the classification is unit-testable without building a
+ * fake Better Auth endpoint context.
+ *
+ * A role change always gets its own action, whoever the caller is. A ban or
+ * unban is an administrative action on someone else's account, never a
+ * self-service one. Anything else is ACCOUNT_UPDATED when the account acts
+ * on itself, or ADMIN_ACTION when a different, already-authenticated caller
+ * — an admin editing someone else's profile through `/admin/update-user` —
+ * is the one who triggered it.
+ *
+ * This also covers writes with no dedicated admin path, like a password
+ * change or a reset: they still go through `user.update` under the hood, so
+ * they still land as ACCOUNT_UPDATED — consistent with "account
+ * modification" being the broad bucket the letter intends it to be.
+ */
+export function classifyUserUpdateAction(
+  updatedUserId: string,
+  context: UserUpdateAuditContext,
+): AuditAction {
+  if (context.path === SET_ROLE_PATH) {
+    return AuditAction.ROLE_CHANGED;
+  }
+  if (context.path !== null && BAN_PATHS.has(context.path)) {
+    return AuditAction.ADMIN_ACTION;
+  }
+  if (context.actorId && context.actorId !== updatedUserId) {
+    return AuditAction.ADMIN_ACTION;
+  }
+  return AuditAction.ACCOUNT_UPDATED;
+}
+
+export function auditAccountUpdated(
+  auditService: AuditService,
+  updatedUserId: string,
+  updatedRole: string | null,
+  context: UserUpdateAuditContext,
+): Promise<void> {
+  const action = classifyUserUpdateAction(updatedUserId, context);
+
+  return auditService.record({
+    action,
+    targetType: USER_TARGET_TYPE,
+    targetId: updatedUserId,
+    actorId: context.actorId,
+    actorRole: context.actorRole,
+    payload: action === AuditAction.ROLE_CHANGED ? { role: updatedRole } : null,
+    ip: null,
+  });
+}

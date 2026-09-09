@@ -25,6 +25,7 @@ import {
 } from './auth.schema';
 import { getAuthProvisioning } from './auth-provisioning';
 import { handleUserCreated } from './user-created.handler';
+import { auditAccountCreated, auditAccountUpdated } from './user-audit-hooks';
 
 /**
  * Origins allowed to carry a session cookie. The same list feeds CORS in the
@@ -91,10 +92,30 @@ export const authOptions = {
     user: {
       create: {
         async after(user) {
-          const { walletService, userService } = getAuthProvisioning();
+          const { walletService, userService, auditService } =
+            getAuthProvisioning();
           await handleUserCreated(user.id, {
             createWallet: (id) => walletService.createDefault(id),
             deleteUser: (id) => userService.remove(id),
+          });
+          await auditAccountCreated(auditService, user.id);
+        },
+      },
+      /**
+       * Covers every write to a `user` row made through Better Auth — a role
+       * change, a ban, an admin editing someone else's profile, or an
+       * account editing its own — since they all funnel through this one
+       * hook. See `user-audit-hooks.ts` for how the action is chosen.
+       */
+      update: {
+        async after(user, context) {
+          const { auditService } = getAuthProvisioning();
+          const role = typeof user.role === 'string' ? user.role : null;
+          const actorRole = context?.context.session?.user.role as unknown;
+          await auditAccountUpdated(auditService, user.id, role, {
+            path: context?.path ?? null,
+            actorId: context?.context.session?.user.id ?? null,
+            actorRole: typeof actorRole === 'string' ? actorRole : null,
           });
         },
       },

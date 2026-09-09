@@ -2,11 +2,16 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import chalk from 'chalk';
+import { ConfigService } from '@nestjs/config';
 import { DataSource, type EntityManager } from 'typeorm';
 import { auth, authOptions } from '../src/config/auth/auth';
 import { registerAuthProvisioning } from '../src/config/auth/auth-provisioning';
 import { buildDataSourceOptions } from '../src/config/database/data-source';
+import type { Env } from '../src/config/env/env.schema';
 import { Allocation } from '../src/modules/allocations/entities/allocation.entity';
+import { Audit } from '../src/modules/audit/entities';
+import { AuditRepo } from '../src/modules/audit/repos';
+import { AuditService } from '../src/modules/audit/services';
 import { AllocationStatus } from '../src/modules/allocations/enums/allocation-status.enum';
 import { Employer } from '../src/modules/employers/entities/employer.entity';
 import { PartnerCategory } from '../src/modules/partners/categories/entities/partner-category.entity';
@@ -344,6 +349,13 @@ try {
       new WalletEntryRepo(dataSource.getRepository(WalletEntry)),
     ),
     userService: new UserService(new UserRepo(dataSource.getRepository(User))),
+    // No Nest container here either, so a plain `ConfigService` reads
+    // straight off `process.env` — the export endpoint this feeds is never
+    // called from a seed script, only the wallet-provisioning hook is.
+    auditService: new AuditService(
+      new AuditRepo(dataSource.getRepository(Audit)),
+      new ConfigService<Env, true>(process.env),
+    ),
   });
 
   const existingUsers = await dataSource.getRepository(User).count();
@@ -363,7 +375,7 @@ try {
   }
 
   if (reset) {
-    await truncateAll(dataSource);
+    await truncateAll();
     console.log(chalk.gray('├─ Tables vidées'));
   }
 

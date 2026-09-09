@@ -15,6 +15,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { auth, trustedOrigins } from './config/auth/auth';
 import { AUTH_BASE_PATH } from './config/auth/auth.constants';
 import { registerAuthProvisioning } from './config/auth/auth-provisioning';
+import { AuditService } from './modules/audit/services/audit.service';
 import { UserService } from './modules/user/services/user.service';
 import { WalletService } from './modules/wallets/services/wallet.service';
 import { buildOpenApiDocument } from './swagger';
@@ -79,6 +80,7 @@ export async function configureApp(
   registerAuthProvisioning({
     walletService: app.get(WalletService),
     userService: app.get(UserService),
+    auditService: app.get(AuditService),
   });
 
   app.use(helmet({ contentSecurityPolicy: false }));

@@ -195,6 +195,25 @@ non modifiables (§3.2), et une passe de synchronisation de schéma est exacteme
 ce qui peut réécrire la table qui les contient. Toute évolution de schéma passe
 par une migration.
 
+### Rôles de connexion
+
+Deux rôles Postgres, jamais un seul :
+
+| Variable                                          | Rôle       | Droits                                                                                                                                                              |
+| ------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_ADMIN_USER` / `DATABASE_ADMIN_PASSWORD` | Privilégié | Propriétaire du schéma. Exécute les migrations, les scripts `db:*`, et c'est le rôle d'un opérateur qui se connecte directement à la base.                          |
+| `DATABASE_USER` / `DATABASE_PASSWORD`             | Applicatif | `SELECT`/`INSERT`/`UPDATE`/`DELETE` uniquement — jamais de DDL, jamais de gestion de rôle. C'est la seule connexion que l'application, à l'exécution, ouvre jamais. |
+
+Le rôle applicatif n'est provisionné nulle part à la main : `ensure-application-role.ts`
+le crée (ou resynchronise son mot de passe) et lui accorde ses droits — y compris
+sur les tables que les migrations futures créeront, via `ALTER DEFAULT PRIVILEGES` —
+à chaque exécution de `db:migrate`, et au démarrage de l'application elle-même
+(`main.ts`, avant que sa propre connexion, restreinte, ne s'ouvre). C'est ce
+qui rend le `REVOKE UPDATE, DELETE, TRUNCATE` de la table `audit_log` réel : la
+connexion que l'application utilise pour tout le reste ne peut, structurellement,
+ni la modifier ni la vider — et ni les fixtures de test, ni aucun script, n'ont
+jamais le droit de contourner cette restriction pour elle.
+
 ## Documentation d'API
 
 `SwaggerModule` sert le contrat OpenAPI lui-même sur `/docs/json`, Scalar en rend

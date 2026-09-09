@@ -16,6 +16,7 @@ import { Roles } from '@/common/decorators/roles.decorator';
 import { PaginationQueryDto } from '@/common/pagination';
 import { ROLES } from '@/config/auth/auth.constants';
 import type { AuthUser } from '@/config/auth/auth';
+import { Audited, AuditAction } from '@/modules/audit';
 import {
   ApplyAllocationDoc,
   CreateAllocationDoc,
@@ -65,6 +66,7 @@ export class AllocationController {
   @Post(':id/apply')
   @HttpCode(HttpStatus.OK)
   @Roles(ROLES.ADMIN)
+  @Audited(AuditAction.ALLOCATION_APPLIED, 'allocation')
   @ApplyAllocationDoc()
   apply(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string) {
     return this.allocationService.apply(id);

@@ -29,7 +29,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  await resetDatabase(context);
+  await resetDatabase();
 });
 
 async function signUpAdmin() {

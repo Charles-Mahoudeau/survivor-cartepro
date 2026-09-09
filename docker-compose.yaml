@@ -23,13 +23,21 @@ services:
       - NODE_ENV=${NODE_ENV:-production}
       - DATABASE_HOST=${DATABASE_HOST:-postgres}
       - DATABASE_PORT=${DATABASE_PORT:-5432}
-      - DATABASE_USER=${DATABASE_USER:-cartepro}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-cartepro}
+      # The restricted role the running app connects as. DATABASE_ADMIN_USER
+      # below is the separate, privileged role: it owns the schema and is
+      # the only one this container uses to apply migrations on boot, over
+      # a short-lived connection that closes before this one opens — see
+      # `main.ts`'s `prepareDatabase`.
+      - DATABASE_USER=${DATABASE_USER:-cartepro_app}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-cartepro_app}
+      - DATABASE_ADMIN_USER=${DATABASE_ADMIN_USER:-cartepro}
+      - DATABASE_ADMIN_PASSWORD=${DATABASE_ADMIN_PASSWORD:-cartepro}
       - DATABASE_NAME=${DATABASE_NAME:-cartepro}
       - DATABASE_LOGGING=${DATABASE_LOGGING:-false}
       - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:?set BETTER_AUTH_SECRET, e.g. openssl rand -base64 32}
       - BETTER_AUTH_URL=${BETTER_AUTH_URL:?set BETTER_AUTH_URL to the public URL of the API}
       - AUTH_TRUSTED_ORIGINS=${AUTH_TRUSTED_ORIGINS:?set AUTH_TRUSTED_ORIGINS to the origins allowed to sign in}
+      - AUDIT_EXPORT_SIGNING_SECRET=${AUDIT_EXPORT_SIGNING_SECRET:?set AUDIT_EXPORT_SIGNING_SECRET, e.g. openssl rand -base64 32}
     expose:
       - 3000
     depends_on:
@@ -41,13 +49,21 @@ services:
     restart: unless-stopped
     environment:
       - POSTGRES_PORT=${DATABASE_PORT:-5432}
-      - POSTGRES_USER=${DATABASE_USER:-cartepro}
-      - POSTGRES_PASSWORD=${DATABASE_PASSWORD:-cartepro}
+      # The bootstrap superuser only — the actual application role
+      # (DATABASE_USER) is provisioned separately, idempotently, by
+      # `db:migrate`/`main.ts`'s `prepareDatabase` (see
+      # `ensure-application-role.ts`), not by this image's own init.
+      - POSTGRES_USER=${DATABASE_ADMIN_USER:-cartepro}
+      - POSTGRES_PASSWORD=${DATABASE_ADMIN_PASSWORD:-cartepro}
       - POSTGRES_DB=${DATABASE_NAME:-cartepro}
     volumes:
       - postgres-data:/var/lib/postgresql
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U cartepro -d cartepro']
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${DATABASE_ADMIN_USER:-cartepro} -d ${DATABASE_NAME:-cartepro}',
+        ]
       interval: 5s
       timeout: 3s
       retries: 10

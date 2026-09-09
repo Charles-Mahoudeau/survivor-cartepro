@@ -1,3 +1,4 @@
+import type { AuditService } from '@/modules/audit/services/audit.service';
 import type { UserService } from '@/modules/user/services/user.service';
 import type { WalletService } from '@/modules/wallets/services/wallet.service';
 
@@ -10,6 +11,7 @@ import type { WalletService } from '@/modules/wallets/services/wallet.service';
 export interface AuthProvisioningServices {
   walletService: WalletService;
   userService: UserService;
+  auditService: AuditService;
 }
 
 let services: AuthProvisioningServices | undefined;

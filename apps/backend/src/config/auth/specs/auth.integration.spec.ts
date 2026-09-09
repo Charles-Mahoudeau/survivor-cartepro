@@ -82,7 +82,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  await resetDatabase(context);
+  await resetDatabase();
 });
 
 describe('sign-up', () => {
@@ -232,7 +232,7 @@ describe('sign-in', () => {
     await signUp(context.app, 'connu@tickettout.test');
 
     const timeRefusal = async (email: string, password: string) => {
-      await truncateRateLimit(context.dataSource);
+      await truncateRateLimit();
       const started = performance.now();
       await post('/sign-in/email').send({ email, password }).expect(401);
       return performance.now() - started;
