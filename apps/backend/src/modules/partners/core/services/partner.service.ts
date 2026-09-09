@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import type { EntityManager } from 'typeorm';
-import { QueryFailedError } from 'typeorm';
+import { uniqueViolationConstraint } from '@/common/unique-violation';
 import {
   InvalidCursorError,
   paginate,
@@ -102,25 +102,16 @@ export class PartnerService {
    * `createForOwner` can't close by themselves.
    */
   private translateCreationConflict(error: unknown): unknown {
-    if (error instanceof QueryFailedError) {
-      const driverError = error.driverError as {
-        code?: string;
-        constraint?: string;
-      };
-
-      if (driverError?.code === '23505') {
-        if (driverError.constraint === SIREN_UNIQUE_CONSTRAINT) {
-          return new ConflictException(
-            ERROR_CODES.PARTNER_SIREN_ALREADY_REGISTERED,
-          );
-        }
-        if (driverError.constraint === OWNER_UNIQUE_CONSTRAINT) {
-          return new ConflictException(ERROR_CODES.PARTNER_ALREADY_EXISTS);
-        }
-      }
+    switch (uniqueViolationConstraint(error)) {
+      case SIREN_UNIQUE_CONSTRAINT:
+        return new ConflictException(
+          ERROR_CODES.PARTNER_SIREN_ALREADY_REGISTERED,
+        );
+      case OWNER_UNIQUE_CONSTRAINT:
+        return new ConflictException(ERROR_CODES.PARTNER_ALREADY_EXISTS);
+      default:
+        return error;
     }
-
-    return error;
   }
 
   async findPublicById(id: string): Promise<PartnerResponseDto> {
