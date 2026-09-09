@@ -23,10 +23,6 @@ import { WalletStatus } from '@/modules/wallets/enums';
 let context: TestApp;
 const getMyWallet = (cookie: string[]) =>
   api(context.app).get(apiPath('/me/wallet')).set('Cookie', cookie);
-const getBalance = (cookie: string[], userId: string) =>
-  api(context.app)
-    .get(apiPath(`/balance/${userId}`))
-    .set('Cookie', cookie);
 const listMyWalletEntries = (cookie: string[], qs = '') =>
   api(context.app)
     .get(apiPath(`/me/wallet/entries${qs}`))
@@ -129,71 +125,6 @@ describe('GET /me/wallet', () => {
 
   it('refuses a request with no session', async () => {
     await api(context.app).get(apiPath('/me/wallet')).expect(401);
-  });
-});
-
-describe('GET /balance/:userId', () => {
-  it('returns the exact balance of the targeted account', async () => {
-    const admin = await signUp(context.app, 'balance-admin@tickettout.test');
-    await grantRole(context, admin.id, ROLES.ADMIN);
-    const target = await signUp(context.app, 'balance-cible@tickettout.test');
-    await createWallet(context.dataSource, target.id, { balance: 137.5 });
-
-    const response = await getBalance(admin.cookie, target.id).expect(200);
-
-    expect(bodyOf<{ balance: string }>(response)).toEqual({
-      balance: '137.50',
-    });
-  });
-
-  it('answers 404 when the targeted account has no wallet', async () => {
-    const admin = await signUp(
-      context.app,
-      'balance-admin-404@tickettout.test',
-    );
-    await grantRole(context, admin.id, ROLES.ADMIN);
-    const target = await signUp(
-      context.app,
-      'balance-sans-portefeuille@tickettout.test',
-    );
-    await context.dataSource
-      .getRepository(Wallet)
-      .delete({ user: { id: target.id } });
-
-    const response = await getBalance(admin.cookie, target.id).expect(404);
-
-    expect(bodyOf<{ message: string }>(response).message).toBe(
-      'WALLET_NOT_FOUND',
-    );
-  });
-
-  it('refuses an employee', async () => {
-    const employee = await signUp(
-      context.app,
-      'balance-employe@tickettout.test',
-    );
-    const target = await signUp(
-      context.app,
-      'balance-cible-403@tickettout.test',
-    );
-    await createWallet(context.dataSource, target.id, { balance: 10 });
-
-    const response = await getBalance(employee.cookie, target.id).expect(403);
-
-    expect(bodyOf<{ message: string }>(response).message).toBe(
-      'FORBIDDEN_ROLE',
-    );
-  });
-
-  it('refuses a request with no session', async () => {
-    const target = await signUp(
-      context.app,
-      'balance-cible-401@tickettout.test',
-    );
-
-    await api(context.app)
-      .get(apiPath(`/balance/${target.id}`))
-      .expect(401);
   });
 });
 

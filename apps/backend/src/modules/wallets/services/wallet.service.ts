@@ -34,7 +34,6 @@ import type {
   PaymentDebit,
 } from '../wallets.contract';
 import type { ListMyWalletEntriesQueryDto } from '../validators/list-my-wallet-entries-query.dto';
-import type { WalletBalanceResponseDto } from '../validators/wallet-balance.dto';
 import type { WalletEntryResponseDto } from '../validators/wallet-entry.dto';
 import type { WalletResponseDto } from '../validators/wallet.dto';
 
@@ -53,18 +52,12 @@ export class WalletService {
   /** Used by payment-token issuance to check status and balance without the full DTO. */
   async findSummaryByUserId(
     userId: string,
-  ): Promise<Pick<Wallet, 'id' | 'status' | 'balance'>> {
+  ): Promise<Pick<Wallet, 'id' | 'status' | 'balance' | 'currency'>> {
     const wallet = await this.walletRepo.findSummaryByUserId(userId);
     if (!wallet) {
       throw new NotFoundException(ERROR_CODES.WALLET_NOT_FOUND);
     }
     return wallet;
-  }
-
-  /** Admin-only lookup: the balance of any account's wallet, by user id. */
-  async getBalance(userId: string): Promise<WalletBalanceResponseDto> {
-    const wallet = await this.findSummaryByUserId(userId);
-    return { balance: wallet.balance.toString() };
   }
 
   async getMine(userId: string): Promise<WalletResponseDto> {
