@@ -34,6 +34,7 @@ import type {
   PaymentDebit,
 } from '../wallets.contract';
 import type { ListMyWalletEntriesQueryDto } from '../validators/list-my-wallet-entries-query.dto';
+import type { WalletBalanceResponseDto } from '../validators/wallet-balance.dto';
 import type { WalletEntryResponseDto } from '../validators/wallet-entry.dto';
 import type { WalletResponseDto } from '../validators/wallet.dto';
 
@@ -58,6 +59,12 @@ export class WalletService {
       throw new NotFoundException(ERROR_CODES.WALLET_NOT_FOUND);
     }
     return wallet;
+  }
+
+  /** Admin-only lookup: the balance of any account's wallet, by user id. */
+  async getBalance(userId: string): Promise<WalletBalanceResponseDto> {
+    const wallet = await this.findSummaryByUserId(userId);
+    return { balance: wallet.balance.toString() };
   }
 
   async getMine(userId: string): Promise<WalletResponseDto> {
