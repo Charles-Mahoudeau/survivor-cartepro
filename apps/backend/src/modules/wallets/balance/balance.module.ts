@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { WalletsModule } from '@/modules/wallets/wallets.module';
 import { BalanceController } from './controllers';
-import { BalanceService } from './services';
 
 /**
  * The third-party read of an employee balance. It owns no table and no repo:
@@ -11,6 +10,5 @@ import { BalanceService } from './services';
 @Module({
   imports: [WalletsModule],
   controllers: [BalanceController],
-  providers: [BalanceService],
 })
 export class BalanceModule {}
