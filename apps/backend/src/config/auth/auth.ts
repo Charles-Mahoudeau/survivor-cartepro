@@ -3,6 +3,7 @@
 import '../env/load-env';
 import { apiKey } from '@better-auth/api-key';
 import { betterAuth } from 'better-auth';
+import { createAuthMiddleware } from 'better-auth/api';
 import { admin } from 'better-auth/plugins/admin';
 import { openAPI } from 'better-auth/plugins';
 import { Pool } from 'pg';
@@ -25,7 +26,13 @@ import {
 } from './auth.schema';
 import { getAuthProvisioning } from './auth-provisioning';
 import { handleUserCreated } from './user-created.handler';
-import { auditAccountCreated, auditAccountUpdated } from './user-audit-hooks';
+import {
+  auditAccountCreated,
+  auditAccountUpdated,
+  auditFailedSignIn,
+  isFailedSignIn,
+  readAttemptedEmail,
+} from './user-audit-hooks';
 
 /**
  * Origins allowed to carry a session cookie. The same list feeds CORS in the
@@ -120,6 +127,25 @@ export const authOptions = {
         },
       },
     },
+  },
+
+  /**
+   * A rejected sign-in never reaches a database hook — no row is written — so
+   * it is caught here, on the endpoint pipeline, where the returned error is
+   * still readable. `after` runs on the failure path: the library assigns a
+   * thrown `APIError` to `context.returned` before calling its hooks.
+   */
+  hooks: {
+    after: createAuthMiddleware(async (ctx) => {
+      if (!isFailedSignIn(ctx.path, ctx.context.returned)) return;
+
+      const { auditService } = getAuthProvisioning();
+
+      await auditFailedSignIn(auditService, {
+        email: readAttemptedEmail(ctx.body),
+        ip: ctx.headers?.get('x-forwarded-for') ?? null,
+      });
+    }),
   },
 
   /**

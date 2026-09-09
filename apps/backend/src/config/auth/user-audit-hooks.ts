@@ -1,3 +1,4 @@
+import { isAPIError } from 'better-auth/api';
 import { AuditAction } from '@/modules/audit/enums/audit-action.enum';
 import type { AuditService } from '@/modules/audit/services/audit.service';
 
@@ -78,5 +79,58 @@ export function auditAccountUpdated(
     actorRole: context.actorRole,
     payload: action === AuditAction.ROLE_CHANGED ? { role: updatedRole } : null,
     ip: null,
+  });
+}
+
+/** Better Auth's credential sign-in path, unprefixed by `AUTH_BASE_PATH`. */
+const SIGN_IN_EMAIL_PATH = '/sign-in/email';
+
+/**
+ * True when a credential sign-in came back as an error rather than a session.
+ *
+ * Better Auth runs its `after` hooks on the failure path too: a thrown
+ * `APIError` is caught, assigned to `context.returned`, and only then are the
+ * hooks called. So the outcome is read from what was returned, never from the
+ * absence of a session.
+ */
+export function isFailedSignIn(path: string, returned: unknown): boolean {
+  return path === SIGN_IN_EMAIL_PATH && isAPIError(returned);
+}
+
+/**
+ * The address someone tried to sign in as, or null when the body carried none.
+ */
+export function readAttemptedEmail(body: unknown): string | null {
+  if (typeof body !== 'object' || body === null || !('email' in body)) {
+    return null;
+  }
+  const { email } = body;
+
+  return typeof email === 'string' ? email : null;
+}
+
+export interface FailedSignInAuditContext {
+  email: string | null;
+  ip: string | null;
+}
+
+/**
+ * Records a rejected sign-in. The actor is null by construction — nobody is
+ * authenticated — so the attempted address and the address it came from are
+ * the whole value of the entry. The credentials themselves never reach it:
+ * only the email is read out of the body, never the body itself.
+ */
+export function auditFailedSignIn(
+  auditService: AuditService,
+  context: FailedSignInAuditContext,
+): Promise<void> {
+  return auditService.record({
+    action: AuditAction.LOGIN_FAILED,
+    targetType: USER_TARGET_TYPE,
+    targetId: null,
+    actorId: null,
+    actorRole: null,
+    payload: context.email ? { email: context.email } : null,
+    ip: context.ip,
   });
 }
