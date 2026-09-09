@@ -13,6 +13,9 @@ build
 # Tests
 coverage
 .nyc_output
+__pycache__
+*.pyc
+.venv
 
 # Environment
 .env
