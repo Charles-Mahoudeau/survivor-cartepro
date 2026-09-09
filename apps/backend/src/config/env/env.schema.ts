@@ -17,8 +17,9 @@ export const EnvSchema = z.object({
   HOST: z.string().min(1).default('0.0.0.0'),
   DATABASE_HOST: z.string().min(1).trim().default('localhost'),
   DATABASE_PORT: z.coerce.number().default(5432),
-  DATABASE_USER: z.string().min(1).default('cartepro'),
-  DATABASE_PASSWORD: z.string().min(1).default('cartepro'),
+  /** The restricted, non-superuser role the running app connects as — never the schema owner. */
+  DATABASE_USER: z.string().min(1).default('cartepro_app'),
+  DATABASE_PASSWORD: z.string().min(1).default('cartepro_app'),
   DATABASE_NAME: z.string().min(1).default('cartepro'),
   DATABASE_LOGGING: z.enum(['true', 'false']).default('true'),
 
