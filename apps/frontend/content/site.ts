@@ -17,9 +17,6 @@ export const SITE_CONTENT = {
     description:
       'Tous les montants affichés dans cette application sont fictifs. Aucune somme réelle n’est détenue, transférée ni encaissée.',
   },
-  /** Wording fixed by the cabinet: it is reproduced verbatim, never reworded. */
-  disclaimer:
-    'Démonstrateur technique, ne constitue pas un service public en exploitation.',
   offline: {
     pageTitle: 'Hors ligne — CartePro',
     title: 'Vous êtes hors ligne',
