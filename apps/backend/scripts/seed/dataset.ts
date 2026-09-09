@@ -11,16 +11,16 @@ import { ROLES, type Role } from '../../src/config/auth/auth.constants';
  * by a generator seeded with `SEED_RANDOM_SEED` and anchored on
  * `SEED_REFERENCE_DATE`, so two runs produce the same rows, ids included.
  *
- * The six partners named first are the ones of the brief (JEB/DNI/2026-002
- * §2.1) and of `apps/frontend/app/mock-data.ts`; the six that follow are the
- * first wave, active since May, so the earliest weeks have someone to pay.
+ * The six partners named first are the ones the cabinet mandated, in its
+ * order; the six that follow are the first wave, active since May, so the
+ * earliest weeks have someone to pay.
  *
  * Amounts are in cents so a running balance never drifts; the writer divides
  * once, at the edge, into the `numeric(12,2)` columns.
  */
 
 /** Everyone signs in with it. Long enough for `MIN_PASSWORD_LENGTH`. */
-export const SEED_PASSWORD = 'TicketTout2026!';
+export const SEED_PASSWORD = 'CartePro2026!';
 
 /** Fixed on purpose: the whole dataset is a function of this number. */
 export const SEED_RANDOM_SEED = 20260904;
@@ -70,9 +70,12 @@ export const SPENDING_PROFILES: Record<
 };
 
 export type CategorySlug =
-  | 'sport-nature'
-  | 'culture-loisirs'
+  | 'restauration'
   | 'alimentation'
+  | 'culture-loisirs'
+  | 'sante'
+  | 'mobilite'
+  | 'sport-nature'
   | 'mode-artisanat'
   | 'bien-etre'
   | 'commerce-proximite';
@@ -82,10 +85,18 @@ export interface SeedCategory {
   displayName: string;
 }
 
+/**
+ * The first six are the ones the cabinet named, in its order. The three that
+ * follow are held by shops of the first wave, kept so the ninety days of
+ * history still span the categories the dimensioning note reports on.
+ */
 export const CATEGORIES: SeedCategory[] = [
-  { slug: 'sport-nature', displayName: 'Sport & Nature' },
-  { slug: 'culture-loisirs', displayName: 'Culture & Loisirs' },
+  { slug: 'restauration', displayName: 'Restauration' },
   { slug: 'alimentation', displayName: 'Alimentation' },
+  { slug: 'culture-loisirs', displayName: 'Culture' },
+  { slug: 'sante', displayName: 'Santé' },
+  { slug: 'mobilite', displayName: 'Mobilité' },
+  { slug: 'sport-nature', displayName: 'Sport' },
   { slug: 'mode-artisanat', displayName: 'Mode & Artisanat' },
   { slug: 'bien-etre', displayName: 'Bien-être' },
   { slug: 'commerce-proximite', displayName: 'Commerce de proximité' },
@@ -93,8 +104,11 @@ export const CATEGORIES: SeedCategory[] = [
 
 /** A plausible basket per category, in cents, before the profile factor. */
 export const AMOUNT_RANGES_CENTS: Record<CategorySlug, [number, number]> = {
+  restauration: [900, 3200],
   alimentation: [350, 2800],
   'culture-loisirs': [900, 6500],
+  sante: [600, 4500],
+  mobilite: [200, 3800],
   'sport-nature': [1500, 9500],
   'mode-artisanat': [2500, 12000],
   'bien-etre': [3000, 9000],
@@ -200,18 +214,18 @@ function activation(decidedAt: string, reason: string): SeedDecision {
 export const PARTNERS: SeedPartner[] = [
   {
     owner: {
-      name: 'Boulangerie Maison Aubry',
-      email: 'contact@maison-aubry.fr',
+      name: 'Le Comptoir du Midi',
+      email: 'contact@comptoir-du-midi.fr',
       role: ROLES.PARTNER,
       createdAt: '2026-05-04T08:40:00Z',
     },
-    legalName: 'SARL MAISON AUBRY',
-    tradeName: 'Boulangerie Maison Aubry',
+    legalName: 'SARL LE COMPTOIR DU MIDI',
+    tradeName: 'Le Comptoir du Midi',
     siren: '431874221',
     businessPurpose:
-      'Boulangerie-pâtisserie artisanale, fabrication et vente de pain, viennoiseries et sandwichs.',
+      'Restauration traditionnelle, service du midi et vente à emporter.',
     status: PartnerStatus.ACTIVE,
-    categorySlugs: ['alimentation'],
+    categorySlugs: ['restauration'],
     addressLine: '14 rue de Béthune',
     postalCode: '59000',
     city: 'Lille',
@@ -222,22 +236,22 @@ export const PARTNERS: SeedPartner[] = [
     decisions: [
       activation(
         '2026-05-18T10:15:00Z',
-        'SIREN vérifié. Artisan boulanger inscrit au répertoire des métiers, activité conforme à la catégorie Alimentation. Partenaire retenu pour la première vague.',
+        'SIREN vérifié. Établissement de restauration traditionnelle inscrit au registre du commerce, activité conforme à la catégorie Restauration.',
       ),
     ],
   },
   {
     owner: {
-      name: 'Fromagerie des Alpages',
-      email: 'contact@fromagerie-des-alpages.fr',
+      name: 'Épicerie Sainte-Claire',
+      email: 'contact@epicerie-sainte-claire.fr',
       role: ROLES.PARTNER,
       createdAt: '2026-05-05T13:50:00Z',
     },
-    legalName: 'FROMAGERIE DES ALPAGES SAS',
-    tradeName: 'Fromagerie des Alpages',
+    legalName: 'EPICERIE SAINTE-CLAIRE SAS',
+    tradeName: 'Épicerie Sainte-Claire',
     siren: '520398744',
     businessPurpose:
-      'Affinage et vente de fromages fermiers de Savoie, plateaux et paniers garnis.',
+      'Commerce de détail alimentaire, épicerie générale et produits frais.',
     status: PartnerStatus.ACTIVE,
     categorySlugs: ['alimentation'],
     addressLine: '3 rue Sainte-Claire',
@@ -246,123 +260,123 @@ export const PARTNERS: SeedPartner[] = [
     region: 'Auvergne-Rhône-Alpes',
     latitude: 45.8992,
     longitude: 6.1294,
-    submittedAt: '2026-05-05T14:20:00Z',
+    submittedAt: '2026-05-05T14:25:00Z',
     decisions: [
       activation(
-        '2026-05-19T09:30:00Z',
-        'Dossier complet. Commerce de bouche à enseigne physique, activité conforme à la catégorie Alimentation. Partenaire retenu pour la première vague.',
+        '2026-05-19T09:40:00Z',
+        'SIREN vérifié. Commerce de détail alimentaire, activité conforme à la catégorie Alimentation.',
       ),
     ],
   },
   {
     owner: {
-      name: 'Kayak Aventure Ardèche',
-      email: 'contact@kayak-aventure-ardeche.fr',
+      name: 'Librairie Vasseur',
+      email: 'contact@librairie-vasseur.fr',
       role: ROLES.PARTNER,
-      createdAt: '2026-05-06T10:05:00Z',
+      createdAt: '2026-05-11T10:05:00Z',
     },
-    legalName: 'KAYAK AVENTURE ARDECHE SARL',
-    tradeName: 'Kayak Aventure Ardèche',
-    siren: '789456019',
+    legalName: 'LIBRAIRIE VASSEUR SARL',
+    tradeName: 'Librairie Vasseur',
+    siren: '638921047',
     businessPurpose:
-      'Location de canoës et kayaks, descentes encadrées des gorges de l’Ardèche et sorties de groupe.',
-    status: PartnerStatus.ACTIVE,
-    categorySlugs: ['sport-nature'],
-    addressLine: 'Route des Gorges',
-    postalCode: '07150',
-    city: 'Vallon-Pont-d’Arc',
-    region: 'Auvergne-Rhône-Alpes',
-    latitude: 44.4069,
-    longitude: 4.3933,
-    submittedAt: '2026-05-06T10:40:00Z',
-    decisions: [
-      activation(
-        '2026-05-20T11:00:00Z',
-        'SIREN vérifié, encadrement diplômé attesté. Activité de plein air conforme à la catégorie Sport & Nature. Partenaire retenu pour la première vague.',
-      ),
-    ],
-  },
-  {
-    owner: {
-      name: 'La Clé des Songes',
-      email: 'contact@lacledessonges.fr',
-      role: ROLES.PARTNER,
-      createdAt: '2026-05-07T15:20:00Z',
-    },
-    legalName: 'LA CLE DES SONGES SAS',
-    tradeName: 'La Clé des Songes',
-    siren: '348120650',
-    businessPurpose:
-      'Exploitation de salles d’escape game, animation de sessions pour particuliers et équipes.',
+      'Librairie indépendante, vente de livres neufs, papeterie et presse.',
     status: PartnerStatus.ACTIVE,
     categorySlugs: ['culture-loisirs'],
-    addressLine: '22 rue Crébillon',
-    postalCode: '44000',
-    city: 'Nantes',
-    region: 'Pays de la Loire',
-    latitude: 47.2135,
-    longitude: -1.5589,
-    submittedAt: '2026-05-07T15:45:00Z',
-    decisions: [
-      activation(
-        '2026-05-22T14:10:00Z',
-        'Dossier complet. Activité de loisirs en salle, ouverte aux groupes, conforme à la catégorie Culture & Loisirs. Partenaire retenu pour la première vague.',
-      ),
-    ],
-  },
-  {
-    owner: {
-      name: 'Maroquinerie Le Guen',
-      email: 'contact@maroquinerie-leguen.fr',
-      role: ROLES.PARTNER,
-      createdAt: '2026-05-11T09:00:00Z',
-    },
-    legalName: 'MAROQUINERIE LE GUEN',
-    tradeName: 'Maroquinerie Le Guen',
-    siren: '654209816',
-    businessPurpose:
-      'Fabrication artisanale et vente d’articles de maroquinerie, réparation de cuir.',
-    status: PartnerStatus.ACTIVE,
-    categorySlugs: ['mode-artisanat'],
-    addressLine: '9 rue Saint-Michel',
+    addressLine: '27 rue du Général Leclerc',
     postalCode: '35000',
     city: 'Rennes',
     region: 'Bretagne',
-    latitude: 48.1146,
-    longitude: -1.6806,
-    submittedAt: '2026-05-11T09:30:00Z',
+    latitude: 48.1113,
+    longitude: -1.6797,
+    submittedAt: '2026-05-11T11:00:00Z',
     decisions: [
       activation(
-        '2026-05-26T10:45:00Z',
-        'Artisan maroquinier inscrit au répertoire des métiers. Activité conforme à la catégorie Mode & Artisanat. Partenaire retenu pour la première vague.',
+        '2026-05-22T14:30:00Z',
+        'SIREN vérifié. Librairie inscrite au registre du commerce, activité conforme à la catégorie Culture.',
       ),
     ],
   },
   {
     owner: {
-      name: 'Océane Bien-Être',
-      email: 'contact@oceane-bien-etre.fr',
+      name: 'Pharmacie du Parc',
+      email: 'contact@pharmacie-du-parc.fr',
       role: ROLES.PARTNER,
-      createdAt: '2026-05-12T11:15:00Z',
+      createdAt: '2026-05-18T09:15:00Z',
     },
-    legalName: 'OCEANE BIEN-ETRE SARL',
-    tradeName: 'Océane Bien-Être',
-    siren: '917305468',
+    legalName: 'PHARMACIE DU PARC SELARL',
+    tradeName: 'Pharmacie du Parc',
+    siren: '749205338',
     businessPurpose:
-      'Institut de bien-être : massages, soins du corps, espace sauna et hammam.',
+      'Officine de pharmacie, dispensation de médicaments et parapharmacie.',
     status: PartnerStatus.ACTIVE,
-    categorySlugs: ['bien-etre'],
-    addressLine: '45 cours de l’Intendance',
+    categorySlugs: ['sante'],
+    addressLine: '8 avenue du Parc',
     postalCode: '33000',
     city: 'Bordeaux',
     region: 'Nouvelle-Aquitaine',
-    latitude: 44.8412,
-    longitude: -0.5769,
-    submittedAt: '2026-05-12T11:40:00Z',
+    latitude: 44.8404,
+    longitude: -0.5805,
+    submittedAt: '2026-05-18T10:20:00Z',
+    decisions: [
+      activation(
+        '2026-05-26T11:05:00Z',
+        'SIREN vérifié. Officine inscrite à l ordre national des pharmaciens, activité conforme à la catégorie Santé.',
+      ),
+    ],
+  },
+  {
+    owner: {
+      name: 'Transports Régionaux Unifiés',
+      email: 'contact@transports-regionaux-unifies.fr',
+      role: ROLES.PARTNER,
+      createdAt: '2026-05-20T14:35:00Z',
+    },
+    legalName: 'TRANSPORTS REGIONAUX UNIFIES SA',
+    tradeName: 'Transports Régionaux Unifiés',
+    siren: '856013492',
+    businessPurpose:
+      'Transport public de voyageurs, titres de transport urbains et interurbains.',
+    status: PartnerStatus.ACTIVE,
+    categorySlugs: ['mobilite'],
+    addressLine: '52 boulevard de Strasbourg',
+    postalCode: '31000',
+    city: 'Toulouse',
+    region: 'Occitanie',
+    latitude: 43.6108,
+    longitude: 1.4494,
+    submittedAt: '2026-05-20T15:10:00Z',
+    decisions: [
+      activation(
+        '2026-05-27T09:50:00Z',
+        'SIREN vérifié. Délégataire de service public de transport de voyageurs, activité conforme à la catégorie Mobilité.',
+      ),
+    ],
+  },
+  {
+    owner: {
+      name: 'Sport Loisirs Aubagne',
+      email: 'contact@sport-loisirs-aubagne.fr',
+      role: ROLES.PARTNER,
+      createdAt: '2026-05-25T11:45:00Z',
+    },
+    legalName: 'SPORT LOISIRS AUBAGNE SARL',
+    tradeName: 'Sport Loisirs Aubagne',
+    siren: '967184205',
+    businessPurpose:
+      'Vente d équipements sportifs et de loisirs, location de matériel.',
+    status: PartnerStatus.ACTIVE,
+    categorySlugs: ['sport-nature'],
+    addressLine: '19 cours Barthélemy',
+    postalCode: '13400',
+    city: 'Aubagne',
+    region: "Provence-Alpes-Côte d'Azur",
+    latitude: 43.2925,
+    longitude: 5.5706,
+    submittedAt: '2026-05-25T12:30:00Z',
     decisions: [
       activation(
         '2026-05-27T16:20:00Z',
-        'Dossier complet. Établissement de soins non médicaux, activité conforme à la catégorie Bien-être. Partenaire retenu pour la première vague.',
+        'SIREN vérifié. Commerce d articles de sport, activité conforme à la catégorie Sport.',
       ),
     ],
   },
