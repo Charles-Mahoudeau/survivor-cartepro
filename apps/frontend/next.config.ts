@@ -1,4 +1,14 @@
+import { withSerwist } from '@serwist/turbopack';
 import type { NextConfig } from 'next';
+
+/** Bundled and served by app/serwist/[path]/route.ts. */
+const SERVICE_WORKER_PATH = '/serwist/sw.js';
+
+/**
+ * The worker must never settle into an HTTP cache: a frozen copy would never be
+ * replaced by the next deploy, and the app would keep an old caching policy.
+ */
+const SERVICE_WORKER_CACHE_CONTROL = 'public, max-age=0, must-revalidate';
 
 /** Matches the development default of lib/env.ts, where the API listens. */
 const DEVELOPMENT_BACKEND_URL = 'http://localhost:3001';
@@ -34,6 +44,18 @@ const nextConfig: NextConfig = {
 
     return [{ source: '/auth/:path*', destination: `${backend}/auth/:path*` }];
   },
+
+  async headers() {
+    return [
+      {
+        source: SERVICE_WORKER_PATH,
+        headers: [
+          { key: 'Cache-Control', value: SERVICE_WORKER_CACHE_CONTROL },
+          { key: 'Service-Worker-Allowed', value: '/' },
+        ],
+      },
+    ];
+  },
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);
