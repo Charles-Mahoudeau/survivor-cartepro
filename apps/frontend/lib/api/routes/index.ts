@@ -1,6 +1,7 @@
 import 'server-only';
 
 import * as partner from './partner';
+import * as partnerApplication from './partner-application';
 import * as partnerCategory from './partner-category';
 import * as wallet from './wallet';
 
@@ -9,4 +10,5 @@ export const api = {
   wallet,
   partner,
   partnerCategory,
+  partnerApplication,
 };
