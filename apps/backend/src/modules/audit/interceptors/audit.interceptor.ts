@@ -9,9 +9,11 @@ import { Observable, tap } from 'rxjs';
 import {
   AUDIT_KEY,
   AuditMetadata,
-  AuditResolverContext,
 } from '@/modules/audit/decorators/audited.decorator';
+import type { AuditAction } from '@/modules/audit/enums/audit-action.enum';
+import { AUDIT_REDACTED_KEYS } from '@/modules/audit/constants';
 import { AuditService } from '@/modules/audit/services/audit.service';
+import { redact } from '@/common/utils/redact.util';
 import { RequestWithSession } from '@/common/decorators';
 
 /**
@@ -44,29 +46,57 @@ export class AuditInterceptor implements NestInterceptor {
       params[key] = Array.isArray(value) ? (value[0] ?? '') : (value ?? '');
     }
 
-    return next.handle().pipe(
-      tap((result: unknown) => {
-        const resolverContext: AuditResolverContext = {
-          params,
-          body: request.body as unknown,
-          result,
-        };
-        const action = meta.resolveAction
-          ? meta.resolveAction(resolverContext)
-          : meta.action;
-        const targetId = meta.resolveTargetId
-          ? meta.resolveTargetId(resolverContext)
+    const payload = redact(request.body, 0, AUDIT_REDACTED_KEYS) as Record<
+      string,
+      unknown
+    > | null;
+
+    /**
+     * `resolveTargetId` derives the target from the handler's result, so it
+     * only runs on the success path: a refused operation wrote nothing to
+     * point at, and calling it with no result would throw inside the
+     * interceptor and take the response down with it.
+     */
+    const write = (result: unknown, action: AuditAction, settled: boolean) => {
+      const targetId =
+        settled && meta.resolveTargetId
+          ? meta.resolveTargetId({
+              params,
+              body: request.body as unknown,
+              result,
+            })
           : (params.id ?? null);
 
-        void this.auditService.record({
-          action,
-          targetType: meta.targetType,
-          targetId,
-          actorId,
-          actorRole,
-          payload: request.body as Record<string, unknown> | null,
-          ip,
-        });
+      void this.auditService.record({
+        action,
+        targetType: meta.targetType,
+        targetId,
+        actorId,
+        actorRole,
+        payload,
+        ip,
+      });
+    };
+
+    return next.handle().pipe(
+      tap({
+        next: (result: unknown) => {
+          const action = meta.resolveAction
+            ? meta.resolveAction({
+                params,
+                body: request.body as unknown,
+                result,
+              })
+            : meta.action;
+          write(result, action, true);
+        },
+        // A refusal is only recorded where the route asked for it, since a
+        // handler throwing on a precondition proves nothing worth keeping.
+        error: () => {
+          if (meta.failureAction) {
+            write(null, meta.failureAction, false);
+          }
+        },
       }),
     );
   }

@@ -18,6 +18,13 @@ export interface AuditOptions {
    * Overrides `action` when present.
    */
   resolveAction?: (ctx: AuditResolverContext) => AuditAction;
+  /**
+   * What to record when the handler throws. Absent by default: most routes
+   * refuse on a precondition and have nothing to prove. Present where the
+   * refusal is itself the sensitive operation — a collection refused for an
+   * insufficient balance is exactly what the letter asks to trace.
+   */
+  failureAction?: AuditAction;
 }
 
 export interface AuditMetadata extends AuditOptions {
