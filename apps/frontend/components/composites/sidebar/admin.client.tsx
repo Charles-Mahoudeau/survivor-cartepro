@@ -1,6 +1,6 @@
 'use client';
 
-import { RiDashboardLine } from '@remixicon/react';
+import { RiDashboardLine, RiInboxLine } from '@remixicon/react';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 
@@ -12,19 +12,26 @@ import {
   SidebarHeader,
   type SidebarGroupData,
 } from '@/components/ui/sidebar';
+import { ADMIN_CONTENT } from '@/content/admin';
 
 const HOME = '/admin';
 
 const GROUPS: SidebarGroupData[] = [
   {
     id: 'admin',
-    label: 'Pilotage',
+    label: ADMIN_CONTENT.nav.group,
     items: [
       {
         id: 'overview',
-        label: 'Tableau de bord',
+        label: ADMIN_CONTENT.nav.overview,
         href: HOME,
         icon: <RiDashboardLine />,
+      },
+      {
+        id: 'applications',
+        label: ADMIN_CONTENT.nav.applications,
+        href: '/admin/partners',
+        icon: <RiInboxLine />,
       },
     ],
   },
@@ -36,7 +43,7 @@ export function AdminSidebar({ account }: { account: ReactNode }) {
   return (
     <Sidebar variant="inset">
       <SidebarHeader>
-        <SidebarBrand description="Administration" />
+        <SidebarBrand description={ADMIN_CONTENT.roleLabel} />
       </SidebarHeader>
       <SidebarBuildContent
         sidebarGroups={GROUPS}

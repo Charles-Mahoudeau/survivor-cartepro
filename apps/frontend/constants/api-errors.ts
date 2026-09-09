@@ -8,6 +8,8 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   FORBIDDEN_ROLE: 'Votre profil ne donne pas accès à cette ressource.',
   WALLET_NOT_FOUND: 'Aucun portefeuille n’est rattaché à votre compte.',
   PARTNER_NOT_FOUND: 'Ce partenaire n’existe pas ou n’est plus actif.',
+  PARTNER_NOT_PENDING:
+    'Cette demande a déjà été instruite. Rechargez la page pour voir la décision.',
   BAD_REQUEST: 'La demande est incorrecte. Rechargez la page et réessayez.',
   INTERNAL_SERVER_ERROR:
     'Le service est momentanément indisponible. Réessayez.',

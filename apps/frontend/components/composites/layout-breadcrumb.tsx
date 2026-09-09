@@ -13,7 +13,8 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 
 export interface LayoutBreadcrumbPath {
   title: string;
-  href: string;
+  /** The last entry is the current page, rendered as text rather than a link. */
+  href?: string;
   badge?: ReactNode;
 }
 
@@ -36,7 +37,7 @@ export function LayoutBreadcrumb({ path }: { path: LayoutBreadcrumbPath[] }) {
               const last = index === path.length - 1;
 
               return (
-                <Fragment key={item.href}>
+                <Fragment key={item.href ?? item.title}>
                   <BreadcrumbItem
                     className={last ? undefined : 'hidden md:block'}
                   >
@@ -46,7 +47,7 @@ export function LayoutBreadcrumb({ path }: { path: LayoutBreadcrumbPath[] }) {
                         {item.badge}
                       </BreadcrumbPage>
                     ) : (
-                      <BreadcrumbLink href={item.href}>
+                      <BreadcrumbLink href={item.href ?? '#'}>
                         {item.title}
                         {item.badge}
                       </BreadcrumbLink>

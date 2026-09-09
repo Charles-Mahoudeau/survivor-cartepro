@@ -5,6 +5,7 @@ import { createFetch, createSchema } from '@better-fetch/fetch';
 import { backendInternalUrl } from '@/lib/env';
 import { backendErrorSchema } from '../../schemas/backend/error';
 import { partnerEndpointsSchema } from './endpoints/partner';
+import { partnerApplicationEndpointsSchema } from './endpoints/partner-application';
 import { partnerCategoryEndpointsSchema } from './endpoints/partner-category';
 import { walletEndpointsSchema } from './endpoints/wallet';
 
@@ -20,6 +21,7 @@ const backendSchema = createSchema({
   ...walletEndpointsSchema,
   ...partnerEndpointsSchema,
   ...partnerCategoryEndpointsSchema,
+  ...partnerApplicationEndpointsSchema,
 });
 
 function createBackend() {
@@ -63,6 +65,7 @@ export const ECODES = {
   FORBIDDEN_ROLE: 'FORBIDDEN_ROLE',
   WALLET_NOT_FOUND: 'WALLET_NOT_FOUND',
   PARTNER_NOT_FOUND: 'PARTNER_NOT_FOUND',
+  PARTNER_NOT_PENDING: 'PARTNER_NOT_PENDING',
 
   BAD_REQUEST: 'BAD_REQUEST',
   INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',

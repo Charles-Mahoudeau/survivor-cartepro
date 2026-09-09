@@ -7,6 +7,14 @@ export const partnerCategorySummarySchema = z.object({
   displayName: z.string(),
 });
 
+/** The states a dossier moves through, from filed to instructed. */
+export const partnerStatusSchema = z.enum([
+  'pending',
+  'active',
+  'refused',
+  'banned',
+]);
+
 export const partnerSchema = z.object({
   id: z.uuid(),
   legalName: z.string(),
@@ -31,6 +39,7 @@ export const listPartnersQuerySchema = paginationQuerySchema.extend({
 export type PartnerCategorySummary = z.infer<
   typeof partnerCategorySummarySchema
 >;
+export type PartnerStatus = z.infer<typeof partnerStatusSchema>;
 export type Partner = z.infer<typeof partnerSchema>;
 export type PartnerPage = z.infer<typeof partnerPageSchema>;
 export type ListPartnersQuery = z.infer<typeof listPartnersQuerySchema>;

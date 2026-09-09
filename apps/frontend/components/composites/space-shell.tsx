@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
 
 import { BandeauSimulation } from '@/components/composites/simulation-banner';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
@@ -21,9 +21,11 @@ export function SpaceShell({
 }) {
   return (
     <SidebarProvider>
-      {sidebar}
+      {/* Both slots mark the active entry from the path, which a dynamic
+          route only knows at request time. */}
+      <Suspense fallback={null}>{sidebar}</Suspense>
       <SidebarInset className="md:peer-data-[variant=inset]:shadow-none">
-        {breadcrumb}
+        <Suspense fallback={null}>{breadcrumb}</Suspense>
         <div
           id="contenu"
           className="grid w-full max-w-6xl grid-cols-12 gap-x-6 gap-y-8 p-4 pt-0 lg:p-6 lg:pt-0"
