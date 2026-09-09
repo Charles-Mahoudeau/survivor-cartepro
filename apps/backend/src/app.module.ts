@@ -8,6 +8,7 @@ import { EmployersModule } from '@/modules/employers/employers.module';
 import { HealthModule } from '@/modules/health/health.module';
 import { PaymentsModule } from '@/modules/payments/payments.module';
 import { UserModule } from '@/modules/user';
+import { BalanceModule } from '@/modules/wallets/balance';
 import { WalletsModule } from '@/modules/wallets/wallets.module';
 import { PartnersModule } from '@/modules/partners';
 import { AuditModule } from '@/modules/audit';
@@ -25,6 +26,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     EmployersModule,
     PartnersModule,
     WalletsModule,
+    BalanceModule,
     PaymentsModule,
     AllocationsModule,
     AuditModule,

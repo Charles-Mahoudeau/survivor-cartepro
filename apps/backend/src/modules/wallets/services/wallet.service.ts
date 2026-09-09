@@ -52,7 +52,7 @@ export class WalletService {
   /** Used by payment-token issuance to check status and balance without the full DTO. */
   async findSummaryByUserId(
     userId: string,
-  ): Promise<Pick<Wallet, 'id' | 'status' | 'balance'>> {
+  ): Promise<Pick<Wallet, 'id' | 'status' | 'balance' | 'currency'>> {
     const wallet = await this.walletRepo.findSummaryByUserId(userId);
     if (!wallet) {
       throw new NotFoundException(ERROR_CODES.WALLET_NOT_FOUND);

@@ -38,10 +38,10 @@ export class WalletRepo {
 
   findSummaryByUserId(
     userId: string,
-  ): Promise<Pick<Wallet, 'id' | 'status' | 'balance'> | null> {
+  ): Promise<Pick<Wallet, 'id' | 'status' | 'balance' | 'currency'> | null> {
     return this.repo.findOne({
       where: { user: { id: userId } },
-      select: { id: true, status: true, balance: true },
+      select: { id: true, status: true, balance: true, currency: true },
     });
   }
 
