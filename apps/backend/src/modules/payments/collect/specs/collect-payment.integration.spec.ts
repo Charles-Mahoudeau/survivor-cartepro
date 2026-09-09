@@ -1,7 +1,5 @@
 import { ERROR_CODES } from '@/common/constants/error-codes.constant';
-import { ROLES } from '@/config/auth/auth.constants';
 import { PartnerStatus } from '@/modules/partners/core/enums/partner-status.enum';
-import { PartnerFixture } from '@/modules/partners/core/specs/partner.fixture';
 import { PaymentToken } from '@/modules/payments/core/entities';
 import { Payment } from '@/modules/payments/core/entities/payment.entity';
 import { CaptureMode, PaymentTokenStatus } from '@/modules/payments/core/enums';
@@ -9,7 +7,6 @@ import { WalletEntry } from '@/modules/wallets/entities/wallet-entry.entity';
 import { Wallet } from '@/modules/wallets/entities/wallet.entity';
 import { WalletEntryDirection } from '@/modules/wallets/enums/wallet-entry-direction.enum';
 import { WalletEntryKind } from '@/modules/wallets/enums/wallet-entry-kind.enum';
-import { WalletStatus } from '@/modules/wallets/enums/wallet-status.enum';
 import {
   closeTestApp,
   createTestApp,
@@ -17,60 +14,14 @@ import {
   type TestApp,
 } from '../../../../../test/app';
 import { createPaymentToken } from '../../../../../test/fixtures/payment.fixture';
-import {
-  grantRole,
-  signUp,
-  type SignedUpAccount,
-} from '../../../../../test/fixtures/user.fixture';
-import { createWallet } from '../../../../../test/fixtures/wallet.fixture';
+import { suspendWallet } from '../../../../../test/fixtures/wallet.fixture';
 import { api, apiPath, bodyOf } from '../../../../../test/http';
-import type { PaymentTokenResponseDto } from '../../payment-token/validators';
 import type { PaymentReceiptResponseDto } from '../validators';
+import { CollectPaymentFixture } from './collect-payment.fixture';
 
 let context: TestApp;
-let emailSequence = 0;
-
-const uniqueEmail = (label: string) =>
-  `collect-${label}-${++emailSequence}@tickettout.test`;
-
 const collect = (cookie: string[], body: Record<string, unknown>) =>
   api(context.app).post(apiPath('/payments')).set('Cookie', cookie).send(body);
-
-interface Employee {
-  account: SignedUpAccount;
-  walletId: string;
-}
-
-async function createEmployee(balance: number): Promise<Employee> {
-  const account = await signUp(context.app, uniqueEmail('employee'));
-  const wallet = await createWallet(context.dataSource, account.id, {
-    balance,
-  });
-  return { account, walletId: wallet.id };
-}
-
-async function createPartner(
-  status: PartnerStatus = PartnerStatus.ACTIVE,
-): Promise<{ account: SignedUpAccount; partnerId: string }> {
-  const account = await signUp(context.app, uniqueEmail('partner'));
-  const partner = await PartnerFixture.create(context.dataSource, account.id, {
-    status,
-  });
-  await grantRole(context, account.id, ROLES.PARTNER);
-  return { account, partnerId: partner.id };
-}
-
-/** Goes through the employee's own route, so the QR under test is a real one. */
-async function issueToken(
-  employee: Employee,
-): Promise<PaymentTokenResponseDto> {
-  return bodyOf<PaymentTokenResponseDto>(
-    await api(context.app)
-      .post(apiPath('/me/payment-tokens'))
-      .set('Cookie', employee.account.cookie)
-      .expect(201),
-  );
-}
 
 const readWallet = (walletId: string) =>
   context.dataSource.getRepository(Wallet).findOneByOrFail({ id: walletId });
@@ -84,6 +35,11 @@ const readEntries = (walletId: string) =>
   context.dataSource.getRepository(WalletEntry).find({
     where: { wallet: { id: walletId } },
     relations: { payment: true },
+  });
+
+const readToken = (tokenId: string) =>
+  context.dataSource.getRepository(PaymentToken).findOneByOrFail({
+    id: tokenId,
   });
 
 beforeAll(async () => {
@@ -100,9 +56,9 @@ beforeEach(async () => {
 
 describe('POST /payments — collecting from a scan', () => {
   it('debits the wallet, writes the movement and spends the token, all at once', async () => {
-    const employee = await createEmployee(50);
-    const partner = await createPartner();
-    const token = await issueToken(employee);
+    const employee = await CollectPaymentFixture.signUpEmployee(context, 50);
+    const partner = await CollectPaymentFixture.signUpPartner(context);
+    const token = await CollectPaymentFixture.issueToken(context, employee);
 
     const response = await collect(partner.account.cookie, {
       qrPayload: token.qrPayload,
@@ -139,17 +95,15 @@ describe('POST /payments — collecting from a scan', () => {
     });
     expect(entries[0].payment?.id).toBe(receipt.paymentId);
 
-    await expect(
-      context.dataSource
-        .getRepository(PaymentToken)
-        .findOneByOrFail({ id: token.token }),
-    ).resolves.toMatchObject({ status: PaymentTokenStatus.CONSUMED });
+    await expect(readToken(token.token)).resolves.toMatchObject({
+      status: PaymentTokenStatus.CONSUMED,
+    });
   });
 
   it('never discloses the wallet balance to the till', async () => {
-    const employee = await createEmployee(50);
-    const partner = await createPartner();
-    const token = await issueToken(employee);
+    const employee = await CollectPaymentFixture.signUpEmployee(context, 50);
+    const partner = await CollectPaymentFixture.signUpPartner(context);
+    const token = await CollectPaymentFixture.issueToken(context, employee);
 
     const response = await collect(partner.account.cookie, {
       qrPayload: token.qrPayload,
@@ -165,10 +119,10 @@ describe('POST /payments — collecting from a scan', () => {
   });
 
   it('pays the partner behind the session, not one the body names', async () => {
-    const employee = await createEmployee(50);
-    const collecting = await createPartner();
-    const other = await createPartner();
-    const token = await issueToken(employee);
+    const employee = await CollectPaymentFixture.signUpEmployee(context, 50);
+    const collecting = await CollectPaymentFixture.signUpPartner(context);
+    const other = await CollectPaymentFixture.signUpPartner(context);
+    const token = await CollectPaymentFixture.issueToken(context, employee);
 
     await collect(collecting.account.cookie, {
       qrPayload: token.qrPayload,
@@ -183,9 +137,9 @@ describe('POST /payments — collecting from a scan', () => {
 
 describe('POST /payments — collecting from a typed code', () => {
   it('accepts the code in lower case and records a manual capture', async () => {
-    const employee = await createEmployee(20);
-    const partner = await createPartner();
-    const token = await issueToken(employee);
+    const employee = await CollectPaymentFixture.signUpEmployee(context, 20);
+    const partner = await CollectPaymentFixture.signUpPartner(context);
+    const token = await CollectPaymentFixture.issueToken(context, employee);
 
     await collect(partner.account.cookie, {
       shortCode: token.shortCode.toLowerCase(),
@@ -200,7 +154,7 @@ describe('POST /payments — collecting from a typed code', () => {
   });
 
   it('refuses a code no live token carries', async () => {
-    const partner = await createPartner();
+    const partner = await CollectPaymentFixture.signUpPartner(context);
 
     const response = await collect(partner.account.cookie, {
       shortCode: 'ZZZZZZZZ',
@@ -214,8 +168,8 @@ describe('POST /payments — collecting from a typed code', () => {
   });
 
   it('refuses a token whose window has passed', async () => {
-    const employee = await createEmployee(20);
-    const partner = await createPartner();
+    const employee = await CollectPaymentFixture.signUpEmployee(context, 20);
+    const partner = await CollectPaymentFixture.signUpPartner(context);
     const token = await createPaymentToken(
       context.dataSource,
       employee.walletId,
@@ -239,9 +193,9 @@ describe('POST /payments — collecting from a typed code', () => {
 
 describe('POST /payments — a token pays once', () => {
   it('hands a till repeating its own request the payment it already made', async () => {
-    const employee = await createEmployee(50);
-    const partner = await createPartner();
-    const token = await issueToken(employee);
+    const employee = await CollectPaymentFixture.signUpEmployee(context, 50);
+    const partner = await CollectPaymentFixture.signUpPartner(context);
+    const token = await CollectPaymentFixture.issueToken(context, employee);
     const body = { qrPayload: token.qrPayload, amount: 12.5 };
 
     const first = await collect(partner.account.cookie, body).expect(201);
@@ -258,9 +212,9 @@ describe('POST /payments — a token pays once', () => {
   });
 
   it('refuses a till claiming a token another amount already spent', async () => {
-    const employee = await createEmployee(50);
-    const partner = await createPartner();
-    const token = await issueToken(employee);
+    const employee = await CollectPaymentFixture.signUpEmployee(context, 50);
+    const partner = await CollectPaymentFixture.signUpPartner(context);
+    const token = await CollectPaymentFixture.issueToken(context, employee);
 
     await collect(partner.account.cookie, {
       qrPayload: token.qrPayload,
@@ -284,9 +238,9 @@ describe('POST /payments — a token pays once', () => {
   });
 
   it('debits once when the same till submits twice at the same moment', async () => {
-    const employee = await createEmployee(50);
-    const partner = await createPartner();
-    const token = await issueToken(employee);
+    const employee = await CollectPaymentFixture.signUpEmployee(context, 50);
+    const partner = await CollectPaymentFixture.signUpPartner(context);
+    const token = await CollectPaymentFixture.issueToken(context, employee);
     const body = { qrPayload: token.qrPayload, amount: 12.5 };
 
     const responses = await Promise.all([
@@ -310,10 +264,10 @@ describe('POST /payments — a token pays once', () => {
   });
 
   it('never hands one till the payment another till collected', async () => {
-    const employee = await createEmployee(50);
-    const first = await createPartner();
-    const second = await createPartner();
-    const token = await issueToken(employee);
+    const employee = await CollectPaymentFixture.signUpEmployee(context, 50);
+    const first = await CollectPaymentFixture.signUpPartner(context);
+    const second = await CollectPaymentFixture.signUpPartner(context);
+    const token = await CollectPaymentFixture.issueToken(context, employee);
 
     const responses = await Promise.all([
       collect(first.account.cookie, { qrPayload: token.qrPayload, amount: 10 }),
@@ -337,9 +291,9 @@ describe('POST /payments — a token pays once', () => {
 
 describe('POST /payments — refusals leave nothing behind', () => {
   it('refuses a debit the balance cannot absorb, and keeps the token live', async () => {
-    const employee = await createEmployee(5);
-    const partner = await createPartner();
-    const token = await issueToken(employee);
+    const employee = await CollectPaymentFixture.signUpEmployee(context, 5);
+    const partner = await CollectPaymentFixture.signUpPartner(context);
+    const token = await CollectPaymentFixture.issueToken(context, employee);
 
     const response = await collect(partner.account.cookie, {
       qrPayload: token.qrPayload,
@@ -355,20 +309,16 @@ describe('POST /payments — refusals leave nothing behind', () => {
     await expect(readWallet(employee.walletId)).resolves.toMatchObject({
       balance: '5.00',
     });
-    await expect(
-      context.dataSource
-        .getRepository(PaymentToken)
-        .findOneByOrFail({ id: token.token }),
-    ).resolves.toMatchObject({ status: PaymentTokenStatus.LIVE });
+    await expect(readToken(token.token)).resolves.toMatchObject({
+      status: PaymentTokenStatus.LIVE,
+    });
   });
 
   it('refuses a suspended wallet holding a token issued before the suspension', async () => {
-    const employee = await createEmployee(50);
-    const partner = await createPartner();
-    const token = await issueToken(employee);
-    await context.dataSource
-      .getRepository(Wallet)
-      .update({ id: employee.walletId }, { status: WalletStatus.DISABLED });
+    const employee = await CollectPaymentFixture.signUpEmployee(context, 50);
+    const partner = await CollectPaymentFixture.signUpPartner(context);
+    const token = await CollectPaymentFixture.issueToken(context, employee);
+    await suspendWallet(context.dataSource, employee.walletId);
 
     const response = await collect(partner.account.cookie, {
       qrPayload: token.qrPayload,
@@ -386,9 +336,12 @@ describe('POST /payments — refusals leave nothing behind', () => {
   });
 
   it('refuses a partner whose dossier is not approved yet', async () => {
-    const employee = await createEmployee(50);
-    const partner = await createPartner(PartnerStatus.PENDING);
-    const token = await issueToken(employee);
+    const employee = await CollectPaymentFixture.signUpEmployee(context, 50);
+    const partner = await CollectPaymentFixture.signUpPartner(
+      context,
+      PartnerStatus.PENDING,
+    );
+    const token = await CollectPaymentFixture.issueToken(context, employee);
 
     const response = await collect(partner.account.cookie, {
       qrPayload: token.qrPayload,
@@ -403,9 +356,9 @@ describe('POST /payments — refusals leave nothing behind', () => {
   });
 
   it('refuses a payload whose signature does not match its claims', async () => {
-    const employee = await createEmployee(50);
-    const partner = await createPartner();
-    const token = await issueToken(employee);
+    const employee = await CollectPaymentFixture.signUpEmployee(context, 50);
+    const partner = await CollectPaymentFixture.signUpPartner(context);
+    const token = await CollectPaymentFixture.issueToken(context, employee);
     const [body, signature] = token.qrPayload.split('.');
     const tampered = `${body}.${signature.startsWith('A') ? 'B' : 'A'}${signature.slice(1)}`;
 
@@ -424,7 +377,7 @@ describe('POST /payments — refusals leave nothing behind', () => {
 
 describe('POST /payments — request shape', () => {
   it('refuses a request carrying no credential', async () => {
-    const partner = await createPartner();
+    const partner = await CollectPaymentFixture.signUpPartner(context);
 
     const response = await collect(partner.account.cookie, { amount: 10 });
 
@@ -437,9 +390,9 @@ describe('POST /payments — request shape', () => {
   });
 
   it('refuses a request carrying both credentials', async () => {
-    const employee = await createEmployee(50);
-    const partner = await createPartner();
-    const token = await issueToken(employee);
+    const employee = await CollectPaymentFixture.signUpEmployee(context, 50);
+    const partner = await CollectPaymentFixture.signUpPartner(context);
+    const token = await CollectPaymentFixture.issueToken(context, employee);
 
     const response = await collect(partner.account.cookie, {
       qrPayload: token.qrPayload,
@@ -457,9 +410,9 @@ describe('POST /payments — request shape', () => {
   });
 
   it('refuses an amount with more precision than a cent', async () => {
-    const employee = await createEmployee(50);
-    const partner = await createPartner();
-    const token = await issueToken(employee);
+    const employee = await CollectPaymentFixture.signUpEmployee(context, 50);
+    const partner = await CollectPaymentFixture.signUpPartner(context);
+    const token = await CollectPaymentFixture.issueToken(context, employee);
 
     const response = await collect(partner.account.cookie, {
       qrPayload: token.qrPayload,
@@ -471,9 +424,9 @@ describe('POST /payments — request shape', () => {
   });
 
   it('refuses an amount of zero', async () => {
-    const employee = await createEmployee(50);
-    const partner = await createPartner();
-    const token = await issueToken(employee);
+    const employee = await CollectPaymentFixture.signUpEmployee(context, 50);
+    const partner = await CollectPaymentFixture.signUpPartner(context);
+    const token = await CollectPaymentFixture.issueToken(context, employee);
 
     const response = await collect(partner.account.cookie, {
       qrPayload: token.qrPayload,
@@ -485,9 +438,9 @@ describe('POST /payments — request shape', () => {
   });
 
   it('refuses a blank till reference the column would reject', async () => {
-    const employee = await createEmployee(50);
-    const partner = await createPartner();
-    const token = await issueToken(employee);
+    const employee = await CollectPaymentFixture.signUpEmployee(context, 50);
+    const partner = await CollectPaymentFixture.signUpPartner(context);
+    const token = await CollectPaymentFixture.issueToken(context, employee);
 
     const response = await collect(partner.account.cookie, {
       qrPayload: token.qrPayload,
@@ -513,9 +466,9 @@ describe('POST /payments — who may call it', () => {
   });
 
   it('rejects an employee collecting from another employee', async () => {
-    const employee = await createEmployee(50);
-    const payer = await createEmployee(50);
-    const token = await issueToken(payer);
+    const employee = await CollectPaymentFixture.signUpEmployee(context, 50);
+    const payer = await CollectPaymentFixture.signUpEmployee(context, 50);
+    const token = await CollectPaymentFixture.issueToken(context, payer);
 
     const response = await collect(employee.account.cookie, {
       qrPayload: token.qrPayload,
