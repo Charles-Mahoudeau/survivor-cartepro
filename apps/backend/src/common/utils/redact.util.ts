@@ -23,9 +23,14 @@ function normalizeKey(key: string): string {
  * walked, which also terminates a self-referencing structure.
  * @param value - anything about to be logged
  * @param depth - current walk depth, internal
+ * @param deniedKeys - which keys to blank; the log denylist unless told otherwise
  * @returns a new structure safe to serialize into a log line
  */
-export function redact(value: unknown, depth = 0): unknown {
+export function redact(
+  value: unknown,
+  depth = 0,
+  deniedKeys: ReadonlySet<string> = REDACTED_KEYS,
+): unknown {
   if (value === null || typeof value !== 'object') {
     return value;
   }
@@ -35,14 +40,14 @@ export function redact(value: unknown, depth = 0): unknown {
   }
 
   if (Array.isArray(value)) {
-    return value.map((item) => redact(item, depth + 1));
+    return value.map((item) => redact(item, depth + 1, deniedKeys));
   }
 
   const result: Record<string, unknown> = {};
   for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
-    result[key] = REDACTED_KEYS.has(normalizeKey(key))
+    result[key] = deniedKeys.has(normalizeKey(key))
       ? REDACTED_PLACEHOLDER
-      : redact(item, depth + 1);
+      : redact(item, depth + 1, deniedKeys);
   }
   return result;
 }
