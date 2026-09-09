@@ -1,11 +1,12 @@
 import { LayoutBreadcrumb } from '@/components/composites/layout-breadcrumb';
 import { PRO_CONTENT } from '@/content/pro';
 
-export const PRO_TRAIL_ROOT = {
-  title: PRO_CONTENT.roleLabel,
-  href: '/pro',
-} as const;
+import { PRO_TRAIL_ROOT } from '../page';
 
 export default function Page() {
-  return <LayoutBreadcrumb path={[PRO_TRAIL_ROOT]} />;
+  return (
+    <LayoutBreadcrumb
+      path={[PRO_TRAIL_ROOT, { title: PRO_CONTENT.collect.trail }]}
+    />
+  );
 }
