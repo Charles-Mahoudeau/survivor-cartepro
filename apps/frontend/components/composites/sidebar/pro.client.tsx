@@ -1,6 +1,6 @@
 'use client';
 
-import { RiStoreLine } from '@remixicon/react';
+import { RiCashLine, RiStoreLine } from '@remixicon/react';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 
@@ -12,19 +12,26 @@ import {
   SidebarHeader,
   type SidebarGroupData,
 } from '@/components/ui/sidebar';
+import { PRO_CONTENT } from '@/content/pro';
 
 const HOME = '/pro';
 
 const GROUPS: SidebarGroupData[] = [
   {
     id: 'pro',
-    label: 'Établissement',
+    label: PRO_CONTENT.nav.group,
     items: [
       {
         id: 'overview',
-        label: 'Tableau de bord',
+        label: PRO_CONTENT.nav.overview,
         href: HOME,
         icon: <RiStoreLine />,
+      },
+      {
+        id: 'collect',
+        label: PRO_CONTENT.nav.collect,
+        href: '/pro/collect',
+        icon: <RiCashLine />,
       },
     ],
   },
@@ -36,7 +43,7 @@ export function ProSidebar({ account }: { account: ReactNode }) {
   return (
     <Sidebar variant="inset">
       <SidebarHeader>
-        <SidebarBrand description="Espace partenaire" />
+        <SidebarBrand description={PRO_CONTENT.roleLabel} />
       </SidebarHeader>
       <SidebarBuildContent
         sidebarGroups={GROUPS}

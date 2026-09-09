@@ -8,6 +8,7 @@ import { partnerEndpointsSchema } from './endpoints/partner';
 import { partnerApplicationEndpointsSchema } from './endpoints/partner-application';
 import { paymentTokenEndpointsSchema } from './endpoints/payment-token';
 import { partnerCategoryEndpointsSchema } from './endpoints/partner-category';
+import { paymentEndpointsSchema } from './endpoints/payment';
 import { walletEndpointsSchema } from './endpoints/wallet';
 
 /** Nest answers under this prefix; `/auth` and `/health` live outside it. */
@@ -24,6 +25,7 @@ const backendSchema = createSchema({
   ...partnerCategoryEndpointsSchema,
   ...partnerApplicationEndpointsSchema,
   ...paymentTokenEndpointsSchema,
+  ...paymentEndpointsSchema,
 });
 
 function createBackend() {
@@ -70,6 +72,13 @@ export const ECODES = {
   PARTNER_NOT_PENDING: 'PARTNER_NOT_PENDING',
   PAYMENT_TOKEN_NOT_FOUND: 'PAYMENT_TOKEN_NOT_FOUND',
   EMPTY_BALANCE: 'EMPTY_BALANCE',
+  PARTNER_NOT_ACTIVE: 'PARTNER_NOT_ACTIVE',
+  INSUFFICIENT_BALANCE: 'INSUFFICIENT_BALANCE',
+  PAYMENT_TOKEN_INVALID: 'PAYMENT_TOKEN_INVALID',
+  PAYMENT_TOKEN_LOOKUP_INVALID: 'PAYMENT_TOKEN_LOOKUP_INVALID',
+  PAYMENT_TOKEN_EXPIRED: 'PAYMENT_TOKEN_EXPIRED',
+  PAYMENT_TOKEN_REVOKED: 'PAYMENT_TOKEN_REVOKED',
+  PAYMENT_TOKEN_ALREADY_USED: 'PAYMENT_TOKEN_ALREADY_USED',
 
   BAD_REQUEST: 'BAD_REQUEST',
   INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
