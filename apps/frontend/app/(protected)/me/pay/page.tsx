@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
-import { BandeauSimulation } from '@/components/composites/simulation-banner';
 import { ME_CONTENT } from '@/content/me';
 import { SITE_CONTENT } from '@/content/site';
 import { getCurrentPaymentTokenHook, getMyWalletHook } from '@/hooks/api';
@@ -26,10 +25,6 @@ export default function Page() {
         <Suspense fallback={<PaySkeleton />}>
           <PaymentCode />
         </Suspense>
-      </section>
-
-      <section className="col-span-12 lg:col-span-8">
-        <BandeauSimulation />
       </section>
     </>
   );
