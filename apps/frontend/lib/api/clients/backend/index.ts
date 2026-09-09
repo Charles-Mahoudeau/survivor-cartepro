@@ -6,6 +6,7 @@ import { backendInternalUrl } from '@/lib/env';
 import { backendErrorSchema } from '../../schemas/backend/error';
 import { partnerEndpointsSchema } from './endpoints/partner';
 import { partnerApplicationEndpointsSchema } from './endpoints/partner-application';
+import { paymentTokenEndpointsSchema } from './endpoints/payment-token';
 import { partnerCategoryEndpointsSchema } from './endpoints/partner-category';
 import { walletEndpointsSchema } from './endpoints/wallet';
 
@@ -22,6 +23,7 @@ const backendSchema = createSchema({
   ...partnerEndpointsSchema,
   ...partnerCategoryEndpointsSchema,
   ...partnerApplicationEndpointsSchema,
+  ...paymentTokenEndpointsSchema,
 });
 
 function createBackend() {
@@ -66,6 +68,8 @@ export const ECODES = {
   WALLET_NOT_FOUND: 'WALLET_NOT_FOUND',
   PARTNER_NOT_FOUND: 'PARTNER_NOT_FOUND',
   PARTNER_NOT_PENDING: 'PARTNER_NOT_PENDING',
+  PAYMENT_TOKEN_NOT_FOUND: 'PAYMENT_TOKEN_NOT_FOUND',
+  EMPTY_BALANCE: 'EMPTY_BALANCE',
 
   BAD_REQUEST: 'BAD_REQUEST',
   INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',

@@ -9,7 +9,10 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   WALLET_NOT_FOUND: 'Aucun portefeuille n’est rattaché à votre compte.',
   PARTNER_NOT_FOUND: 'Ce partenaire n’existe pas ou n’est plus actif.',
   PARTNER_NOT_PENDING:
-    'Cette demande a déjà été instruite. Rechargez la page pour voir la décision.',
+    'Cette demande a déjà été traitée. Rechargez la page pour voir la décision.',
+  PAYMENT_TOKEN_NOT_FOUND: 'Aucun code de paiement n’est actif. Générez-en un.',
+  EMPTY_BALANCE:
+    'Votre solde est épuisé. Un code de paiement ne peut pas être généré.',
   BAD_REQUEST: 'La demande est incorrecte. Rechargez la page et réessayez.',
   INTERNAL_SERVER_ERROR:
     'Le service est momentanément indisponible. Réessayez.',

@@ -6,11 +6,13 @@ export const ME_CONTENT = {
     wallet: 'Mon compte',
     history: 'Historique',
     partners: 'Partenaires',
+    pay: 'Payer',
   },
   mobileNav: {
     wallet: 'Compte',
     history: 'Historique',
     partners: 'Partenaires',
+    pay: 'Payer',
   },
   signOut: 'Se déconnecter',
   signOutShort: 'Déconnexion',
@@ -56,6 +58,31 @@ export const ME_CONTENT = {
     loading: 'Chargement…',
     results: (count: number) =>
       count === 1 ? '1 partenaire' : `${count} partenaires`,
+  },
+  pay: {
+    title: 'Payer',
+    subtitle: 'Présentez ce code au commerçant',
+    generate: 'Générer un code de paiement',
+    regenerate: 'Générer un nouveau code',
+    cancel: 'Annuler ce code',
+    cancelling: 'Annulation…',
+    generating: 'Génération…',
+    scanLabel: 'Code à scanner',
+    shortCodeLabel: 'Ou dictez ce code',
+    expiresIn: 'Expire dans',
+    expired: 'Ce code a expiré. Générez-en un nouveau.',
+    idle: 'Aucun code actif. Générez-en un au moment de payer.',
+    emptyBalance:
+      'Votre solde est épuisé. Un code de paiement ne peut pas être généré tant que votre employeur ne vous a pas crédité.',
+    noWallet:
+      'Aucun portefeuille n’est rattaché à votre compte. Votre employeur doit vous déclarer auprès du dispositif.',
+    disabled:
+      'Votre portefeuille est désactivé. Contactez votre employeur ou l’administration du dispositif.',
+    offlineNote: 'Bon à savoir :',
+    offlineNoteBody:
+      'Ce code reste valable sans connexion : il porte lui-même sa signature. Le commerçant le vérifie de son côté.',
+    singleUse:
+      'À usage unique, valable quelques minutes. Générer un nouveau code annule le précédent.',
   },
   error: {
     title: 'Cette page n’a pas pu être affichée.',
