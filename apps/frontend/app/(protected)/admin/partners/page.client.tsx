@@ -77,7 +77,9 @@ export function ApplicationsClient({ page, status }: ApplicationsClientProps) {
                 </span>
                 <Button asChild variant="ghost" size="sm">
                   <Link href={`/admin/partners/${application.id}`}>
-                    {ADMIN_CONTENT.applications.review}
+                    {application.status === 'pending'
+                      ? ADMIN_CONTENT.applications.review
+                      : ADMIN_CONTENT.applications.viewDecision}
                     <RiArrowRightLine aria-hidden className="size-4" />
                   </Link>
                 </Button>

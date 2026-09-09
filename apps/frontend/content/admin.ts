@@ -9,28 +9,29 @@ export const ADMIN_CONTENT = {
   applications: {
     title: 'Demandes d’inscription',
     subtitle:
-      'Chaque décision est motivée, horodatée et conservée. Elle ne peut pas être reprise.',
+      'Chaque demande est examinée par un agent. La décision est motivée, horodatée et conservée : elle ne peut pas être reprise.',
     empty: 'Aucune demande dans cet état.',
     loadMore: 'Charger plus',
     loading: 'Chargement…',
     filedOn: 'Déposée le',
     siren: 'SIREN',
-    review: 'Instruire',
+    review: 'Examiner',
+    viewDecision: 'Voir la décision',
     status: {
-      pending: 'À instruire',
+      pending: 'En attente',
       active: 'Acceptée',
       refused: 'Refusée',
       banned: 'Suspendue',
     },
     filter: {
       label: 'Filtrer par état',
-      pending: 'À instruire',
+      pending: 'En attente',
       active: 'Acceptées',
       refused: 'Refusées',
     },
   },
   application: {
-    trail: 'Instruction',
+    trail: 'Demande',
     back: 'Retour aux demandes',
     legalName: 'Raison sociale',
     tradeName: 'Enseigne',
@@ -40,7 +41,7 @@ export const ADMIN_CONTENT = {
     categories: 'Catégories',
     owner: 'Compte demandeur',
     filedOn: 'Déposée le',
-    decidedOn: 'Instruite le',
+    decidedOn: 'Décidée le',
     decision: {
       title: 'Décision',
       help: 'Le motif est conservé et opposable. Il est communiqué au partenaire.',
@@ -56,7 +57,7 @@ export const ADMIN_CONTENT = {
         'Un motif est obligatoire, y compris pour une acceptation.',
     },
     settled: {
-      title: 'Demande déjà instruite',
+      title: 'Demande déjà traitée',
       body: 'Cette demande a reçu une décision. Une décision ne se reprend pas : elle se corrige par une nouvelle demande.',
     },
   },
