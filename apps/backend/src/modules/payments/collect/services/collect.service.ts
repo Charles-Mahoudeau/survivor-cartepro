@@ -72,8 +72,6 @@ export class CollectService {
       if (outcome.status === 'already-consumed') {
         const existing = await this.paymentRepo.findByTokenId(tokenId, manager);
         if (!existing) {
-          // Invariant violation: a token only turns `consumed` in the same
-          // transaction that creates its payment. Never expected in practice.
           throw new InternalServerErrorException(
             ERROR_CODES.PAYMENT_TOKEN_CONSUMED,
           );

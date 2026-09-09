@@ -5,7 +5,7 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { isDebitAllowed } from './helpers/wallet-overdraft.helper';
+import { isDebitAllowed } from './helpers';
 import {
   InvalidCursorError,
   paginate,
@@ -188,23 +188,27 @@ export class WalletService {
     }
 
     const balance = Number(wallet.balance);
-    if (!isDebitAllowed(balance, amount)) {
+    const normalizedAmount = Number(toEuros(toCents(amount)));
+
+    if (!isDebitAllowed(balance, normalizedAmount)) {
       throw new UnprocessableEntityException(ERROR_CODES.INSUFFICIENT_BALANCE);
     }
 
-    const balanceAfter = Number(toEuros(toCents(balance) - toCents(amount)));
+    const balanceAfter = Number(
+      toEuros(toCents(balance) - toCents(normalizedAmount)),
+    );
 
     await this.walletEntryRepo.insertAll(manager, [
       {
         wallet: { id: walletId },
         direction: WalletEntryDirection.DEBIT,
-        amount,
+        amount: normalizedAmount,
         balanceAfter,
         kind: WalletEntryKind.PAYMENT_SENT,
         payment: { id: paymentId },
       },
     ]);
-    await this.walletRepo.debitById(manager, walletId, amount);
+    await this.walletRepo.debitById(manager, walletId, normalizedAmount);
   }
 
   private readPeriod(query: PeriodQueryDto): Period {

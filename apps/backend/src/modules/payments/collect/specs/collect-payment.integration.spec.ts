@@ -238,18 +238,44 @@ describe('POST /payments — collecting from a typed code', () => {
 });
 
 describe('POST /payments — a token pays once', () => {
-  it('refuses a repeat of a request that already went through', async () => {
+  it('hands a till repeating its own request the payment it already made', async () => {
     const employee = await createEmployee(50);
     const partner = await createPartner();
     const token = await issueToken(employee);
     const body = { qrPayload: token.qrPayload, amount: 12.5 };
 
-    await collect(partner.account.cookie, body).expect(201);
-    const repeat = await collect(partner.account.cookie, body);
+    const first = await collect(partner.account.cookie, body).expect(201);
+    const repeat = await collect(partner.account.cookie, body).expect(201);
 
-    expect(repeat.status).toBe(400);
-    expect(bodyOf(repeat)).toEqual(
-      expect.objectContaining({ message: ERROR_CODES.PAYMENT_TOKEN_INVALID }),
+    expect(bodyOf<PaymentReceiptResponseDto>(repeat).paymentId).toBe(
+      bodyOf<PaymentReceiptResponseDto>(first).paymentId,
+    );
+    expect(await readPayments()).toHaveLength(1);
+    expect(await readEntries(employee.walletId)).toHaveLength(1);
+    await expect(readWallet(employee.walletId)).resolves.toMatchObject({
+      balance: '37.50',
+    });
+  });
+
+  it('refuses a till claiming a token another amount already spent', async () => {
+    const employee = await createEmployee(50);
+    const partner = await createPartner();
+    const token = await issueToken(employee);
+
+    await collect(partner.account.cookie, {
+      qrPayload: token.qrPayload,
+      amount: 12.5,
+    }).expect(201);
+    const other = await collect(partner.account.cookie, {
+      qrPayload: token.qrPayload,
+      amount: 20,
+    });
+
+    expect(other.status).toBe(409);
+    expect(bodyOf(other)).toEqual(
+      expect.objectContaining({
+        message: ERROR_CODES.PAYMENT_TOKEN_ALREADY_USED,
+      }),
     );
     expect(await readPayments()).toHaveLength(1);
     await expect(readWallet(employee.walletId)).resolves.toMatchObject({
