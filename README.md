@@ -5,6 +5,9 @@ partenaire, administration.
 
 Projet Epitech tek3, cahier des charges `JEB/DNI/2026-002`.
 
+📖 **[Documentation complète](docs/index.md)** — installation, spécification
+de l'API, schéma de base de données, guide d'utilisation.
+
 ## Structure
 
 ```
