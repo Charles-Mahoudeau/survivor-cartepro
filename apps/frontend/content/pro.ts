@@ -5,6 +5,7 @@ export const PRO_CONTENT = {
     group: 'Établissement',
     overview: 'Tableau de bord',
     collect: 'Encaisser',
+    partners: 'Catalogue',
   },
   collect: {
     title: 'Encaisser un paiement',
@@ -37,6 +38,11 @@ export const PRO_CONTENT = {
       title: 'Établissement pas encore actif',
       body: 'Votre demande d’inscription doit être acceptée par l’administration avant de pouvoir encaisser.',
     },
+  },
+  partners: {
+    title: 'Catalogue des partenaires',
+    subtitle: 'Les établissements référencés CartePro, le vôtre compris.',
+    trail: 'Catalogue',
   },
   error: {
     title: 'Cette page n’a pas pu être affichée.',
