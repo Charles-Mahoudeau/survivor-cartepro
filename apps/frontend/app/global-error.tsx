@@ -7,10 +7,7 @@ import { useEffect } from 'react';
 import './globals.css';
 import { SITE_CONTENT } from '@/content/site';
 
-/**
- * Replaces the root layout when the shell itself fails, so it carries the
- * wordmark and the disclaimer on its own rather than inheriting them.
- */
+/** Replaces the root layout when the shell itself fails, carrying its own wordmark. */
 export default function GlobalError({
   error,
   reset,
