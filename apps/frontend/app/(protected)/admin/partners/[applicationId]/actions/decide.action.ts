@@ -1,11 +1,12 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, updateTag } from 'next/cache';
 import { z } from 'zod';
 
 import { ApiError } from '@/lib/api/helpers';
 import { decideApplication } from '@/lib/api/routes/partner-application';
 import { decideApplicationSchema } from '@/lib/api/schemas/backend/partner-application';
+import { PARTNERS_TAG } from '@/lib/cache/tags';
 import { actionClient } from '@/lib/safe-action';
 
 const decideInputSchema = decideApplicationSchema.extend({
@@ -25,6 +26,7 @@ export const decideApplicationAction = actionClient
       throw new ApiError(error);
     }
 
+    updateTag(PARTNERS_TAG);
     revalidatePath('/admin/partners');
     revalidatePath(`/admin/partners/${applicationId}`);
 

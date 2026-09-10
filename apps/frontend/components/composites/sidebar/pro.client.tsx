@@ -1,6 +1,11 @@
 'use client';
 
-import { RiCashLine, RiStoreLine } from '@remixicon/react';
+import {
+  RiBuildingLine,
+  RiCashLine,
+  RiMapPin2Line,
+  RiStoreLine,
+} from '@remixicon/react';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 
@@ -32,6 +37,18 @@ const GROUPS: SidebarGroupData[] = [
         label: PRO_CONTENT.nav.collect,
         href: '/pro/collect',
         icon: <RiCashLine />,
+      },
+      {
+        id: 'partners',
+        label: PRO_CONTENT.nav.partners,
+        href: '/pro/partners',
+        icon: <RiMapPin2Line />,
+      },
+      {
+        id: 'account',
+        label: PRO_CONTENT.nav.account,
+        href: '/pro/account',
+        icon: <RiBuildingLine />,
       },
     ],
   },

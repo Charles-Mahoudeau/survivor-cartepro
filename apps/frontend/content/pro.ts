@@ -5,6 +5,8 @@ export const PRO_CONTENT = {
     group: 'Établissement',
     overview: 'Tableau de bord',
     collect: 'Encaisser',
+    partners: 'Catalogue',
+    account: 'Mon établissement',
   },
   collect: {
     title: 'Encaisser un paiement',
@@ -36,6 +38,66 @@ export const PRO_CONTENT = {
     notActive: {
       title: 'Établissement pas encore actif',
       body: 'Votre demande d’inscription doit être acceptée par l’administration avant de pouvoir encaisser.',
+    },
+  },
+  partners: {
+    title: 'Catalogue des partenaires',
+    subtitle: 'Les établissements référencés CartePro, le vôtre compris.',
+    trail: 'Catalogue',
+  },
+  account: {
+    title: 'Mon établissement',
+    subtitle:
+      'Votre demande de référencement, la décision de l’administration et les informations affichées aux salariés.',
+    trail: 'Mon établissement',
+    status: {
+      title: 'Référencement',
+      labels: {
+        pending: 'En attente d’examen',
+        active: 'Référencé',
+        refused: 'Refusé',
+        banned: 'Suspendu',
+      },
+      explanations: {
+        pending:
+          'Un agent examine votre demande. Vous pourrez encaisser dès qu’elle sera acceptée.',
+        active:
+          'Votre établissement apparaît dans le catalogue et peut encaisser.',
+        refused:
+          'Votre demande a été refusée. Le motif de la décision figure ci-dessous.',
+        banned:
+          'Votre établissement est suspendu : il n’apparaît plus dans le catalogue et ne peut plus encaisser.',
+      },
+      decision: 'Décision du',
+    },
+    identity: {
+      title: 'Identité de l’entreprise',
+      legalName: 'Raison sociale',
+      siren: 'SIREN',
+      businessPurpose: 'Objet social',
+      locked:
+        'Ces informations ont été examinées par l’administration : elles ne se modifient pas ici.',
+    },
+    form: {
+      title: 'Informations affichées aux salariés',
+      fields: {
+        tradeName: { label: 'Enseigne', required: 'Saisissez l’enseigne.' },
+        addressLine: { label: 'Adresse', required: 'Saisissez l’adresse.' },
+        postalCode: {
+          label: 'Code postal',
+          format: 'Le code postal compte cinq chiffres.',
+        },
+        city: { label: 'Ville', required: 'Saisissez la ville.' },
+        categories: {
+          label: 'Catégories',
+          hint: 'Une ou plusieurs, selon ce que vous vendez.',
+          required: 'Choisissez au moins une catégorie.',
+        },
+      },
+      submit: 'Enregistrer',
+      submitting: 'Enregistrement…',
+      saved: 'Informations enregistrées.',
+      failed: 'L’enregistrement a échoué. Réessayez.',
     },
   },
   error: {

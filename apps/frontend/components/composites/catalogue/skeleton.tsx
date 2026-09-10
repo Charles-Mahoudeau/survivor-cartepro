@@ -2,7 +2,8 @@ import { Card } from '@/components/composites/card';
 
 const pulse = 'animate-pulse rounded bg-muted';
 
-export function PartnersSkeleton({ rows = 5 }: { rows?: number }) {
+/** Stands in for the catalogue while its first page loads. */
+export function CatalogueSkeleton({ rows = 5 }: { rows?: number }) {
   return (
     <div aria-busy="true">
       <div className={`mb-4 h-10 rounded-xl ${pulse}`} />
