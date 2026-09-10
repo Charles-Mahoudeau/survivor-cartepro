@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 
+import { InstallPrompt } from '@/components/composites/install-prompt.client';
 import { SpaceShell } from '@/components/composites/space-shell';
 import { ROLES } from '@/lib/auth/constants';
 import { RoleGate } from '@/lib/auth/role-gate';
@@ -19,6 +20,7 @@ export default function Layout({
       <Suspense fallback={null}>
         <RoleGate role={ROLES.EMPLOYEE} />
       </Suspense>
+      <InstallPrompt />
       {children}
     </SpaceShell>
   );
