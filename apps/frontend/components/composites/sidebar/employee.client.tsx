@@ -56,7 +56,7 @@ export function EmployeeSidebar({ account }: { account: ReactNode }) {
   return (
     <Sidebar variant="inset">
       <SidebarHeader>
-        <SidebarBrand description="Espace salarié" />
+        <SidebarBrand description={ME_CONTENT.spaceLabel} />
       </SidebarHeader>
       <SidebarBuildContent
         sidebarGroups={GROUPS}
