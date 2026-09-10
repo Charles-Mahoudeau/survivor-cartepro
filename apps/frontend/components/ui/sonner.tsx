@@ -9,10 +9,15 @@ import {
 } from '@remixicon/react';
 import { Toaster as Sonner, type ToasterProps } from 'sonner';
 
+import { useIsMobile } from '@/hooks/use-mobile';
+
 function Toaster({ ...props }: ToasterProps) {
+  const isMobile = useIsMobile();
+
   return (
     <Sonner
       className="toaster group"
+      position={isMobile ? 'top-center' : 'bottom-right'}
       icons={{
         success: <RiCheckboxCircleLine className="size-4" />,
         info: <RiInformationLine className="size-4" />,
