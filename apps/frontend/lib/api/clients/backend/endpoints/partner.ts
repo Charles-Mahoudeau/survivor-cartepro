@@ -7,6 +7,7 @@ import {
   partnerPageSchema,
   partnerProfileSchema,
   partnerSchema,
+  updatePartnerProfileSchema,
 } from '../../../schemas/backend/partner';
 
 const partnerParamsSchema = z.object({
@@ -22,6 +23,15 @@ export const partnerEndpointsSchema = {
   '@post/partners': {
     method: 'post',
     input: createPartnerSchema,
+    output: partnerProfileSchema,
+  },
+  '@get/partners/me/profile': {
+    method: 'get',
+    output: partnerProfileSchema,
+  },
+  '@patch/partners/me/profile': {
+    method: 'patch',
+    input: updatePartnerProfileSchema,
     output: partnerProfileSchema,
   },
   '@get/partners/:partnerId': {

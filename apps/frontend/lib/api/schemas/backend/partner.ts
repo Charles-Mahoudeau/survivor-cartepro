@@ -73,6 +73,16 @@ export const createPartnerSchema = z.object({
   categories: z.array(z.string()).min(1),
 });
 
+export const updatePartnerProfileSchema = z.object({
+  tradeName: z.string().trim().min(1).optional(),
+  addressLine: z.string().trim().min(1).optional(),
+  postalCode: z.string().trim().min(1).optional(),
+  city: z.string().trim().min(1).optional(),
+  latitude: z.number().min(-90).max(90).optional(),
+  longitude: z.number().min(-180).max(180).optional(),
+  categories: z.array(z.string()).min(1).optional(),
+});
+
 export type PartnerCategorySummary = z.infer<
   typeof partnerCategorySummarySchema
 >;
@@ -83,3 +93,4 @@ export type ListPartnersQuery = z.infer<typeof listPartnersQuerySchema>;
 export type PartnerLastDecision = z.infer<typeof partnerLastDecisionSchema>;
 export type PartnerProfile = z.infer<typeof partnerProfileSchema>;
 export type CreatePartner = z.infer<typeof createPartnerSchema>;
+export type UpdatePartnerProfile = z.infer<typeof updatePartnerProfileSchema>;

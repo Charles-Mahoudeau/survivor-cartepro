@@ -6,6 +6,7 @@ import { backendInternalUrl } from '@/lib/env';
 import { backendErrorSchema } from '../../schemas/backend/error';
 import { allocationEndpointsSchema } from './endpoints/allocation';
 import { employerEndpointsSchema } from './endpoints/employer';
+import { transactionEndpointsSchema } from './endpoints/transaction';
 import { partnerEndpointsSchema } from './endpoints/partner';
 import { partnerApplicationEndpointsSchema } from './endpoints/partner-application';
 import { paymentTokenEndpointsSchema } from './endpoints/payment-token';
@@ -30,6 +31,7 @@ const backendSchema = createSchema({
   ...paymentEndpointsSchema,
   ...allocationEndpointsSchema,
   ...employerEndpointsSchema,
+  ...transactionEndpointsSchema,
 });
 
 function createBackend() {
@@ -97,6 +99,8 @@ export const ECODES = {
   ERR_API_FETCH_FAILED: 'ERR_API_FETCH_FAILED',
   ADDRESS_NOT_FOUND: 'ADDRESS_NOT_FOUND',
   GEOCODING_UNAVAILABLE: 'GEOCODING_UNAVAILABLE',
+  ACCOUNT_NOT_FOUND: 'ACCOUNT_NOT_FOUND',
+  ACCOUNT_SELF_SUSPENSION: 'ACCOUNT_SELF_SUSPENSION',
   UNKNOWN_ERROR: 'UNKNOWN_ERROR',
 } as const;
 

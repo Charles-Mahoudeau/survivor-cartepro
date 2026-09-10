@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Chip } from '@/components/ui/chip';
 import { AUTH_CONTENT } from '@/content/auth';
 import type { PartnerCategory } from '@/lib/api/schemas/backend/partner-category';
+import { POSTAL_CODE_LENGTH } from '@/lib/address';
 import { authClient } from '@/lib/auth/client';
 import { MIN_PASSWORD_LENGTH } from '@/lib/auth/constants';
 import { AUTH_ERROR_MESSAGES, toAuthError } from '@/lib/auth/errors';
@@ -22,7 +23,6 @@ import { AUTH_ERROR_MESSAGES, toAuthError } from '@/lib/auth/errors';
 import { registerPartnerAction } from './actions/register-partner.action';
 import {
   buildPartnerSignUpSchema,
-  POSTAL_CODE_LENGTH,
   type PartnerSignUpInput,
 } from './schemas/partner-signup.schema';
 

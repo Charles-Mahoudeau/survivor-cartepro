@@ -1,13 +1,9 @@
 import { z } from 'zod';
 
 import { AUTH_CONTENT } from '@/content/auth';
+import { POSTAL_CODE_FORMAT } from '@/lib/address';
 import { MIN_PASSWORD_LENGTH } from '@/lib/auth/constants';
 import { hasSirenFormat, isValidSiren, normalizeSiren } from '@/lib/siren';
-
-/** A French postal code has five digits. */
-export const POSTAL_CODE_LENGTH = 5;
-
-const POSTAL_CODE_FORMAT = new RegExp(`^\\d{${POSTAL_CODE_LENGTH}}$`);
 
 const { name, email, password } = AUTH_CONTENT.fields;
 const { fields } = AUTH_CONTENT.partnerSignUp;

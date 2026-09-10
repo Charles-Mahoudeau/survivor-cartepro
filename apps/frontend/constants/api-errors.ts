@@ -48,5 +48,8 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
     'Adresse introuvable. Vérifiez le numéro, la voie et le code postal.',
   GEOCODING_UNAVAILABLE:
     'La vérification de l’adresse est momentanément indisponible. Réessayez dans un instant.',
+  ACCOUNT_NOT_FOUND: 'Ce compte n’existe pas.',
+  ACCOUNT_SELF_SUSPENSION:
+    'Vous ne pouvez pas suspendre ni clôturer votre propre compte.',
   UNKNOWN_ERROR: 'L’opération a échoué. Réessayez.',
 };
