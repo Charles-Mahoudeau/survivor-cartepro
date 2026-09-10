@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { AuthShell } from '@/components/composites/auth-shell';
@@ -30,6 +31,10 @@ export default function PartnerSignUpPage() {
 }
 
 async function Registration() {
+  // Keeps this boundary out of the static shell: otherwise the build tries
+  // to prerender it and eagerly runs the cached categories fetch offline.
+  await connection();
+
   const [user, categories] = await Promise.all([
     getCurrentUser(),
     listPartnerCategoriesHook(),

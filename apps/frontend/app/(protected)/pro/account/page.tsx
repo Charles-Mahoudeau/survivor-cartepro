@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { Card } from '@/components/composites/card';
@@ -37,6 +38,10 @@ export default function Page() {
 }
 
 async function Dossier() {
+  // Keeps this boundary out of the static shell: otherwise the build tries
+  // to prerender it and eagerly runs the cached categories fetch offline.
+  await connection();
+
   const [profile, categories] = await Promise.all([
     getMyPartnerProfileHook(),
     listPartnerCategoriesHook(),
