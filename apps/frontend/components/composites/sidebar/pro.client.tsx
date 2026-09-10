@@ -4,6 +4,7 @@ import { RiCashLine, RiStoreLine } from '@remixicon/react';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 
+import { BottomNav } from '@/components/composites/bottom-nav.client';
 import { SidebarBrand } from '@/components/composites/sidebar/brand';
 import {
   Sidebar,
@@ -39,19 +40,19 @@ const GROUPS: SidebarGroupData[] = [
 
 export function ProSidebar({ account }: { account: ReactNode }) {
   const pathname = usePathname();
+  const isActive = (href: string) =>
+    href === HOME ? pathname === HOME : pathname.startsWith(href);
 
   return (
-    <Sidebar variant="inset">
-      <SidebarHeader>
-        <SidebarBrand description={PRO_CONTENT.roleLabel} />
-      </SidebarHeader>
-      <SidebarBuildContent
-        sidebarGroups={GROUPS}
-        isActive={(href) =>
-          href === HOME ? pathname === HOME : pathname.startsWith(href)
-        }
-      />
-      <SidebarFooter>{account}</SidebarFooter>
-    </Sidebar>
+    <>
+      <Sidebar variant="inset">
+        <SidebarHeader>
+          <SidebarBrand description={PRO_CONTENT.roleLabel} />
+        </SidebarHeader>
+        <SidebarBuildContent sidebarGroups={GROUPS} isActive={isActive} />
+        <SidebarFooter>{account}</SidebarFooter>
+      </Sidebar>
+      <BottomNav groups={GROUPS} isActive={isActive} />
+    </>
   );
 }

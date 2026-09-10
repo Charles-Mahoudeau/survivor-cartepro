@@ -26,7 +26,7 @@ export function SpaceShell({
         <Suspense fallback={null}>{breadcrumb}</Suspense>
         <div
           id="contenu"
-          className="grid w-full max-w-6xl grid-cols-12 gap-x-6 gap-y-8 p-4 pt-0 lg:p-6 lg:pt-0"
+          className="grid w-full max-w-6xl grid-cols-12 gap-x-6 gap-y-8 p-4 pt-0 pb-20 md:pb-4 lg:p-6 lg:pt-0"
         >
           <div className="col-span-12">
             <BandeauSimulation />
