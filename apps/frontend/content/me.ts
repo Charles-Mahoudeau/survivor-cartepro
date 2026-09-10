@@ -2,20 +2,14 @@
 export const ME_CONTENT = {
   brand: 'CartePro',
   roleLabel: 'Salarié·e',
+  spaceLabel: 'Espace salarié',
   nav: {
     wallet: 'Mon compte',
     history: 'Historique',
     partners: 'Partenaires',
     pay: 'Payer',
   },
-  mobileNav: {
-    wallet: 'Compte',
-    history: 'Historique',
-    partners: 'Partenaires',
-    pay: 'Payer',
-  },
   signOut: 'Se déconnecter',
-  signOutShort: 'Déconnexion',
   simulation: '(simulation)',
   wallet: {
     title: 'Mon portefeuille',

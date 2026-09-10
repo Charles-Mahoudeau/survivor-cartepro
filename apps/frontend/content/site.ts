@@ -12,6 +12,7 @@ export const SITE_CONTENT = {
   signOut: 'Se déconnecter',
   menu: 'Menu',
   close: 'Fermer',
+  navigation: 'Navigation principale',
   simulation: {
     title: 'Simulation.',
     description:
