@@ -9,6 +9,7 @@ de base de données.
 | Document                         | Contenu                                                                                                                             |
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | [install.md](install.md)         | Installer et lancer CartePro sans cloner le dépôt, depuis l'artéfact CI.                                                            |
+| [deployment.md](deployment.md)   | Déployer CartePro en production : option managée (Coolify) ou Docker brut avec reverse proxy manuel.                                |
 | [api.md](api.md)                 | Spécification de base de l'API : racine, authentification, erreurs, ressources. Le contrat complet est servi en direct sur `/docs`. |
 | [db-schema.dbml](db-schema.dbml) | Schéma de base de données, introspecté sur une base fraîchement migrée et seedée.                                                   |
 

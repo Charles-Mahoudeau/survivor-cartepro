@@ -12,10 +12,10 @@ Le point de départ pour installer et lancer le projet reste le
 
 ## Sommaire
 
-| Document                                           | Contenu                                                                      |
-| -------------------------------------------------- | ---------------------------------------------------------------------------- |
-| [guide-utilisation.md](guide-utilisation.md)       | Parcours complet du prototype, écran par écran, pour une démonstration.      |
-| [audit-integrity-note.md](audit-integrity-note.md) | Mécanisme d'intégrité du journal d'audit (chaînage par hash).                |
-| [audit-alteration/](audit-alteration/README.md)    | Démonstration réelle (avant/après) d'une altération détectée sur ce journal. |
-| [design/](design/README.md)                        | Spécifications d'implémentation (authentification, frontend, PWA).           |
-| [technical/](technical/README.md)                  | Installation, spécification de base de l'API, schéma de base de données.     |
+| Document                                           | Contenu                                                                                             |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| [guide-utilisation.md](guide-utilisation.md)       | Parcours complet du prototype, écran par écran, pour une démonstration.                             |
+| [audit-integrity-note.md](audit-integrity-note.md) | Mécanisme d'intégrité du journal d'audit (chaînage par hash).                                       |
+| [audit-alteration/](audit-alteration/README.md)    | Démonstration réelle (avant/après) d'une altération détectée sur ce journal.                        |
+| [design/](design/README.md)                        | Spécifications d'implémentation (authentification, frontend, PWA).                                  |
+| [technical/](technical/README.md)                  | Installation, déploiement en production, spécification de base de l'API, schéma de base de données. |
