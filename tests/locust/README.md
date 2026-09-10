@@ -92,7 +92,7 @@ bun run db:seed --reset
 
 Chaque fichier lit un pool de comptes dans `tests/locust/data/*.csv`
 (colonnes `email,password` — un mot de passe vide retombe sur le mot de passe
-partagé de la recette, `TicketTout2026!`, cf. `scripts/seed/dataset.ts`).
+partagé de la recette, `CartePro2026!`, cf. `scripts/seed/dataset.ts`).
 
 | Fichier              | Comptes fournis par défaut                                                    |
 | -------------------- | ----------------------------------------------------------------------------- |
@@ -138,7 +138,7 @@ compagnon est partagé et fini, l'épuiser sous charge est attendu.
 | Variable                   | Défaut                            | Effet                                                                         |
 | -------------------------- | --------------------------------- | ----------------------------------------------------------------------------- |
 | `LOCUST_APP_ORIGIN`        | `http://localhost:3000`           | En-tête `Origin` envoyé au sign-in (doit figurer dans `AUTH_TRUSTED_ORIGINS`) |
-| `LOCUST_SEED_PASSWORD`     | `TicketTout2026!`                 | Mot de passe par défaut pour toute ligne CSV sans mot de passe                |
+| `LOCUST_SEED_PASSWORD`     | `CartePro2026!`                   | Mot de passe par défaut pour toute ligne CSV sans mot de passe                |
 | `LOCUST_EMPLOYEE_ACCOUNTS` | `tests/locust/data/employees.csv` | Pool de comptes salariés                                                      |
 | `LOCUST_ADMIN_ACCOUNTS`    | `tests/locust/data/admins.csv`    | Pool de comptes administration                                                |
 | `LOCUST_PARTNER_ACCOUNTS`  | `tests/locust/data/partners.csv`  | Pool de comptes partenaires                                                   |

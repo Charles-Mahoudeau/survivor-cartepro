@@ -28,7 +28,7 @@ APP_ORIGIN = os.environ.get("LOCUST_APP_ORIGIN", "http://localhost:3000")
 # Every account the recette dataset seeds shares this password
 # (apps/backend/scripts/seed/dataset.ts, SEED_PASSWORD). Override for a
 # differently-seeded database.
-SEED_PASSWORD = os.environ.get("LOCUST_SEED_PASSWORD", "TicketTout2026!")
+SEED_PASSWORD = os.environ.get("LOCUST_SEED_PASSWORD", "CartePro2026!")
 
 # auth.constants.ts: SIGN_IN_RATE_LIMIT is 5 attempts / 60s, keyed by source IP
 # and shared by every account — sign-in included, not just failed attempts.
