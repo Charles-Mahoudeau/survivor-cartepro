@@ -1,0 +1,19 @@
+# Static Traefik dynamic configuration for the artifact's local HTTPS setup.
+# Only paths, no key material: the certificate itself is generated fresh by
+# `build.yml` for every build and mounted read-only at the paths below.
+tls:
+  certificates:
+    - certFile: /certs/cartepro.localhost.crt
+      keyFile: /certs/cartepro.localhost.key
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /certs/cartepro.localhost.crt
+        keyFile: /certs/cartepro.localhost.key
+
+http:
+  middlewares:
+    https-redirect:
+      redirectScheme:
+        scheme: https
+        permanent: true

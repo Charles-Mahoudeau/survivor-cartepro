@@ -5,4 +5,4 @@ docker load < docker-images.tar.gz
 
 echo "Starting containers..."
 docker compose up -d
-echo "App ready on: http://cartepro.localhost"
+echo "App ready on: https://cartepro.localhost"
