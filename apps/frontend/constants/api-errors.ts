@@ -21,6 +21,10 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
     'Ce code a été annulé par le salarié. Demandez-en un nouveau.',
   PAYMENT_TOKEN_ALREADY_USED:
     'Ce code a déjà servi à un paiement. Un code ne vaut qu’une fois.',
+  ALLOCATION_NOT_FOUND: 'Cet abondement n’existe pas.',
+  ALLOCATION_ALREADY_APPLIED:
+    'Cet abondement a déjà été versé. Un versement ne se rejoue pas : créez-en un nouveau.',
+  EMPLOYER_NOT_FOUND: 'Cet employeur n’existe pas.',
   PARTNER_NOT_PENDING:
     'Cette demande a déjà été traitée. Rechargez la page pour voir la décision.',
   PAYMENT_TOKEN_NOT_FOUND: 'Aucun code de paiement n’est actif. Générez-en un.',

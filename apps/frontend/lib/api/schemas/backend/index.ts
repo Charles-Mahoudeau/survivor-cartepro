@@ -1,3 +1,5 @@
+export * from './allocation';
+export * from './employer';
 export * from './error';
 export * from './partner';
 export * from './partner-application';
