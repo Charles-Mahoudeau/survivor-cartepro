@@ -5,6 +5,7 @@ export const ADMIN_CONTENT = {
     group: 'Pilotage',
     overview: 'Tableau de bord',
     applications: 'Demandes partenaires',
+    allocations: 'Abondements',
   },
   applications: {
     title: 'Demandes d’inscription',
@@ -60,5 +61,59 @@ export const ADMIN_CONTENT = {
       title: 'Demande déjà traitée',
       body: 'Cette demande a reçu une décision. Une décision ne se reprend pas : elle se corrige par une nouvelle demande.',
     },
+  },
+  allocations: {
+    title: 'Abondements',
+    subtitle:
+      'Créditez les portefeuilles d’un employeur. Un versement est définitif et ne se rejoue pas.',
+    trail: 'Abondement',
+    empty: 'Aucun abondement pour le moment.',
+    createTitle: 'Nouvel abondement',
+    employerLabel: 'Employeur',
+    employerPlaceholder: 'Choisissez un employeur',
+    labelLabel: 'Libellé',
+    labelPlaceholder: 'Abondement de septembre',
+    amountLabel: 'Montant par salarié',
+    amountHelp: 'En euros. Chaque portefeuille actif recevra ce montant.',
+    create: 'Créer',
+    creating: 'Création…',
+    createdOn: 'Créé le',
+    perEmployee: 'par salarié',
+    wallets: (count: number) =>
+      count === 1 ? '1 portefeuille actif' : `${count} portefeuilles actifs`,
+    status: {
+      draft: 'À verser',
+      applied: 'Versé',
+    },
+    open: 'Ouvrir',
+    employerRequired: 'Choisissez un employeur.',
+    labelRequired: 'Donnez un libellé à cet abondement.',
+    amountRequired: 'Saisissez un montant supérieur à zéro.',
+  },
+  allocation: {
+    back: 'Retour aux abondements',
+    employer: 'Employeur',
+    label: 'Libellé',
+    amount: 'Montant par salarié',
+    total: 'Total à verser',
+    beneficiaries: 'Portefeuilles crédités',
+    excluded: 'Portefeuilles ignorés',
+    excludedReason: {
+      wallet_disabled: 'Portefeuille désactivé',
+    },
+    noExcluded: 'Aucun portefeuille ignoré.',
+    apply: 'Verser maintenant',
+    applying: 'Versement…',
+    applyHelp:
+      'Le versement crédite chaque portefeuille actif. Il écrit des écritures immuables et ne peut pas être annulé.',
+    appliedToast: 'Abondement versé.',
+    settled: {
+      title: 'Abondement déjà versé',
+      body: 'Les écritures qu’il a produites sont définitives. Pour créditer à nouveau, créez un autre abondement.',
+    },
+  },
+  error: {
+    title: 'Cette page n’a pas pu être affichée.',
+    body: 'Une erreur est survenue. Vous pouvez réessayer.',
   },
 } as const;

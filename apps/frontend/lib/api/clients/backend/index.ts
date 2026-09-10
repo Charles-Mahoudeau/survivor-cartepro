@@ -4,6 +4,8 @@ import { createFetch, createSchema } from '@better-fetch/fetch';
 
 import { backendInternalUrl } from '@/lib/env';
 import { backendErrorSchema } from '../../schemas/backend/error';
+import { allocationEndpointsSchema } from './endpoints/allocation';
+import { employerEndpointsSchema } from './endpoints/employer';
 import { partnerEndpointsSchema } from './endpoints/partner';
 import { partnerApplicationEndpointsSchema } from './endpoints/partner-application';
 import { paymentTokenEndpointsSchema } from './endpoints/payment-token';
@@ -26,6 +28,8 @@ const backendSchema = createSchema({
   ...partnerApplicationEndpointsSchema,
   ...paymentTokenEndpointsSchema,
   ...paymentEndpointsSchema,
+  ...allocationEndpointsSchema,
+  ...employerEndpointsSchema,
 });
 
 function createBackend() {
@@ -70,6 +74,9 @@ export const ECODES = {
   WALLET_NOT_FOUND: 'WALLET_NOT_FOUND',
   PARTNER_NOT_FOUND: 'PARTNER_NOT_FOUND',
   PARTNER_NOT_PENDING: 'PARTNER_NOT_PENDING',
+  ALLOCATION_NOT_FOUND: 'ALLOCATION_NOT_FOUND',
+  ALLOCATION_ALREADY_APPLIED: 'ALLOCATION_ALREADY_APPLIED',
+  EMPLOYER_NOT_FOUND: 'EMPLOYER_NOT_FOUND',
   PAYMENT_TOKEN_NOT_FOUND: 'PAYMENT_TOKEN_NOT_FOUND',
   EMPTY_BALANCE: 'EMPTY_BALANCE',
   PARTNER_NOT_ACTIVE: 'PARTNER_NOT_ACTIVE',
