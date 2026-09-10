@@ -1,0 +1,49 @@
+{
+  "period": { "from": "2026-08-11T08:03:16.435Z", "to": null },
+  "entries": [
+    {
+      "id": "01a08a54-8cc7-731f-b7fd-a458da6de88e",
+      "occurredAt": "2026-09-10T07:59:51.999Z",
+      "actorId": null,
+      "actorRole": null,
+      "action": "admin_action",
+      "targetType": "audit_chain",
+      "targetId": null,
+      "payload": {
+        "note": "Audit chain origin. Operations that happened before this entry predate the audit system and are not represented in the chain — see the integrity note for why fabricating them retroactively is not an option.",
+        "event": "chain_origin"
+      },
+      "ip": null,
+      "previousHash": null,
+      "hash": "e91e399155ff48dffcde6874cdadc22313c51a611f7946b49173771b4244b242"
+    },
+    {
+      "id": "01a08a54-c62e-7b75-8218-c4890dce0ba4",
+      "occurredAt": "2026-09-10T08:00:06.700Z",
+      "actorId": null,
+      "actorRole": null,
+      "action": "account_created",
+      "targetType": "user",
+      "targetId": "01a08a54-c619-74ca-bc22-c283b0a1454c",
+      "payload": null,
+      "ip": null,
+      "previousHash": "e91e399155ff48dffcde6874cdadc22313c51a611f7946b49173771b4244b242",
+      "hash": "98ca08ed3dc4fa7a309fd03ac117a8cb7a0e7f12f3b9e2e83c5fc10adbefeedc"
+    },
+    {
+      "id": "01a08a54-f704-75bd-8229-9a652f77203c",
+      "occurredAt": "2026-09-10T08:00:19.202Z",
+      "actorId": null,
+      "actorRole": null,
+      "action": "account_created",
+      "targetType": "user",
+      "targetId": "01a08a54-f6fd-7d7a-94e5-fcce73e98c80",
+      "payload": null,
+      "ip": null,
+      "previousHash": "76523dfb67fa53bdf310175fce49093d666a2bd616373c8a0eed131488541ef7",
+      "hash": "6c68457bd087a551b754ecd110793e23f717ac810ad65a4825b1ac1b29384317"
+    }
+  ],
+  "chainDigest": "6c68457bd087a551b754ecd110793e23f717ac810ad65a4825b1ac1b29384317",
+  "signature": "6792473eb9d73cffc56cf7e5ce522413aa803337acd611b07a11f20d481e0904"
+}
