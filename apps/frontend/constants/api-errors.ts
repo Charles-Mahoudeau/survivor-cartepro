@@ -26,6 +26,12 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   PAYMENT_TOKEN_NOT_FOUND: 'Aucun code de paiement n’est actif. Générez-en un.',
   EMPTY_BALANCE:
     'Votre solde est épuisé. Un code de paiement ne peut pas être généré.',
+  PARTNER_ALREADY_EXISTS:
+    'Ce compte porte déjà un dossier d’établissement. Retrouvez-le dans votre espace partenaire.',
+  PARTNER_SIREN_ALREADY_REGISTERED:
+    'Ce SIREN est déjà rattaché à un dossier. Un établissement n’est référencé qu’une fois.',
+  PARTNER_CATEGORY_NOT_FOUND:
+    'Une des catégories choisies n’existe plus. Rechargez la page et choisissez-en une autre.',
   BAD_REQUEST: 'La demande est incorrecte. Rechargez la page et réessayez.',
   INTERNAL_SERVER_ERROR:
     'Le service est momentanément indisponible. Réessayez.',
@@ -34,5 +40,9 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   ERR_API_CONNECTION_REFUSED:
     'Le service ne répond pas. Réessayez dans un instant.',
   ERR_API_FETCH_FAILED: 'La connexion au service a échoué. Réessayez.',
+  ADDRESS_NOT_FOUND:
+    'Adresse introuvable. Vérifiez le numéro, la voie et le code postal.',
+  GEOCODING_UNAVAILABLE:
+    'La vérification de l’adresse est momentanément indisponible. Réessayez dans un instant.',
   UNKNOWN_ERROR: 'L’opération a échoué. Réessayez.',
 };

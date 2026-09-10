@@ -2,8 +2,10 @@ import { createSchema } from '@better-fetch/fetch';
 import { z } from 'zod';
 
 import {
+  createPartnerSchema,
   listPartnersQuerySchema,
   partnerPageSchema,
+  partnerProfileSchema,
   partnerSchema,
 } from '../../../schemas/backend/partner';
 
@@ -16,6 +18,11 @@ export const partnerEndpointsSchema = {
     method: 'get',
     query: listPartnersQuerySchema,
     output: partnerPageSchema,
+  },
+  '@post/partners': {
+    method: 'post',
+    input: createPartnerSchema,
+    output: partnerProfileSchema,
   },
   '@get/partners/:partnerId': {
     method: 'get',

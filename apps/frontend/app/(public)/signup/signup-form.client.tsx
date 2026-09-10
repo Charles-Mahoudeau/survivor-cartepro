@@ -116,6 +116,15 @@ export function SignUpForm() {
           {signUp.signIn}
         </Link>
       </p>
+      <p className="mt-2 text-center text-sm text-[color:var(--muted-foreground)]">
+        {AUTH_CONTENT.partnerInvite.prompt}{' '}
+        <Link
+          href="/partner-signup"
+          className="text-primary underline underline-offset-4"
+        >
+          {AUTH_CONTENT.partnerInvite.link}
+        </Link>
+      </p>
     </>
   );
 }
