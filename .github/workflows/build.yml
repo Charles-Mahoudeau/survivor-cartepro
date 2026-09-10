@@ -72,3 +72,6 @@ jobs:
           name: cartepro-livrable
           path: release/
           retention-days: 14
+          # release/.env is a dotfile: upload-artifact drops hidden files by
+          # default, and the deployment cannot start without it.
+          include-hidden-files: true
