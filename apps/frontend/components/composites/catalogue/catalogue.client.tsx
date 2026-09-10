@@ -11,7 +11,7 @@ import { CartePartenaire } from '@/components/composites/carte-partenaire';
 import { Button } from '@/components/ui/button';
 import { Chip } from '@/components/ui/chip';
 import { Input } from '@/components/ui/input';
-import { ME_CONTENT } from '@/content/me';
+import { CATALOGUE_CONTENT } from '@/content/catalogue';
 import type { PartnerPage } from '@/lib/api/schemas/backend/partner';
 import type { PartnerCategory } from '@/lib/api/schemas/backend/partner-category';
 
@@ -23,7 +23,7 @@ import {
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-interface PartnersPageClientProps {
+interface CatalogueClientProps {
   initialPage: PartnerPage;
   categories: PartnerCategory[];
   search: string;
@@ -67,8 +67,8 @@ function SearchField({ value }: { value: string }) {
       <Input
         id="recherche-partenaire"
         type="search"
-        aria-label={ME_CONTENT.partners.searchLabel}
-        placeholder={ME_CONTENT.partners.searchPlaceholder}
+        aria-label={CATALOGUE_CONTENT.searchLabel}
+        placeholder={CATALOGUE_CONTENT.searchPlaceholder}
         className="pl-9"
         value={text}
         onChange={(event) => setText(event.target.value)}
@@ -102,7 +102,7 @@ function CategoryChips({
   }
 
   const chips = [
-    { slug: '', label: ME_CONTENT.partners.allCategories },
+    { slug: '', label: CATALOGUE_CONTENT.allCategories },
     ...categories.map((category) => ({
       slug: category.slug,
       label: category.displayName,
@@ -113,7 +113,7 @@ function CategoryChips({
     <ul
       className="mb-6 flex flex-wrap gap-2"
       role="group"
-      aria-label="Catégories"
+      aria-label={CATALOGUE_CONTENT.categoriesLabel}
     >
       {chips.map(({ slug, label }) => (
         <li key={slug || 'all'}>
@@ -126,12 +126,13 @@ function CategoryChips({
   );
 }
 
-export default function PartnersPageClient({
+/** The searchable list of active partners, paged with a "load more" button. */
+export function CatalogueClient({
   initialPage,
   categories,
   search,
   category,
-}: PartnersPageClientProps) {
+}: CatalogueClientProps) {
   const [partners, setPartners] = useState(initialPage.items);
   const [nextCursor, setNextCursor] = useState(initialPage.nextCursor);
 
@@ -141,7 +142,7 @@ export default function PartnersPageClient({
       setNextCursor(data.nextCursor);
     },
     onError: ({ error }) => {
-      toast.error(error.serverError ?? ME_CONTENT.error.body);
+      toast.error(error.serverError ?? CATALOGUE_CONTENT.loadError);
     },
   });
 
@@ -151,13 +152,13 @@ export default function PartnersPageClient({
       <CategoryChips categories={categories} selected={category} />
 
       <p className="sr-only" aria-live="polite">
-        {ME_CONTENT.partners.results(partners.length)}
+        {CATALOGUE_CONTENT.results(partners.length)}
       </p>
 
       {partners.length === 0 ? (
         <Card className="px-3 py-6">
           <p className="text-muted-foreground text-sm">
-            {ME_CONTENT.partners.empty}
+            {CATALOGUE_CONTENT.empty}
           </p>
         </Card>
       ) : (
@@ -185,9 +186,7 @@ export default function PartnersPageClient({
             }
             disabled={isPending}
           >
-            {isPending
-              ? ME_CONTENT.partners.loading
-              : ME_CONTENT.partners.loadMore}
+            {isPending ? CATALOGUE_CONTENT.loading : CATALOGUE_CONTENT.loadMore}
           </Button>
         </div>
       ) : null}

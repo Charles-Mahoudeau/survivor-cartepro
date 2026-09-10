@@ -50,14 +50,6 @@ export const ME_CONTENT = {
   partners: {
     title: 'Partenaires',
     subtitle: 'Établissements acceptant CartePro',
-    searchPlaceholder: 'Rechercher un commerce, une ville…',
-    searchLabel: 'Rechercher un partenaire',
-    allCategories: 'Tous',
-    empty: 'Aucun partenaire trouvé',
-    loadMore: 'Charger plus',
-    loading: 'Chargement…',
-    results: (count: number) =>
-      count === 1 ? '1 partenaire' : `${count} partenaires`,
   },
   pay: {
     title: 'Payer',
