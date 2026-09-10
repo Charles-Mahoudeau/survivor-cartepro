@@ -51,6 +51,7 @@ services:
       - BETTER_AUTH_URL=${BETTER_AUTH_URL:?set BETTER_AUTH_URL to the public URL of the API}
       - AUTH_TRUSTED_ORIGINS=${AUTH_TRUSTED_ORIGINS:?set AUTH_TRUSTED_ORIGINS to the origins allowed to sign in}
       - AUDIT_EXPORT_SIGNING_SECRET=${AUDIT_EXPORT_SIGNING_SECRET:?set AUDIT_EXPORT_SIGNING_SECRET, e.g. openssl rand -base64 32}
+      - PAYMENT_TOKEN_SIGNING_SECRET=${PAYMENT_TOKEN_SIGNING_SECRET:?set PAYMENT_TOKEN_SIGNING_SECRET, e.g. openssl rand -base64 32}
     depends_on:
       postgres:
         condition: service_healthy
