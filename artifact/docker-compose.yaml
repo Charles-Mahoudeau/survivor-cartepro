@@ -7,25 +7,35 @@ services:
     restart: unless-stopped
     ports:
       - '80:80'
+      - '443:443'
       - '8080:8080'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik:/etc/traefik/dynamic:ro
+      - ./certs:/certs:ro
     command:
       - --api.insecure=true
       - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
+      - --providers.file.directory=/etc/traefik/dynamic
 
   frontend:
     image: cartepro-frontend
     environment:
       - BACKEND_INTERNAL_URL=${BACKEND_INTERNAL_URL:-http://backend:3000}
-      - APP_ORIGIN=${APP_ORIGIN:-http://cartepro.localhost}
+      - APP_ORIGIN=${APP_ORIGIN:-https://cartepro.localhost}
     labels:
       - traefik.enable=true
       - traefik.http.routers.front.entrypoints=web
       - traefik.http.routers.front.rule=Host(`cartepro.localhost`)
       - traefik.http.routers.front.priority=1
+      - traefik.http.routers.front.middlewares=https-redirect@file
+      - traefik.http.routers.front-secure.entrypoints=websecure
+      - traefik.http.routers.front-secure.rule=Host(`cartepro.localhost`)
+      - traefik.http.routers.front-secure.priority=1
+      - traefik.http.routers.front-secure.tls=true
       - traefik.http.services.front.loadbalancer.server.port=3000
 
   backend:
@@ -60,6 +70,11 @@ services:
       - traefik.http.routers.back.entrypoints=web
       - traefik.http.routers.back.rule=Host(`cartepro.localhost`) && (PathPrefix(`/api`) || PathPrefix(`/docs`) || Path(`/health`) || PathPrefix(`/auth`))
       - traefik.http.routers.back.priority=100
+      - traefik.http.routers.back.middlewares=https-redirect@file
+      - traefik.http.routers.back-secure.entrypoints=websecure
+      - traefik.http.routers.back-secure.rule=Host(`cartepro.localhost`) && (PathPrefix(`/api`) || PathPrefix(`/docs`) || Path(`/health`) || PathPrefix(`/auth`))
+      - traefik.http.routers.back-secure.priority=100
+      - traefik.http.routers.back-secure.tls=true
       - traefik.http.services.back.loadbalancer.server.port=3000
 
   postgres:

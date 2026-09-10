@@ -22,6 +22,11 @@ __pycache__
 .env.local
 .env.*.local
 
+# Artifact build output (release/) and its build.yml-generated TLS certificate —
+# never committed, regenerated fresh on every build/push (see build.yml)
+release
+artifact/certs
+
 # Logs
 logs
 *.log
