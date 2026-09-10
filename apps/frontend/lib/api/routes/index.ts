@@ -1,5 +1,7 @@
 import 'server-only';
 
+import * as allocation from './allocation';
+import * as employer from './employer';
 import * as geocoding from './geocoding';
 import * as partner from './partner';
 import * as partnerApplication from './partner-application';
@@ -17,4 +19,6 @@ export const api = {
   partnerApplication,
   paymentToken,
   payment,
+  allocation,
+  employer,
 };

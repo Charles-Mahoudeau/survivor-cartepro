@@ -1,6 +1,6 @@
 'use client';
 
-import { RiDashboardLine, RiInboxLine } from '@remixicon/react';
+import { RiDashboardLine, RiHandCoinLine, RiInboxLine } from '@remixicon/react';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 
@@ -32,6 +32,12 @@ const GROUPS: SidebarGroupData[] = [
         label: ADMIN_CONTENT.nav.applications,
         href: '/admin/partners',
         icon: <RiInboxLine />,
+      },
+      {
+        id: 'allocations',
+        label: ADMIN_CONTENT.nav.allocations,
+        href: '/admin/allocations',
+        icon: <RiHandCoinLine />,
       },
     ],
   },

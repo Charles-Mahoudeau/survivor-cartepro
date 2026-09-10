@@ -41,9 +41,9 @@ jobs:
             -e 's|^NODE_ENV=.*|NODE_ENV=production|' \
             -e 's|^DATABASE_HOST=.*|DATABASE_HOST=postgres|' \
             -e 's|^DATABASE_LOGGING=.*|DATABASE_LOGGING=false|' \
-            -e 's|^BETTER_AUTH_URL=.*|BETTER_AUTH_URL=http://cartepro.localhost|' \
-            -e 's|^AUTH_TRUSTED_ORIGINS=.*|AUTH_TRUSTED_ORIGINS=http://cartepro.localhost|' \
-            -e 's|^APP_ORIGIN=.*|APP_ORIGIN=http://cartepro.localhost|' \
+            -e 's|^BETTER_AUTH_URL=.*|BETTER_AUTH_URL=https://cartepro.localhost|' \
+            -e 's|^AUTH_TRUSTED_ORIGINS=.*|AUTH_TRUSTED_ORIGINS=https://cartepro.localhost|' \
+            -e 's|^APP_ORIGIN=.*|APP_ORIGIN=https://cartepro.localhost|' \
             -e 's|^BACKEND_INTERNAL_URL=.*|BACKEND_INTERNAL_URL=http://backend:3000|' \
             release/.env
 
@@ -53,9 +53,25 @@ jobs:
             sed -i "s|^${secret}=.*|${secret}=${value}|" release/.env
           done
 
+      - name: Generate local HTTPS certificate
+        run: |
+          # Self-signed, scoped to cartepro.localhost only: it backs Traefik's
+          # TLS termination for the artifact and is regenerated on every build,
+          # the same way the signing secrets above are — never committed, so
+          # no private key ever sits in source control.
+          mkdir -p release/certs
+          openssl req -x509 -nodes -newkey rsa:2048 -days 825 \
+            -keyout release/certs/cartepro.localhost.key \
+            -out release/certs/cartepro.localhost.crt \
+            -subj "/CN=cartepro.localhost" \
+            -addext "subjectAltName=DNS:cartepro.localhost"
+
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: cartepro-livrable
           path: release/
           retention-days: 14
+          # release/.env is a dotfile: upload-artifact drops hidden files by
+          # default, and the deployment cannot start without it.
+          include-hidden-files: true

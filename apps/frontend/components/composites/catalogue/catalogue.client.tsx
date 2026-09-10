@@ -1,9 +1,9 @@
 'use client';
 
 import { RiSearchLine } from '@remixicon/react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAction } from 'next-safe-action/hooks';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Card } from '@/components/composites/card';
@@ -17,9 +17,19 @@ import type { PartnerCategory } from '@/lib/api/schemas/backend/partner-category
 
 import { loadMorePartnersAction } from './actions/load-more.action';
 import {
-  PARTNERS_CATEGORY_PARAM,
-  PARTNERS_SEARCH_PARAM,
-} from './search-params';
+  type Filters,
+  filterStateOf,
+  queryOf,
+  withRequestedFilters,
+  withUrlFilters,
+} from './filters';
+import {
+  appendPage,
+  continuesListing,
+  listingFor,
+  listingOf,
+  nextPageQuery,
+} from './listing';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -30,33 +40,23 @@ interface CatalogueClientProps {
   category: string;
 }
 
-function SearchField({ value }: { value: string }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [text, setText] = useState(value);
-  const [, startTransition] = useTransition();
+function SearchField({
+  requested,
+  onSearch,
+}: {
+  requested: string;
+  onSearch: (search: string) => void;
+}) {
+  const [text, setText] = useState(requested);
 
   useEffect(() => {
-    if (text === value) {
+    const search = text.trim();
+    if (search === requested) {
       return;
     }
-    const timer = setTimeout(() => {
-      const params = new URLSearchParams(searchParams);
-      if (text.trim()) {
-        params.set(PARTNERS_SEARCH_PARAM, text.trim());
-      } else {
-        params.delete(PARTNERS_SEARCH_PARAM);
-      }
-      const query = params.toString();
-      startTransition(() => {
-        router.replace(query ? `${pathname}?${query}` : pathname, {
-          scroll: false,
-        });
-      });
-    }, SEARCH_DEBOUNCE_MS);
+    const timer = setTimeout(() => onSearch(search), SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [text, value, pathname, router, searchParams]);
+  }, [text, requested, onSearch]);
 
   return (
     <div className="relative mb-4">
@@ -80,27 +80,12 @@ function SearchField({ value }: { value: string }) {
 function CategoryChips({
   categories,
   selected,
+  onSelect,
 }: {
   categories: PartnerCategory[];
   selected: string;
+  onSelect: (slug: string) => void;
 }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  function select(slug: string) {
-    const params = new URLSearchParams(searchParams);
-    if (slug) {
-      params.set(PARTNERS_CATEGORY_PARAM, slug);
-    } else {
-      params.delete(PARTNERS_CATEGORY_PARAM);
-    }
-    const query = params.toString();
-    router.replace(query ? `${pathname}?${query}` : pathname, {
-      scroll: false,
-    });
-  }
-
   const chips = [
     { slug: '', label: CATALOGUE_CONTENT.allCategories },
     ...categories.map((category) => ({
@@ -117,7 +102,7 @@ function CategoryChips({
     >
       {chips.map(({ slug, label }) => (
         <li key={slug || 'all'}>
-          <Chip pressed={slug === selected} onClick={() => select(slug)}>
+          <Chip pressed={slug === selected} onClick={() => onSelect(slug)}>
             {label}
           </Chip>
         </li>
@@ -133,23 +118,61 @@ export function CatalogueClient({
   search,
   category,
 }: CatalogueClientProps) {
-  const [partners, setPartners] = useState(initialPage.items);
-  const [nextCursor, setNextCursor] = useState(initialPage.nextCursor);
+  const router = useRouter();
+  const pathname = usePathname();
+  const urlFilters: Filters = { search, category };
 
-  const { execute, isPending } = useAction(loadMorePartnersAction, {
-    onSuccess: ({ data }) => {
-      setPartners((current) => [...current, ...data.items]);
-      setNextCursor(data.nextCursor);
+  const [filterState, setFilterState] = useState(() =>
+    filterStateOf(urlFilters),
+  );
+  const currentFilters = withUrlFilters(filterState, urlFilters);
+  if (currentFilters !== filterState) {
+    setFilterState(currentFilters);
+  }
+
+  const [listing, setListing] = useState(() =>
+    listingOf(initialPage, urlFilters),
+  );
+  const currentListing = listingFor(listing, initialPage, urlFilters);
+  if (currentListing !== listing) {
+    setListing(currentListing);
+  }
+
+  const { execute, input, isPending } = useAction(loadMorePartnersAction, {
+    onSuccess: ({ data, input: query }) => {
+      setListing((current) => appendPage(current, query, data));
     },
     onError: ({ error }) => {
       toast.error(error.serverError ?? CATALOGUE_CONTENT.loadError);
     },
   });
 
+  function requestFilters(filters: Filters) {
+    setFilterState((current) => withRequestedFilters(current, filters));
+    const query = queryOf(filters);
+    router.replace(query ? `${pathname}?${query}` : pathname, {
+      scroll: false,
+    });
+  }
+
+  const { requested, resets } = currentFilters;
+  const { partners, nextCursor } = currentListing;
+  const loadingMore = isPending && continuesListing(currentListing, input);
+
   return (
     <>
-      <SearchField key={search} value={search} />
-      <CategoryChips categories={categories} selected={category} />
+      <SearchField
+        key={resets}
+        requested={requested.search}
+        onSearch={(nextSearch) =>
+          requestFilters({ ...requested, search: nextSearch })
+        }
+      />
+      <CategoryChips
+        categories={categories}
+        selected={requested.category}
+        onSelect={(slug) => requestFilters({ ...requested, category: slug })}
+      />
 
       <p className="sr-only" aria-live="polite">
         {CATALOGUE_CONTENT.results(partners.length)}
@@ -177,16 +200,12 @@ export function CatalogueClient({
             type="button"
             variant="outline"
             size="lg"
-            onClick={() =>
-              execute({
-                cursor: nextCursor,
-                search: search || undefined,
-                category: category || undefined,
-              })
-            }
-            disabled={isPending}
+            onClick={() => execute(nextPageQuery(currentListing, nextCursor))}
+            disabled={loadingMore}
           >
-            {isPending ? CATALOGUE_CONTENT.loading : CATALOGUE_CONTENT.loadMore}
+            {loadingMore
+              ? CATALOGUE_CONTENT.loading
+              : CATALOGUE_CONTENT.loadMore}
           </Button>
         </div>
       ) : null}
