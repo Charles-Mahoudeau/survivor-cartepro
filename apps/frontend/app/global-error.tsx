@@ -48,11 +48,6 @@ export default function GlobalError({
             </button>
           </div>
         </main>
-        <footer className="mt-auto border-t border-border bg-card">
-          <div className="mx-auto w-full max-w-5xl px-4 py-6">
-            <p className="text-xs font-medium">{SITE_CONTENT.disclaimer}</p>
-          </div>
-        </footer>
       </body>
     </html>
   );

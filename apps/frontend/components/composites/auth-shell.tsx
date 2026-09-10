@@ -30,10 +30,6 @@ export function AuthShell({
       <p className="text-muted-foreground text-center text-xs">
         {SITE_CONTENT.simulation.description}
       </p>
-
-      <p className="text-muted-foreground mt-auto pt-8 text-center text-xs">
-        {SITE_CONTENT.disclaimer}
-      </p>
     </main>
   );
 }

@@ -2,13 +2,11 @@ import { Suspense, type ReactNode } from 'react';
 
 import { BandeauSimulation } from '@/components/composites/simulation-banner';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { SITE_CONTENT } from '@/content/site';
 
 /**
  * The frame of a space, written once: the sidebar beside the inset, the bar of
  * the space at the top of it, the twelve-column grid a page places sections
- * on, and the disclaimer at the foot of that same inset — outside it, the
- * sidebar shell is a full viewport tall and the line is never reached.
+ * on.
  */
 export function SpaceShell({
   sidebar,
@@ -35,11 +33,6 @@ export function SpaceShell({
           </div>
           {children}
         </div>
-        <footer className="mt-auto p-4 pt-8 lg:p-6 lg:pt-10">
-          <p className="text-muted-foreground text-xs">
-            {SITE_CONTENT.disclaimer}
-          </p>
-        </footer>
       </SidebarInset>
     </SidebarProvider>
   );
