@@ -44,14 +44,9 @@ export const PAYMENT_HOURS = { from: 9, to: 19 } as const;
 /** The employees who empty their wallet do it in the closing hours of the last day. */
 export const CLOSING_PAYMENT_HOURS = { from: 17, to: 19 } as const;
 
-/** What the payment screen announces. */
-export const TOKEN_LIFETIME_MS = 30 * 60 * 1000;
+/** A token is minted a minute before it is presented at the counter. */
 export const TOKEN_LEAD_TIME_MS = 60 * 1000;
 export const QR_CODE_SHARE = 0.7;
-
-/** Unambiguous glyphs only, as a code read aloud over a counter should be. */
-export const SHORT_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-export const SHORT_CODE_LENGTH = 8;
 
 export type SpendingProfile = 'light' | 'normal' | 'heavy';
 

@@ -1,16 +1,16 @@
 #!/usr/bin/env bun
+import './seed/quiet-sql-logging';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import type { INestApplicationContext } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
 import chalk from 'chalk';
-import { ConfigService } from '@nestjs/config';
 import { DataSource, type EntityManager } from 'typeorm';
-import { auth, authOptions } from '../src/config/auth/auth';
+import { AppModule } from '../src/app.module';
+import { auth } from '../src/config/auth/auth';
 import { registerAuthProvisioning } from '../src/config/auth/auth-provisioning';
-import { buildDataSourceOptions } from '../src/config/database/data-source';
-import type { Env } from '../src/config/env/env.schema';
+import { EnvSchema } from '../src/config/env/env.schema';
 import { Allocation } from '../src/modules/allocations/entities/allocation.entity';
-import { Audit } from '../src/modules/audit/entities';
-import { AuditRepo } from '../src/modules/audit/repos';
 import { AuditService } from '../src/modules/audit/services';
 import { AllocationStatus } from '../src/modules/allocations/enums/allocation-status.enum';
 import { Employer } from '../src/modules/employers/entities/employer.entity';
@@ -23,20 +23,16 @@ import { PaymentToken } from '../src/modules/payments/core/entities/payment-toke
 import { PaymentStatus } from '../src/modules/payments/core/enums/payment-status.enum';
 import { PaymentTokenStatus } from '../src/modules/payments/core/enums/payment-token-status.enum';
 import { TRANSACTIONS_CSV_FILENAME } from '../src/modules/payments/transactions/constants';
-import { TransactionRepo } from '../src/modules/payments/transactions/repos/transaction.repo';
 import { TransactionService } from '../src/modules/payments/transactions/services/transaction.service';
 import { User } from '../src/modules/user/entities';
-import { UserRepo } from '../src/modules/user/repos/user.repo';
 import { UserService } from '../src/modules/user/services/user.service';
 import { Wallet } from '../src/modules/wallets/entities/wallet.entity';
 import { WalletEntry } from '../src/modules/wallets/entities/wallet-entry.entity';
 import { WalletEntryDirection } from '../src/modules/wallets/enums/wallet-entry-direction.enum';
 import { WalletEntryKind } from '../src/modules/wallets/enums/wallet-entry-kind.enum';
-import { WalletEntryRepo } from '../src/modules/wallets/repos/wallet-entry.repo';
-import { WalletRepo } from '../src/modules/wallets/repos/wallet.repo';
 import { WalletService } from '../src/modules/wallets/services/wallet.service';
 import { truncateAll } from '../test/db/truncate';
-import { connect, describeConnection, fail } from './db-common';
+import { describeConnection, fail } from './db-common';
 import {
   DEMO_ADMIN,
   EMPLOYERS,
@@ -58,8 +54,18 @@ import {
  * Fills an empty database with the recette dataset, then writes the CSV
  * export of its transactions.
  *
- * The rows are decided before the first connection, by `generateSeedPlan`,
- * so a dataset that would not meet the order fails without writing anything.
+ * The rows are decided by `generateSeedPlan` before the container boots, so a
+ * dataset that would not meet the order fails without opening a connection.
+ *
+ * The connection and the services come from the Nest container, as in the
+ * integration harness: `AppModule` is booted as an application context, and
+ * `DataSource`, `TransactionService`, `WalletService`, `UserService` and
+ * `AuditService` are resolved from it rather than assembled by hand. Closing
+ * the context closes both pools.
+ *
+ * The connection is the restricted application role, and it applies no
+ * migration: the schema is `db:migrate`'s business, as it is for every other
+ * script here.
  *
  * Accounts go through Better Auth rather than an INSERT: a `user` row with no
  * `account` row cannot sign in, and hashing a password here would be a second
@@ -90,13 +96,10 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 /**
- * Query logging off: the dataset is a thousand inserts, and the point of the
- * run is the summary at the end.
+ * The same declaration `ConfigModule` validates with, read here so the plan
+ * can be built before anything opens a connection.
  */
-const dataSource = new DataSource({
-  ...buildDataSourceOptions({ ...process.env, DATABASE_LOGGING: 'false' }),
-  migrationsRun: false,
-});
+const env = EnvSchema.parse(process.env);
 
 function euros(cents: number): number {
   return cents / CENTS_PER_EURO;
@@ -333,35 +336,35 @@ function printCase(walletCase: WalletCase): void {
 console.log(chalk.yellow('Chargement du jeu de données de recette...'));
 console.log(chalk.gray(`Database: ${describeConnection()}`));
 
-const plan = generateSeedPlan();
+const plan = generateSeedPlan({
+  tokenLifetimeSeconds: env.PAYMENT_TOKEN_TTL_SECONDS,
+});
+
+let app: INestApplicationContext | null = null;
 
 try {
-  await connect(dataSource);
+  app = await NestFactory.createApplicationContext(AppModule, {
+    logger: ['error', 'warn'],
+  });
+  const dataSource = app.get(DataSource);
 
   /**
-   * No Nest container here, so the same bridge `bootstrap.ts` uses for the
-   * real app is wired by hand — `createAccount` below goes through Better
-   * Auth's own API, which fires the same wallet-provisioning hook.
+   * `auth.ts` builds its Better Auth instance before any container exists, so
+   * its hooks read the services back from here. `configureApp` does this for
+   * the API; an application context has no HTTP adapter to run it, so the
+   * services are handed over directly — resolved, not rebuilt, or
+   * `createAccount` below would provision wallets and write audit entries
+   * through a second set of instances.
    */
   registerAuthProvisioning({
-    walletService: new WalletService(
-      new WalletRepo(dataSource.getRepository(Wallet)),
-      new WalletEntryRepo(dataSource.getRepository(WalletEntry)),
-    ),
-    userService: new UserService(new UserRepo(dataSource.getRepository(User))),
-    // No Nest container here either, so a plain `ConfigService` reads
-    // straight off `process.env` — the export endpoint this feeds is never
-    // called from a seed script, only the wallet-provisioning hook is.
-    auditService: new AuditService(
-      new AuditRepo(dataSource.getRepository(Audit)),
-      new ConfigService<Env, true>(process.env),
-    ),
+    walletService: app.get(WalletService),
+    userService: app.get(UserService),
+    auditService: app.get(AuditService),
   });
 
   const existingUsers = await dataSource.getRepository(User).count();
   if (existingUsers > 0 && !reset) {
-    await dataSource.destroy();
-    await authOptions.database.end();
+    await app.close();
     console.log('');
     console.log(
       chalk.bold.red(`La base contient déjà ${existingUsers} comptes.`),
@@ -398,16 +401,12 @@ try {
     ),
   );
 
-  const transactions = new TransactionService(
-    new TransactionRepo(dataSource.getRepository(Payment)),
-  );
-  const csv = await transactions.exportCsv();
+  const csv = await app.get(TransactionService).exportCsv();
   mkdirSync(EXPORT_DIRECTORY, { recursive: true });
   const csvPath = join(EXPORT_DIRECTORY, TRANSACTIONS_CSV_FILENAME);
   writeFileSync(csvPath, csv, 'utf8');
 
-  await dataSource.destroy();
-  await authOptions.database.end();
+  await app.close();
 
   const { summary } = plan;
   const activePartners = plan.partners.filter(
@@ -470,6 +469,6 @@ try {
   printCase(summary.zeroCase);
   console.log('');
 } catch (error) {
-  await authOptions.database.end().catch(() => undefined);
-  await fail(dataSource, 'Erreur lors du chargement des données.', error);
+  await app?.close().catch(() => undefined);
+  await fail(null, 'Erreur lors du chargement des données.', error);
 }
