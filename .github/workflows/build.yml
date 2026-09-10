@@ -27,11 +27,31 @@ jobs:
           # Save docker images
           docker save cartepro-backend:latest cartepro-frontend:latest | gzip > release/docker-images.tar.gz
 
-          # Setup .env
-          mv artifact/.env.artifact release/.env
-
           # Set execution permissions
           chmod +x release/start.sh
+
+      - name: Generate .env
+        run: |
+          # Start from the documented defaults, then override only what the
+          # artifact's docker-compose network needs, so the same file stays
+          # the single source of truth for what a deployment expects.
+          cp .env.example release/.env
+
+          sed -i \
+            -e 's|^NODE_ENV=.*|NODE_ENV=production|' \
+            -e 's|^DATABASE_HOST=.*|DATABASE_HOST=postgres|' \
+            -e 's|^DATABASE_LOGGING=.*|DATABASE_LOGGING=false|' \
+            -e 's|^BETTER_AUTH_URL=.*|BETTER_AUTH_URL=http://cartepro.localhost|' \
+            -e 's|^AUTH_TRUSTED_ORIGINS=.*|AUTH_TRUSTED_ORIGINS=http://cartepro.localhost|' \
+            -e 's|^APP_ORIGIN=.*|APP_ORIGIN=http://cartepro.localhost|' \
+            -e 's|^BACKEND_INTERNAL_URL=.*|BACKEND_INTERNAL_URL=http://backend:3000|' \
+            release/.env
+
+          # Each build ships its own signing secrets; never the .env.example placeholder.
+          for secret in BETTER_AUTH_SECRET PAYMENT_TOKEN_SIGNING_SECRET AUDIT_EXPORT_SIGNING_SECRET; do
+            value=$(openssl rand -base64 32)
+            sed -i "s|^${secret}=.*|${secret}=${value}|" release/.env
+          done
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
